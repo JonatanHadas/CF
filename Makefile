@@ -8,8 +8,9 @@ LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32
 GAME_DATA := game/game_data utils/serialization
 
 HEADS_game/game_data := $(GAME_DATA)
+HEADS_game/game_logic := game/game_logic $(GAME_DATA)
 
-COMMON_OBJECTS := game/game_data
+COMMON_OBJECTS := game/game_data game/game_logic
 
 # executables
 
