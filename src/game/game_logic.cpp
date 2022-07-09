@@ -31,7 +31,7 @@ double apply_multiplier(double start, double multiplier, int amount){
 #define SPEED 1.0
 #define SPEED_MULTIPLIER 1.5
 
-#define TURN (M_PI / 60)
+#define TURN (M_PI / 10)
 #define TURN_MULTIPLIER 1.5
 
 #define MARGIN 10.0
@@ -54,7 +54,7 @@ PlayerPosition advance_player(
 		int turn_size = count_powerups(player, PowerUpType::NARROW_TURN, effects) - 
 					    count_powerups(player, PowerUpType::WIDE_TURN, effects);
 
-		state.direction += apply_multiplier(TURN, TURN_MULTIPLIER, turn_size);
+		state.direction += real_turn_state * apply_multiplier(TURN, TURN_MULTIPLIER, turn_size);
 	}
 	
 	while(state.direction < 0) state.direction += (2 * M_PI);
