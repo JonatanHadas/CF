@@ -4,12 +4,21 @@ DEL = rm -f
 CMP_FLAGS = 
 LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32
 
+
+GAME_DATA := game/game_data utils/serialization
+
+HEADS_game/game_data := $(GAME_DATA)
+
+COMMON_OBJECTS := game/game_data
+
 # executables
 
-EXECUTABLES := 
+OBJECTS_test := $(COMMON_OBJECTS)
+
+EXECUTABLES := test
 
 # rules
-OBJECTS = 
+OBJECTS = $(COMMON_OBJECTS)
 
 OBJECTS := $(addprefix build/,$(addsuffix .o,$(OBJECTS)))
 EXECUTABLES := $(addprefix build/,$(addsuffix .exe,$(EXECUTABLES)))
