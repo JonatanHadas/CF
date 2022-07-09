@@ -1,9 +1,10 @@
 CC = g++
 DEL = rm -f
 
-CMP_FLAGS = 
-LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32
+CMP_FLAGS = -I"C:\MinGW\include\SDL2" -g
+LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2
 
+# Game objects
 
 GAME_DATA := game/game_data utils/serialization
 GAME_INTERFACES := game/game_observer game/game_view game/player_interface $(GAME_INTERFACES)
@@ -12,16 +13,20 @@ HEADS_game/game_data := $(GAME_DATA)
 HEADS_game/game_logic := game/game_logic $(GAME_DATA)
 HEADS_game/game := game/game game/game_logic $(GAME_INTERFACES)
 
-COMMON_OBJECTS := game/game_data game/game_logic game/game
+# GUI objects
+
+HEADS_gui/gui_utils := gui/gui_utils
+HEADS_gui/game_drawer := gui/game_drawer gui/gui_utils gui/colors $(GAME_INTERFACES)
+HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/gui_utils gui/colors $(GAME_INTERFACES)
 
 # executables
 
-OBJECTS_test := $(COMMON_OBJECTS)
+OBJECTS_test := game/game_data game/game_logic game/game gui/gui_utils gui/game_drawer gui/game_gui
 
 EXECUTABLES := test
 
 # rules
-OBJECTS = $(COMMON_OBJECTS)
+OBJECTS = $(OBJECTS_test)
 
 OBJECTS := $(addprefix build/,$(addsuffix .o,$(OBJECTS)))
 EXECUTABLES := $(addprefix build/,$(addsuffix .exe,$(EXECUTABLES)))
