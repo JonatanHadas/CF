@@ -22,4 +22,6 @@ PlayerPosition advance_player(
 	const set<unique_ptr<PowerUpEffect>>& effects
 );
 
+double get_player_size(int size);
+
 #endif

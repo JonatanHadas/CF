@@ -2,6 +2,9 @@
 
 #include "colors.h"
 
+#include "../utils/geometry.h"
+#include "../game/game_logic.h"
+
 BoardDrawer::BoardDrawer(const BoardSize& board, GameView* view) :
 	board(board),
 	view(view),
@@ -18,9 +21,35 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 	}
 }
 
+#define CIRCLE_RAD 15
+
 void BoardDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
 	
+	Texture rect_texture(renderer,
+		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		10, 10
+	);
+	Texture circle_texture(renderer,
+		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		CIRCLE_RAD * 2, CIRCLE_RAD * 2
+	);
+	
+	rect_texture.do_with_texture(renderer, [&](){
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_RenderClear(renderer);
+	});
+	circle_texture.do_with_texture(renderer, [&](){
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+		SDL_RenderClear(renderer);
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		draw_circle(renderer, CIRCLE_RAD, CIRCLE_RAD, CIRCLE_RAD);
+	});
+	SDL_SetTextureBlendMode(circle_texture.get(), SDL_BLENDMODE_BLEND);
+	
+	SDL_Rect dst;
+
 	texture->do_with_texture(renderer, [&](){
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
@@ -34,22 +63,69 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 				player_colors[i].b,
 				player_colors[i].a
 			);
+
+			SDL_SetTextureColorMod(rect_texture.get(), 
+				player_colors[i].r,
+				player_colors[i].g,
+				player_colors[i].b
+			);
+
+			SDL_SetTextureColorMod(circle_texture.get(), 
+				player_colors[i].r,
+				player_colors[i].g,
+				player_colors[i].b
+			);
 			
 			for(int j = 1; j < player_history.size(); j++){
-				if(!player_history[j-1].hovering){
-					SDL_RenderDrawLine(renderer,
-						DRAW_SCALE * player_history[j].x,
-						DRAW_SCALE * player_history[j].y,
-						DRAW_SCALE * player_history[j-1].x,
-						DRAW_SCALE * player_history[j-1].y
-					);				
+				dst.h = DRAW_SCALE * distance(
+					player_history[j].x, player_history[j].y,
+					player_history[j-1].x, player_history[j-1].y
+				);
+				dst.w = DRAW_SCALE * get_player_size(player_history[j-1].size);
+				dst.x = (DRAW_SCALE * (player_history[j].x + player_history[j-1].x) - dst.w)/2;
+				dst.y = (DRAW_SCALE * (player_history[j].y + player_history[j-1].y) - dst.h)/2;
+				double angle = RAD2ANG(atan2(
+					player_history[j].x - player_history[j-1].x,
+					player_history[j].y - player_history[j-1].y
+				));
+								
+				if(!player_history[j].hovering){
+					SDL_RenderCopyEx(renderer,
+						rect_texture.get(),
+						NULL, &dst,
+						-angle, NULL, SDL_FLIP_NONE
+					);
+					
+					if(!player_history[j-1].hovering){
+						double rad = DRAW_SCALE * get_player_size(min(
+							player_history[j].size,
+							player_history[j-1].size
+						)) / 2;
+						
+						dst.w = dst.h = 2*rad;
+						
+						dst.x = DRAW_SCALE * player_history[j-1].x - dst.w/2.0;
+						dst.y = DRAW_SCALE * player_history[j-1].y - dst.h/2.0;
+						
+						SDL_RenderCopy(renderer,
+							circle_texture.get(),
+							NULL, &dst
+						);
+					}
 				}
 			}
 			
-			if(player_history.size() && player_history.back().hovering){
-				SDL_RenderDrawPoint(renderer,
-					DRAW_SCALE * player_history.back().x,
-					DRAW_SCALE * player_history.back().y
+			if(player_history.size()){
+				double rad = DRAW_SCALE * get_player_size(player_history.back().size) / 2;
+				
+				dst.w = dst.h = 2*rad;
+				
+				dst.x = DRAW_SCALE * player_history.back().x - dst.w/2.0;
+				dst.y = DRAW_SCALE * player_history.back().y - dst.h/2.0;
+				
+				SDL_RenderCopy(renderer,
+					circle_texture.get(),
+					NULL, &dst
 				);
 			}
 		}

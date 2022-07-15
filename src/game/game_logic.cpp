@@ -76,23 +76,35 @@ PlayerPosition advance_player(
 	if(count_powerups(player, PowerUpType::WARP_AROUND, effects)){
 		if(x < -MARGIN){
 			x += board.w + 2*MARGIN;
+			warp = true;
 		}
 		if(x > board.w + MARGIN){
 			x -= board.w + 2*MARGIN;
+			warp = true;
 		}
 
 		if(y < -MARGIN){
 			y += board.h + 2*MARGIN;
+			warp = true;
 		}
 		if(y > board.h + MARGIN){
 			y -= board.h + 2*MARGIN;
+			warp = true;
 		}
 	}
 	
 	return PlayerPosition(
 		x, y,
 		size,
-		count_powerups(player, PowerUpType::HOVER, effects) && (starting_timer > STATING_HOVER),
+		(count_powerups(player, PowerUpType::HOVER, effects) || warp) && (starting_timer > STATING_HOVER),
 		position.alive
 	);
+}
+
+
+#define WIDTH 0.5
+#define WIDTH_MULTIPLIER 2.0
+
+double get_player_size(int size){
+	return apply_multiplier(WIDTH, WIDTH_MULTIPLIER, size);
 }
