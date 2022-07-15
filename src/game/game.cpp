@@ -1,9 +1,8 @@
 #include "game.h"
 
 #include "game_logic.h"
+#include "../utils/geometry.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <stdlib.h>
 
 Game::GamePlayerInterface::GamePlayerInterface(Game& game, int player) :
@@ -140,6 +139,7 @@ void Game::step(){
 			pending_inputs[player].pop_front();
 		}
 		
+		if(!histories[player].back().alive) continue;  // Do not advance the dead.
 		
 		histories[player].push_back(advance_player(
 			player, board, starting_timer,
@@ -147,6 +147,83 @@ void Game::step(){
 			states[player], turn_state,
 			powerup_effects
 		));
+		
+	}
+	
+	// Check for collisions
+	for(int player = 0; player < states.size(); player++){
+		if(!histories[player].back().alive) continue;  // Do not check the dead.
+		if(histories[player].back().hovering) continue;  // Cannot collide wile hovering.
+
+		double radius = get_player_size(histories[player].back().size) / 2;
+		double x = histories[player][histories[player].size()-2].x;
+		double y = histories[player][histories[player].size()-2].y;
+		
+		
+		bool at_begining = false;
+		if(leaving_box(
+			radius, radius, board.w - radius, board.h-radius,
+			x, y,
+			histories[player].back().x, histories[player].back().y,
+			histories[player].back().x, histories[player].back().y,
+			at_begining
+		)) histories[player].back().alive = false;
+				
+		for(int other_player = 0; other_player < states.size(); other_player++){
+			bool start_colliding = other_player != player;  // If same player we need a special case for the end of the history.
+			for(int i = histories[other_player].size() - 1; i > 0; i--){
+				double other_width = get_player_size(histories[other_player][i].size);
+				
+				if(!start_colliding){  // Still at end of this player's curve.
+					if(distance(
+						histories[player].back().x, histories[player].back().y,
+						histories[other_player][i].x, histories[other_player][i].y
+					) < radius + other_width/2 ||
+					distance(
+						x, y, histories[other_player][i].x, histories[other_player][i].y
+					) < radius + other_width/2){
+						continue;
+					}
+					
+					start_colliding = true;
+				}
+				
+				if(histories[other_player][i].hovering) continue;
+				
+				if(find_line_collision(
+					histories[other_player][i].x, histories[other_player][i].y,
+					histories[other_player][i-1].x, histories[other_player][i-1].y,
+					other_width,
+					x, y,
+					histories[player].back().x, histories[player].back().y,
+					radius,
+					histories[player].back().x, histories[player].back().y,
+					at_begining
+				)) histories[player].back().alive = false;
+
+				if(at_begining) break;
+				
+				if(i != histories[other_player].size() - 1 && !histories[other_player][i + 1].hovering){
+					other_width = get_player_size(min(
+						histories[other_player][i].size,
+						histories[other_player][i+1].size
+					));
+					
+					if(find_circle_collision(
+						histories[other_player][i].x, histories[other_player][i].y,
+						x, y,
+						histories[player].back().x, histories[player].back().y,
+						radius + other_width/2,
+						histories[player].back().x, histories[player].back().y,
+						at_begining
+					)) histories[player].back().alive = false;
+					
+					if(at_begining) break;
+				}
+			}
+			if(at_begining) break;
+		}
+		if(at_begining) histories[player].back().hovering = true;
 	}
 
 	// Update observers
@@ -157,4 +234,5 @@ void Game::step(){
 
 	// Update timer
 	starting_timer++;
+	
 }
