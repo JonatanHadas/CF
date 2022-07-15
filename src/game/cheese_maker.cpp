@@ -8,9 +8,9 @@ CheeseMaker::CheeseMaker() :
 	
 
 #define MIN_INTERVAL 30
-#define MAX_INTERVAL 60
+#define MAX_INTERVAL 480
 
-#define HOLE_SIZE 3
+#define HOLE_SIZE 12
 	
 bool CheeseMaker::step(){
 	if(timer) timer--;

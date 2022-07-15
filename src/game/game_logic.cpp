@@ -28,15 +28,15 @@ double apply_multiplier(double start, double multiplier, int amount){
 }
 
 
-#define SPEED 1.0
+#define SPEED (0.3)
 #define SPEED_MULTIPLIER 1.5
 
-#define TURN (M_PI / 10)
+#define TURN (M_PI / 60)
 #define TURN_MULTIPLIER 1.5
 
-#define MARGIN 10.0
+#define MARGIN 0.5
 
-#define STATING_HOVER 120
+#define STARTING_HOVER 60
 
 PlayerPosition advance_player(
 	int player, const BoardSize& board, int starting_timer,
@@ -96,13 +96,13 @@ PlayerPosition advance_player(
 	return PlayerPosition(
 		x, y,
 		size,
-		(count_powerups(player, PowerUpType::HOVER, effects) || warp) && (starting_timer > STATING_HOVER),
+		(count_powerups(player, PowerUpType::HOVER, effects) || warp) && (starting_timer > STARTING_HOVER),
 		position.alive
 	);
 }
 
 
-#define WIDTH 0.5
+#define WIDTH 1.2
 #define WIDTH_MULTIPLIER 2.0
 
 double get_player_size(int size){
