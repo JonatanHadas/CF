@@ -27,6 +27,7 @@ Game::Game(const BoardSize& board, int player_num, set<GameObserver*>&& observer
 	states(player_num, PlayerState(0, 0)),
 	pending_inputs(player_num, deque<int>()),
 	player_active(player_num, true),
+	cheese_makers(player_num, CheeseMaker()),
 	observers(observers) {
 		
 	for(int i = 0; i < player_num; i++) interfaces.push_back(GamePlayerInterface(*this, i));
@@ -148,6 +149,7 @@ void Game::step(){
 			powerup_effects
 		));
 		
+		histories[player].back().hovering |= cheese_makers[player].step();
 	}
 	
 	// Check for collisions

@@ -6,6 +6,8 @@
 #include "game_observer.h"
 #include "player_interface.h"
 
+#include "cheese_maker.h"
+
 #include <vector>
 #include <deque>
 #include <set>
@@ -31,6 +33,8 @@ class Game : public GameView{
 	set<GameObserver*> observers;
 
 	vector<int> scores;
+	
+	vector<CheeseMaker> cheese_makers;
 
 	class GamePlayerInterface : public PlayerInterface{
 		Game& game;
