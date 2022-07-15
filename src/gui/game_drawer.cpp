@@ -161,6 +161,9 @@ void GameDrawer::init(SDL_Renderer* renderer){
 void GameDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
 	
+	SDL_SetRenderDrawColor(renderer, 32, 32, 32, 0);
+	SDL_RenderClear(renderer);
+
 	board_drawer.draw(renderer);
 	
 	SDL_RenderCopy(renderer, board_drawer.get_texture().get(), NULL, NULL);

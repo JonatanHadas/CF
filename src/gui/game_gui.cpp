@@ -1,18 +1,19 @@
 #include "game_gui.h"
-
-GameGui::GameGui(const BoardSize& board, GameView* view, PlayerInterface* interface) :
+#include <iostream>
+GameGui::GameGui(const BoardSize& board, GameView* view, const map<PlayerInterface*, KeySet>& interfaces) :
 	drawer(board, view),
 	view(view),
-	interface(interface) {}
+	interfaces(interfaces) {}
 
 void GameGui::step(){
 	auto keyboard_state = SDL_GetKeyboardState(NULL);
-	
-	int turn_state = 0;
-	if(keyboard_state[SDL_SCANCODE_LEFT]) turn_state -= 1;
-	if(keyboard_state[SDL_SCANCODE_RIGHT]) turn_state += 1;
-	
-	interface->step(view->get_round(), turn_state);
+	for(auto interface: interfaces){
+		int turn_state = 0;
+		if(keyboard_state[interface.second.left]) turn_state -= 1;
+		if(keyboard_state[interface.second.right]) turn_state += 1;
+		
+		interface.first->step(view->get_round(), turn_state);
+	}	
 }
 
 void GameGui::handle_event(const SDL_Event& event){}
