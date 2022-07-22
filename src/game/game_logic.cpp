@@ -34,8 +34,6 @@ double apply_multiplier(double start, double multiplier, int amount){
 #define TURN (M_PI / 60)
 #define TURN_MULTIPLIER 1.5
 
-#define MARGIN 0.5
-
 #define STARTING_HOVER 60
 
 PlayerPosition advance_player(
@@ -47,18 +45,26 @@ PlayerPosition advance_player(
 	int real_turn_state = turn_state;
 	if(count_powerups(player, PowerUpType::INVERT, effects) % 2) real_turn_state = -turn_state;
 
+	double turn = 0;
+	bool corner = false;
+	double direction = position.direction;
 	if(count_powerups(player, PowerUpType::RIGHT_TURN, effects)){
-		if(turn_state && !state.turn_state) state.direction += M_PI_2 * real_turn_state;
+		if(turn_state && !state.turn_state){
+			direction += M_PI_2 * real_turn_state;
+			corner = true;
+		}
 	}
 	else{
 		int turn_size = count_powerups(player, PowerUpType::NARROW_TURN, effects) - 
 					    count_powerups(player, PowerUpType::WIDE_TURN, effects);
+						
+		turn = real_turn_state * apply_multiplier(TURN, TURN_MULTIPLIER, turn_size) / 2;
 
-		state.direction += real_turn_state * apply_multiplier(TURN, TURN_MULTIPLIER, turn_size);
+		direction += turn;
 	}
 	
-	while(state.direction < 0) state.direction += (2 * M_PI);
-	while(state.direction > (2 * M_PI)) state.direction -= (2 * M_PI);
+	while(direction < -M_PI) direction += (2 * M_PI);
+	while(direction > M_PI) direction -= (2 * M_PI);
 	
 	state.turn_state = turn_state;
 	
@@ -68,35 +74,48 @@ PlayerPosition advance_player(
 	
 	int size = count_powerups(player, PowerUpType::THICKEN, effects) -
 			   count_powerups(player, PowerUpType::NARROW, effects);
+	double radius = get_player_size(size) / 2;
 			   
-	double x = position.x + (speed * cos(state.direction));
-	double y = position.y + (speed * sin(state.direction));
+	double x = position.x + (speed * cos(direction));
+	double y = position.y + (speed * sin(direction));
 	
-	bool warp = false;
+	direction += turn;
+	
+	int warp_x = 0, warp_y = 0;
+	bool warping_x = false, warping_y = false;
 	if(count_powerups(player, PowerUpType::WARP_AROUND, effects)){
-		if(x < -MARGIN){
-			x += board.w + 2*MARGIN;
-			warp = true;
+		if(x < radius){
+			warp_x = 1;
 		}
-		if(x > board.w + MARGIN){
-			x -= board.w + 2*MARGIN;
-			warp = true;
+		else if(x > board.w - radius){
+			warp_x = -1;
+		}
+		if(x < 0 || x > board.w){
+			x += board.w * warp_x;
+			warp_x = -warp_x;
+			warping_x = true;
 		}
 
-		if(y < -MARGIN){
-			y += board.h + 2*MARGIN;
-			warp = true;
+		if(y < radius){
+			warp_y = 1;
 		}
-		if(y > board.h + MARGIN){
-			y -= board.h + 2*MARGIN;
-			warp = true;
+		else if(y > board.h - radius){
+			warp_y = -1;
+		}
+		if(y < 0 || y > board.h){
+			y += board.h * warp_y;
+			warp_y = -warp_y;
+			warping_y = true;
 		}
 	}
 	
 	return PlayerPosition(
-		x, y,
+		x, y, direction,
 		size,
-		(count_powerups(player, PowerUpType::HOVER, effects) || warp) && (starting_timer > STARTING_HOVER),
+		warp_x, warp_y,
+		warping_x, warping_y,
+		corner,
+		count_powerups(player, PowerUpType::HOVER, effects) || (starting_timer < STARTING_HOVER),
 		position.alive
 	);
 }

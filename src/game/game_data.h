@@ -18,10 +18,21 @@ public:
 
 class PlayerPosition{	
 public:
-	PlayerPosition(double x, double y, int size, bool hovering, bool alive);
+	PlayerPosition(double x, double y, double direction);
+	PlayerPosition(
+		double x, double y, double direction,
+		int size,
+		int warp_x, int warp_y,
+		bool warping_x, bool warping_y,
+		bool corner, bool hovering, bool alive
+	);
 
 	double x, y;
+	double direction;
 	int size;
+	int warp_x, warp_y;
+	bool warping_x, warping_y;
+	bool corner;
 	bool hovering, alive;
 
 	void serialize(ostream& output) const;
@@ -30,9 +41,8 @@ public:
 
 class PlayerState{
 public:
-	PlayerState(double direction, int turn_state);
+	PlayerState(int turn_state);
 
-	double direction;
 	int turn_state;
 
 	void serialize(ostream& output) const;

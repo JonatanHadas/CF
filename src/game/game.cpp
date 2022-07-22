@@ -24,7 +24,7 @@ Game::Game(const BoardSize& board, int player_num, set<GameObserver*>&& observer
 	board(board),
 	round_num(-1),
 	histories(player_num, vector<PlayerPosition>()),
-	states(player_num, PlayerState(0, 0)),
+	states(player_num, PlayerState(0)),
 	pending_inputs(player_num, deque<int>()),
 	player_active(player_num, true),
 	cheese_makers(player_num, CheeseMaker()),
@@ -56,16 +56,13 @@ void Game::new_round(){
 		player_history.push_back(PlayerPosition(
 			random_number(MARGIN, board.w - MARGIN),  // x
 			random_number(MARGIN, board.h - MARGIN),  // y
-			0,  // size
-			true,  // hovering
-			true  // alive
+			random_number(0, 2 * M_PI)  // direction
 		));
 		positions.push_back(player_history.back());
 	}
 	
 	for(auto& state: states){
 		state.turn_state = 0;
-		state.direction = random_number(0, 2 * M_PI);
 	}
 	
 	for(auto observer: observers){

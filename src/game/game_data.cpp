@@ -19,24 +19,44 @@ BoardSize BoardSize::deserialize(istream& input){
 	return BoardSize(w, h);
 }
 
-
 #define HOVER_MASK (1 << 0)
 #define ALIVE_MASK (1 << 1)
+#define WARP_X_MASK (1 << 2)
+#define WARP_Y_MASK (1 << 3)
+#define CORNER_MASK (1 << 4)
 
-PlayerPosition::PlayerPosition(double x, double y, int size, bool hovering, bool alive) :
-	x(x),
-	y(y),
+PlayerPosition::PlayerPosition(
+	double x, double y, double direction,
+	int size,
+	int warp_x, int warp_y,
+	bool warping_x, bool warping_y,
+	bool corner, bool hovering, bool alive
+) :
+	x(x), y(y), direction(direction),
 	size(size),
-	hovering(hovering),
-	alive(alive) {}
+	warp_x(warp_x), warp_y(warp_y),
+	warping_x(warping_x), warping_y(warping_y),
+	corner(corner), hovering(hovering), alive(alive) {}
+	
+PlayerPosition::PlayerPosition(double x, double y, double direction) :
+	PlayerPosition(x, y, direction, 0, 0, 0, false, false, false, true, true) {}
 
 void PlayerPosition::serialize(ostream& output) const {
 	write_raw(output, x);
 	write_raw(output, y);
 	
+	write_raw(output, direction);
+	
 	write_raw(output, size);
 	
+	write_raw(output, warp_x);
+	write_raw(output, warp_y);
+	
 	unsigned char flags = 0;
+	if(warping_x) flags |= WARP_X_MASK;
+	if(warping_y) flags |= WARP_Y_MASK;
+	if(corner) flags |= CORNER_MASK;
+
 	if(hovering) flags |= HOVER_MASK;
 	if(alive) flags |= ALIVE_MASK;
 	
@@ -47,28 +67,36 @@ PlayerPosition PlayerPosition::deserialize(istream& input){
 	auto x = read_raw<double>(input);
 	auto y = read_raw<double>(input);
 
+	auto direction = read_raw<double>(input);
+
 	auto size = read_raw<int>(input);
+
+	auto warp_x = read_raw<int>(input);
+	auto warp_y = read_raw<int>(input);
 
 	auto flags = read_raw<unsigned char>(input);
 	
-	return PlayerPosition(x, y, size, flags & HOVER_MASK, flags & ALIVE_MASK);
+	return PlayerPosition(
+		x, y, direction,
+		size,
+		warp_x, warp_y,
+		flags & WARP_X_MASK, flags & WARP_Y_MASK,
+		flags & CORNER_MASK, flags & HOVER_MASK, flags & ALIVE_MASK
+	);
 }
 
 
-PlayerState::PlayerState(double direction, int turn_state) :
-	direction(direction),
+PlayerState::PlayerState(int turn_state) :
 	turn_state(turn_state) {}
 
 void PlayerState::serialize(ostream& output) const {
-	write_raw(output, direction);
 	write_raw(output, turn_state);
 }
 
 PlayerState PlayerState::deserialize(istream& input){
-	auto direction = read_raw<double>(input);
 	auto turn_state = read_raw<int>(input);
 	
-	return PlayerState(direction, turn_state);
+	return PlayerState(turn_state);
 }
 
 
