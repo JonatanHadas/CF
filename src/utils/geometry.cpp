@@ -1,6 +1,6 @@
 #include "geometry.h"
 
-#include <map>
+#include <functional>
 
 using namespace std;
 
@@ -8,6 +8,48 @@ using namespace std;
 double distance(double x1, double y1, double x2, double y2){
 	return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 }
+
+inline double leftness(
+	double x0, double y0,
+	double x1, double y1,
+	double x2, double y2
+){
+	x0 -= x1;
+	x2 -= x1;
+	y0 -= y1;
+	y2 -= y1;
+	
+	return x2*y0 - y2*x0;
+}
+
+inline bool line_intersects(
+	double line_x1, double line_y1,
+	double line_x2, double line_y2,
+	double x1, double y1,
+	double x2, double y2
+) {
+	return leftness(x1, y1, line_x1, line_y1, line_x2, line_y2) * leftness(x2, y2, line_x1, line_y1, line_x2, line_y2) < 0;
+}
+
+inline bool intersects(
+	double x1a, double y1a,
+	double x2a, double y2a,
+	double x1b, double y1b,
+	double x2b, double y2b
+){
+	return line_intersects(x1a, y1a, x2a, y2a, x1b, y1b, x2b, y2b) && line_intersects(x1b, y1b, x2b, y2b, x1a, y1a, x2a, y2a);
+}
+
+inline void project(
+	double& x0, double& y0,
+	double x1, double y1,
+	double x2, double y2
+){
+	double t = ((x0-x1)*(x2-x1) + (y0-y1)*(y2-y1))/((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+	x0 = x1 + (x2-x1)*t;
+	y0 = y1 + (x2-x1)*t;
+}
+
 
 
 inline double lower_quadratic(double a, double b, double c){
@@ -71,144 +113,183 @@ bool find_circle_collision(
 	return true;
 }
 
-bool find_line_collision(
-	double line_x1, double line_y1,
-	double line_x2, double line_y2,
-	double width,
+inline int find_point_index(
+	const vector<double>& xs, const vector<double>& ys,
+	function<double(double, double)> side  // assuming side(xs[0], ys[0]) * side(xs.back(), ys.back()) < 0
+) {
+	int start = 0;
+	int end = xs.size() - 1;
+	
+	double side0 = side(xs[0], ys[0]);
+	while(end - start > 2){
+		int middle = (start + end) / 2;
+		
+		if(side(xs[middle], ys[middle]) * side0 < 0) end = middle;
+		else start = middle;
+	}
+	
+	return end;
+}
+
+template<class T>
+inline void insert(vector<T>& vec, int index, T value){
+	vec.insert(vec.begin() + index, value);
+}
+
+bool find_convex_collision(
+	const vector<double>& xs, const vector<double>& ys,
 	double x1, double y1,
 	double x2, double y2,
 	double radius,
 	double& collision_x, double& collision_y,
 	bool& at_begining
 ){
-	line_x2 -= line_x1;
-	x1 -= line_x1;
-	x2 -= line_x1;
-	line_y2 -= line_y1;
-	y1 -= line_y1;
-	y2 -= line_y1;
+	vector<double> line_xs({x1,x2}), line_ys({y1, y2});
+	vector<double> moved_xs = line_xs, moved_ys = line_ys;
 	
-	double length = sqrt(line_x2*line_x2 + line_y2*line_y2);
-	rotate(x1, y1, line_x2, -line_y2, x1, y1);
-	rotate(x2, y2, line_x2, -line_y2, x2, y2);
-	
-	map<double, double> x_dist;
-	map<double, double> y_dist;
-		
-	if(x1 <= 0) x_dist[0] = -x1;
-	else if(x1 > length) x_dist[0] = x1 - length;
-	else x_dist[0] = 0;
-	
-	if(y1 > width/2) y_dist[0] = y1 - width/2;
-	else if(-y1 > width/2) y_dist[0] = -y1 - width/2;
-	else y_dist[0] = 0;
-	
-	double end_x_dist, end_y_dist;
-	if(x2 <= 0) end_x_dist = -x2;
-	else if(x2 > length) end_x_dist = x2 - length;
-	else end_x_dist = 0;
-	
-	if(y2 > width/2) end_y_dist = y2 - width/2;
-	else if(-y2 > width/2) end_y_dist = -y2 - width/2;
-	else end_y_dist = 0;
-	
-	if(x1*x2 < 0){  // Find intersection with x=0
-		double t = -x1/(x2-x1);
-		x_dist[t] = 0;
-	}
-	if((x1-length)*(x2-length) < 0) {  // Find intersection with x=length
-		double t = (length-x1)/(x2-x1);
-		x_dist[t] = 0;
-	}
+	for(int j = 0; j < moved_xs.size(); j++){
+		double line_x = moved_xs[j], line_y = moved_ys[j];
+		for(int i = 0; i < xs.size(); i++){
+			int next_i = (i+1)%xs.size();
+			int prev_i = (i + xs.size() - 1)%xs.size();
+			
+			double x = xs[i], y = ys[i];
+			double next_x = xs[next_i], next_y = ys[next_i];
+			double prev_x = xs[prev_i], prev_y = ys[prev_i];
+			
+			double next_vx = next_x - x, next_vy = next_y - y;
+			double prev_vx = x - prev_x, prev_vy = y - prev_y;
 
-	if((y1-width/2)*(y2-width/2) < 0) {  // Find intersection with y=width/2
-		double t = (width/2-y1)/(y2-y1);
-		y_dist[t] = 0;
-	}
-	if((y1+width/2)*(y2+width/2) < 0) {  // Find intersection with y=-width/2
-		double t = -(width/2+y1)/(y2-y1);
-		y_dist[t] = 0;
+			if(
+				(line_x - x)*next_vx + (line_y - y)*next_vy <= 0 &&
+				(line_x - x)*prev_vx + (line_y - y)*prev_vy >= 0
+			) {
+				moved_xs[j] = x;
+				moved_ys[j] = y;
+				break;
+			}
+			
+			if(
+				leftness(moved_xs[j], moved_ys[j], x, y, next_x, next_y) < 0 &&
+				(line_x - x)*next_vx + (line_y - y)*next_vy >= 0 &&
+				(line_x - next_x)*next_vx + (line_y - next_y)*next_vy <= 0
+			){
+				project(moved_xs[j], moved_ys[j], x, y, next_x, next_y);
+				break;
+			}
+		}
 	}
 	
-	auto next_x_it = x_dist.begin(), next_y_it = y_dist.begin();
-	auto it_x = next_x_it++, it_y = next_y_it++;
-		
-	if(it_x->second * it_x->second + it_y->second * it_y->second < radius*radius){
+	if(distance(moved_xs[0], moved_ys[0], line_xs[0], line_ys[0]) < radius){
 		collision_x = x1;
 		collision_y = y1;
 		at_begining = true;
-		goto transform_result;
+		return true;
 	}
 	
-	{
-		double x = it_x->second;
-		double y = it_y->second;
-		double next_x = next_x_it == x_dist.end() ? end_x_dist : next_x_it->second;
-		double next_xt = next_x_it == x_dist.end() ? 1 : next_x_it->first;
-		double next_y = next_y_it == y_dist.end() ? end_y_dist : next_y_it->second;
-		double next_yt = next_y_it == y_dist.end() ? 1 : next_y_it->first;
+	for(int i = 0; i < xs.size(); i++){
+		int next_i = (i + 1)%xs.size();
+		int prev_i = (i + xs.size() - 1)%xs.size();
 		
-		if(x * (next_x - x) / next_xt + y * (next_y - y) / next_yt > 0) return false;  // Going away
-	
-		bool done = false;
-		while(!done){
-			if(next_x_it == x_dist.end() && next_y_it == y_dist.end()) done = true;  // Last iteration;
-			double next_x = next_x_it == x_dist.end() ? end_x_dist : next_x_it->second;
-			double next_xt = next_x_it == x_dist.end() ? 1 : next_x_it->first;
-			double next_y = next_y_it == y_dist.end() ? end_y_dist : next_y_it->second;
-			double next_yt = next_y_it == y_dist.end() ? 1 : next_y_it->first;
+		double x = xs[i], y = ys[i];
+		double next_x = xs[next_i], next_y = ys[next_i];
+		double prev_x = xs[prev_i], prev_y = ys[prev_i];
+		
+		double next_vx = next_x - x, next_vy = next_y - y;
+		double prev_vx = x - prev_x, prev_vy = y - prev_y;
+
+		if(intersects(x1, y1, x2, y2, x, y, next_x, next_y)){
+			int index = find_point_index(line_xs, line_ys, [&](double test_x, double test_y) {
+				return leftness(test_x, test_y, x, y, next_x, next_y);
+			});
 			
-			double dx = next_x - it_x->second;
-			double dxt = next_xt - it_x->first;
-			double dy = next_y - it_y->second;
-			double dyt = next_yt - it_y->first;
+			double x_before = line_xs[index - 1];
+			double y_before = line_ys[index - 1];
+			double vx = line_xs[index] - x_before;
+			double vy = line_ys[index] - y_before;
 			
-			double t, x, y, end_t, end_x, end_y;
-			if(it_x->first > it_y->first){
-				t = it_x->first;
-				x = it_x->second;
-				y = it_y->second + (t-it_y->first)*dy/dyt;
-			}
-			else{
-				t = it_y->first;
-				y = it_y->second;
-				x = it_x->second + (t-it_x->first)*dx/dxt;
-			}
-			if(next_x < next_y){
-				end_t = next_xt;
-				end_x = next_x;
-				end_y = it_y->second + (end_t-it_y->first)*dy/dyt;
-				if(!done) it_x = next_x_it++;
-			}
-			else{
-				end_t = next_yt;
-				end_y = next_y;
-				end_x = it_x->second + (end_t-it_x->first)*dx/dxt;
-				if(!done) it_y = next_y_it++;
-			}
+			double t = ((x - x_before)*next_vy - (y - y_before)*next_vx)/(vx*next_vy - vy*next_vx);
+			double x_inter = x_before + vx*t;
+			double y_inter = y_before + vy*t;
 			
-			double a = dx*dx/(dxt*dxt) + dy*dy/(dyt*dyt);
-			double b = 2*(x*dx/dxt + y*dy/dyt);
-			double c = x*x + y*y;
-			if(end_x*end_x + end_y*end_y > radius*radius){
-				if(end_x * dx/dxt + end_y*dy/dyt <= 0) continue;  // Still not close enough, and not at minimum yet.
-				
-				if(quadratic_min(a, b, c) > radius*radius) return false;  // Minimum not close enough.
-			}
-			
-			double dt = lower_quadratic(a, b, c - radius*radius) + EPSILON;
-			collision_x = x1 + (x2-x1)*(t+dt);
-			collision_y = y1 + (y2-y1)*(t+dt);
-			goto transform_result;
+			insert(line_xs, index, x_inter);
+			insert(line_ys, index, y_inter);
+			insert(moved_xs, index, x_inter);
+			insert(moved_ys, index, y_inter);
 		}
-		return false;  // Still to far away at the end.
+		
+		if(
+			((x1 - x)*next_vx + (y1 - y)*next_vy) * ((x2 - x)*next_vx + (y2 - y)*next_vy) < 0
+		){
+			int index = find_point_index(line_xs, line_ys, [&](double test_x, double test_y) {
+				return (test_x - x)*next_vx + (test_y - y)*next_vy;
+			});
+			double x_before = line_xs[index - 1];
+			double y_before = line_ys[index - 1];
+			double vx = line_xs[index] - x_before;
+			double vy = line_ys[index] - y_before;
+			
+			double t = ((x - x_before)*next_vx + (y - y_before)*next_vy)/(vx*next_vx + vy*next_vy);
+			double x_inter = x_before + vx*t;
+			double y_inter = y_before + vy*t;
+			
+			if(leftness(x_inter, y_inter, x, y, next_x, next_y) < 0){
+				insert(line_xs, index, x_inter);
+				insert(line_ys, index, y_inter);
+				insert(moved_xs, index, x);
+				insert(moved_ys, index, y);
+			}
+		}
+
+		if(
+			((x1 - x)*prev_vx + (y1 - y)*prev_vy) * ((x2 - x)*prev_vx + (y2 - y)*prev_vy) < 0
+		){
+			int index = find_point_index(line_xs, line_ys, [&](double test_x, double test_y) {
+				return (test_x - x)*prev_vx + (test_y - y)*prev_vy;
+			});
+			double x_before = line_xs[index - 1];
+			double y_before = line_ys[index - 1];
+			double vx = line_xs[index] - x_before;
+			double vy = line_ys[index] - y_before;
+			
+			double t = ((x - x_before)*prev_vx + (y - y_before)*prev_vy)/(vx*prev_vx + vy*prev_vy);
+			double x_inter = x_before + vx*t;
+			double y_inter = y_before + vy*t;
+			
+			if(leftness(x_inter, y_inter, prev_x, prev_y, x, y) < 0){
+				insert(line_xs, index, x_inter);
+				insert(line_ys, index, y_inter);
+				insert(moved_xs, index, x);
+				insert(moved_ys, index, y);
+			}
+		}
 	}
 	
-transform_result:
-	rotate(collision_x, collision_y, line_x2, line_y2, collision_x, collision_y);
-	collision_x += line_x1;
-	collision_y += line_y1;
-	return true;
+	for(int i = 1; i < line_xs.size(); i++){
+		double dx = line_xs[i] - moved_xs[i], dy = line_ys[i] - moved_ys[i];
+		double prev_dx = line_xs[i-1] - moved_xs[i-1], prev_dy = line_ys[i-1] - moved_ys[i-1];
+		
+		double vx = dx - prev_dx, vy = dy - prev_dy;
+		
+		// assuming prev_dx^2 + prev_dy^2 > radius^2
+		
+		if(prev_dx*vx + prev_dy*vy >= 0) return false;  // going away
+		
+		double c = prev_dx*prev_dx + prev_dy*prev_dy;
+		double b = 2*(prev_dx*vx + prev_dy*vy);
+		double a = vx*vx + vy*vy;
+		if(dx*dx + dy*dy > radius*radius){
+			if(dx*vx + dy*vy < 0) continue;  // not colliding yet
+			
+			if(quadratic_min(a, b, c) > radius*radius) return false;  // not colliging at minumum
+		}
+		// colliding
+		double t = lower_quadratic(a, b, c - radius*radius) + EPSILON;
+		collision_x = (1-t)*line_xs[i-1] + t*line_xs[i];
+		collision_y = (1-t)*line_ys[i-1] + t*line_ys[i];
+		return true;
+	}
+	return false;
 }
 
 

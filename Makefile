@@ -15,8 +15,9 @@ GAME_INTERFACES := game/game_observer game/game_view game/player_interface $(GAM
 
 HEADS_game/game_data := $(GAME_DATA)
 HEADS_game/game_logic := game/game_logic $(GAME_DATA)
+HEADS_game/game_geometry := game/game_geometry game/game_logic $(GAME_DATA)
 HEADS_game/cheese_maker := game/cheese_maker
-HEADS_game/game := game/game game/game_logic game/cheese_maker $(GAME_INTERFACES)
+HEADS_game/game := game/game game/game_geometry game/game_logic game/cheese_maker $(GAME_INTERFACES)
 
 # GUI objects
 
@@ -28,7 +29,7 @@ HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/gui_utils gui/colors gui/
 
 HEADS_test_main := gui/game_gui gui/game_drawer gui/gui_utils gui/colors gui/keyset game/game game/game_logic game/cheese_maker $(GAME_INTERFACES)
 
-OBJECTS_test := game/game_data game/game_logic game/game gui/gui_utils gui/game_drawer gui/game_gui utils/geometry game/cheese_maker test_main
+OBJECTS_test := game/game_data game/game_logic game/game gui/gui_utils gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry
 
 EXECUTABLES := test
 

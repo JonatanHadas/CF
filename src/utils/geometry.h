@@ -3,6 +3,9 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <vector>
+
+using namespace std;
 
 #define RAD2ANG(x) (x * 180 / M_PI)
 
@@ -18,10 +21,8 @@ bool find_circle_collision(
 	bool& at_begining
 );
 
-bool find_line_collision(
-	double line_x1, double line_y1,
-	double line_x2, double line_y2,
-	double width,
+bool find_convex_collision(
+	const vector<double>& xs, const vector<double>& ys,
 	double x1, double y1,
 	double x2, double y2,
 	double radius,
