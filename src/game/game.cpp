@@ -151,7 +151,7 @@ void Game::step(){
 	}
 	
 	// Check for collisions
-	/*for(int player = 0; player < states.size(); player++){
+	for(int player = 0; player < states.size(); player++){
 		if(!histories[player].back().alive) continue;  // Do not check the dead.
 		if(histories[player].back().hovering) continue;  // Cannot collide wile hovering.		
 		
@@ -170,7 +170,7 @@ void Game::step(){
 				other_player == player
 			)) break;
 		}
-	}*/
+	}
 
 	// Update observers
 	vector<PlayerPosition> positions;

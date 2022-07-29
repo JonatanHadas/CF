@@ -1,8 +1,21 @@
 CC = g++
 DEL = rm -f
 
-CMP_FLAGS = -I"C:\MinGW\include\SDL2" -g
-LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2
+SYS = $(shell uname)
+
+DBG_FLAGS = -g
+
+ifeq ($(SYS), Linux)
+	CMP_FLAGS = -I"/usr/include/SDL2" $(DEBUG_FLAGS)
+	LNK_FLAGS = -lSDL2main -lSDL2
+	EXEC_EXT = 
+else
+ifeq ($(findstring MINGW32, $(SYS)), MINGW32)
+	CMP_FLAGS = -I"C:\MinGW\include\SDL2" $(DEBUG_FLAGS)
+	LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2
+	EXEC_EXT = .exe
+endif
+endif
 
 # Util objects
 
@@ -37,7 +50,7 @@ EXECUTABLES := test
 OBJECTS = $(OBJECTS_test)
 
 OBJECTS := $(addprefix build/,$(addsuffix .o,$(OBJECTS)))
-EXECUTABLES := $(addprefix build/,$(addsuffix .exe,$(EXECUTABLES)))
+EXECUTABLES := $(addprefix build/,$(addsuffix $(EXEC_EXT),$(EXECUTABLES)))
 
 all: $(EXECUTABLES)
 
@@ -48,7 +61,7 @@ clear_all: clear
 	$(DEL) $(EXECUTABLES)
 
 .SECONDEXPANSION:
-$(EXECUTABLES): build/%.exe: $$(addprefix build/,$$(addsuffix .o,$$(OBJECTS_$$*)))
+$(EXECUTABLES): build/%$(EXEC_EXT): $$(addprefix build/,$$(addsuffix .o,$$(OBJECTS_$$*)))
 	$(CC) $(CMP_FLAGS) $^ -o $@ $(LNK_FLAGS)
 	
 $(OBJECTS): build/%.o: src/%.cpp $$(addprefix src/,$$(addsuffix .h,$$(HEADS_$$*)))
