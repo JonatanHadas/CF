@@ -22,23 +22,15 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 }
 
 #define CIRCLE_RAD 15
-
+#include <iostream>
 void BoardDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
 	
-	Texture rect_texture(renderer,
-		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-		10, 10
-	);
 	Texture circle_texture(renderer,
 		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		CIRCLE_RAD * 2, CIRCLE_RAD * 2
 	);
 	
-	rect_texture.do_with_texture(renderer, [&](){
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		SDL_RenderClear(renderer);
-	});
 	circle_texture.do_with_texture(renderer, [&](){
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
 		SDL_RenderClear(renderer);
@@ -64,70 +56,81 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 				player_colors[i].a
 			);
 
-			SDL_SetTextureColorMod(rect_texture.get(), 
-				player_colors[i].r,
-				player_colors[i].g,
-				player_colors[i].b
-			);
-
 			SDL_SetTextureColorMod(circle_texture.get(), 
 				player_colors[i].r,
 				player_colors[i].g,
 				player_colors[i].b
 			);
 			
+			vector<SDL_Vertex> vertices;
+			vector<int> indices;
+			SDL_Vertex vertex = {
+				.color = player_colors[i]
+			};
+			
 			for(int j = 1; j < player_history.size(); j++){
-				dst.h = DRAW_SCALE * distance(
-					player_history[j].x, player_history[j].y,
-					player_history[j-1].x, player_history[j-1].y
-				);
-				dst.w = DRAW_SCALE * get_player_size(player_history[j-1].size);
-				dst.x = (DRAW_SCALE * (player_history[j].x + player_history[j-1].x) - dst.w)/2;
-				dst.y = (DRAW_SCALE * (player_history[j].y + player_history[j-1].y) - dst.h)/2;
-				double angle = RAD2ANG(atan2(
-					player_history[j].x - player_history[j-1].x,
-					player_history[j].y - player_history[j-1].y
-				));
+				if(player_history[j].hovering) continue;
+				
+				double width = get_player_size(player_history[j].size);
+				double prev_width = min(width, get_player_size(player_history[j].size));
+
+				double prev_x = player_history[j-1].x;
+				if(player_history[j].warping_x) prev_x -= board.w * player_history[j].warp_x;
+				double prev_y = player_history[j-1].y;
+				if(player_history[j].warping_y) prev_y -= board.h * player_history[j].warp_y;
 								
-				if(!player_history[j].hovering){
-					SDL_RenderCopyEx(renderer,
-						rect_texture.get(),
-						NULL, &dst,
-						-angle, NULL, SDL_FLIP_NONE
-					);
+				double prev_direction = player_history[j - 1].direction;
+				if(player_history[j].corner) {
+					prev_direction = player_history[j].direction;
 					
-					if(!player_history[j-1].hovering){
-						double rad = DRAW_SCALE * get_player_size(min(
-							player_history[j].size,
-							player_history[j-1].size
-						)) / 2;
-						
-						dst.w = dst.h = 2*rad;
-						
-						dst.x = DRAW_SCALE * player_history[j-1].x - dst.w/2.0;
-						dst.y = DRAW_SCALE * player_history[j-1].y - dst.h/2.0;
-						
-						SDL_RenderCopy(renderer,
-							circle_texture.get(),
-							NULL, &dst
-						);
+					// Draw circle
+					dst.w = dst.h = DRAW_SCALE * prev_width;
+					dst.x = DRAW_SCALE * prev_x - dst.w / 2.0;
+					dst.y = DRAW_SCALE * prev_y - dst.h / 2.0;
+					SDL_RenderCopy(renderer, circle_texture.get(), NULL, &dst);
+				}
+				
+				for(int warp_x = min(-player_history[j].warp_x, 0); warp_x <= max(player_history[j].warp_x, 0); warp_x += 1){
+					for(int warp_y = min(-player_history[j].warp_y, 0); warp_y <= max(player_history[j].warp_y, 0); warp_y += 1){
+						int index = vertices.size();
+						vertex.position = {
+							.x = (float)(DRAW_SCALE * (prev_x - sin(prev_direction)*(width/2) + warp_x * board.w)),
+							.y = (float)(DRAW_SCALE * (prev_y + cos(prev_direction)*(width/2) + warp_y * board.h)),
+						};
+						vertices.push_back(vertex);
+						vertex.position = {
+							.x = (float)(DRAW_SCALE * (prev_x + sin(prev_direction)*(width/2) + warp_x * board.w)),
+							.y = (float)(DRAW_SCALE * (prev_y - cos(prev_direction)*(width/2) + warp_y * board.h)),
+						};
+						vertices.push_back(vertex);
+						vertex.position = {
+							.x = (float)(DRAW_SCALE * (player_history[j].x - sin(player_history[j].direction)*(width/2) + warp_x * board.w)),
+							.y = (float)(DRAW_SCALE * (player_history[j].y + cos(player_history[j].direction)*(width/2) + warp_y * board.h)),
+						};
+						vertices.push_back(vertex);
+						vertex.position = {
+							.x = (float)(DRAW_SCALE * (player_history[j].x + sin(player_history[j].direction)*(width/2) + warp_x * board.w)),
+							.y = (float)(DRAW_SCALE * (player_history[j].y - cos(player_history[j].direction)*(width/2) + warp_y * board.h)),
+						};
+						vertices.push_back(vertex);
+
+						indices.push_back(index);
+						indices.push_back(index+1);
+						indices.push_back(index+2);
+						indices.push_back(index+1);
+						indices.push_back(index+2);
+						indices.push_back(index+3);
 					}
 				}
 			}
-			
-			if(player_history.size()){
-				double rad = DRAW_SCALE * get_player_size(player_history.back().size) / 2;
-				
-				dst.w = dst.h = 2*rad;
-				
-				dst.x = DRAW_SCALE * player_history.back().x - dst.w/2.0;
-				dst.y = DRAW_SCALE * player_history.back().y - dst.h/2.0;
-				
-				SDL_RenderCopy(renderer,
-					circle_texture.get(),
-					NULL, &dst
-				);
-			}
+
+			SDL_RenderGeometry(renderer, NULL, vertices.data(), vertices.size(), indices.data(), indices.size());
+
+			double width = get_player_size(player_history.back().size);
+			dst.w = dst.h = DRAW_SCALE * width;
+			dst.x = DRAW_SCALE * player_history.back().x - dst.w / 2.0;
+			dst.y = DRAW_SCALE * player_history.back().y - dst.h / 2.0;
+			SDL_RenderCopy(renderer, circle_texture.get(), NULL, &dst);
 		}
 	});
 }
