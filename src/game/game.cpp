@@ -29,6 +29,7 @@ Game::Game(const BoardSize& board, int player_num, set<GameObserver*>&& observer
 	pending_inputs(player_num, deque<int>()),
 	player_active(player_num, true),
 	cheese_makers(player_num, CheeseMaker()),
+	collision_grids(player_num, create_collision_grid(board)),
 	observers(observers) {
 		
 	for(int i = 0; i < player_num; i++) interfaces.push_back(GamePlayerInterface(*this, i));
@@ -60,6 +61,9 @@ void Game::new_round(){
 			random_number(0, 2 * M_PI)  // direction
 		));
 		positions.push_back(player_history.back());
+	}
+	for(auto& grid: collision_grids){
+		clear_collision_grid(grid);
 	}
 	
 	for(auto& state: states){
@@ -148,6 +152,7 @@ void Game::step(){
 		));
 		
 		histories[player].back().hovering |= cheese_makers[player].step();
+		add_to_grid(board, histories[player][histories[player].size() - 2], histories[player].back(), collision_grids[player], histories[player].size() - 1);
 	}
 	
 	// Check for collisions
@@ -167,6 +172,7 @@ void Game::step(){
 				histories[player][histories[player].size()-2],
 				histories[player].back(),
 				histories[other_player],
+				collision_grids[other_player],
 				other_player == player
 			)) break;
 		}

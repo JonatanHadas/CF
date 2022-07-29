@@ -5,6 +5,7 @@
 #include "game_view.h"
 #include "game_observer.h"
 #include "player_interface.h"
+#include "collision_grid.h"
 
 #include "cheese_maker.h"
 
@@ -47,6 +48,8 @@ class Game : public GameView{
 	};
 	
 	vector<GamePlayerInterface> interfaces;
+	
+	vector<collision_grid> collision_grids;
 	
 	void new_round();
 	
