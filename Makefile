@@ -29,7 +29,7 @@ HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/gui_utils gui/colors gui/
 
 HEADS_test_main := gui/game_gui gui/game_drawer gui/gui_utils gui/colors gui/keyset game/game game/game_logic game/cheese_maker $(GAME_INTERFACES)
 
-OBJECTS_test := game/game_data game/game_logic game/game gui/gui_utils gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry
+OBJECTS_test := game/game_data game/game_logic game/game gui/gui_utils gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry test_main
 
 EXECUTABLES := test
 
