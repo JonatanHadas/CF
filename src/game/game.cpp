@@ -49,6 +49,7 @@ void Game::new_round(){
 	round_num += 1;
 	
 	starting_timer = 0;
+	end_timer = -1;
 		
 	powerups.clear();
 	powerup_effects.clear();
@@ -137,6 +138,8 @@ bool Game::can_step(){
 	return true;
 }
 
+#define END_TIMER 120
+
 void Game::step(){
 	// Advance players
 	for(int player = 0; player < states.size(); player++){
@@ -196,11 +199,19 @@ void Game::step(){
 		alive[team] = new_alive[team];
 	}
 	if(dead_count){
+		int living_count = 0;
 		for(int team = 0; team < scores.size(); team++){
-			if(alive[team]) scores[team] += dead_count;
+			if(alive[team]){
+				scores[team] += dead_count;
+				living_count++;
+			}
+		}
+
+		if(living_count <= 1 && end_timer < 0){
+			end_timer = END_TIMER;
 		}
 	}
-	
+
 	for(auto observer: observers) observer->update_scores(scores);
 	
 	// Update observers
@@ -211,4 +222,11 @@ void Game::step(){
 
 	// Update timer
 	starting_timer++;
+
+	if(end_timer > 0){
+		end_timer--;
+	}
+	else if(end_timer == 0){
+		new_round();
+	}
 }

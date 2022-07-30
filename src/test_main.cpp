@@ -89,6 +89,9 @@ int main(int argc, char** argv){
 	
 	auto next_tick = SDL_GetTicks() + TICK_LEN;
 	
+	int last_round = -1;
+	int starting_timer = 0;
+	
 	while(true){
 		gui.draw(renderer);
 
@@ -101,7 +104,12 @@ int main(int argc, char** argv){
 			gui.handle_event(event);
 		}
 		
-		gui.step();
+		if(last_round != game.get_round()){
+			last_round = game.get_round();
+			starting_timer = 30;
+		}
+		if(starting_timer) starting_timer--;
+		else gui.step();
 		
 		game.advance();
 		

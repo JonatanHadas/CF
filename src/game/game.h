@@ -22,6 +22,7 @@ class Game : public GameView{
 
 	int round_num;
 	int starting_timer;
+	int end_timer;
 
 	vector<vector<PlayerPosition>> histories;
 	vector<PlayerState> states;
