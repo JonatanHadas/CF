@@ -1,6 +1,7 @@
 #include "game_drawer.h"
 
 #include "colors.h"
+#include "texts.h"
 
 #include "../utils/geometry.h"
 #include "../game/game_logic.h"
@@ -22,7 +23,7 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 }
 
 #define CIRCLE_RAD 15
-#include <iostream>
+
 void BoardDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
 	
@@ -150,8 +151,8 @@ void GameDrawer::init(SDL_Renderer* renderer){
 	if(!is_initialized){
 		int output_w, output_h;
 		SDL_GetRendererOutputSize(renderer, &output_w, &output_h);
-		int scaled_w = output_h * board.w / board.h;
-		int scaled_h = output_w * board.h / board.w;
+		int scaled_w = output_h * board.w / board.h * 2;
+		int scaled_h = output_w * board.h / board.w / 2;
 		screen_width = max(output_w, scaled_w);
 		screen_height = max(output_h, scaled_h);
 						
@@ -160,7 +161,7 @@ void GameDrawer::init(SDL_Renderer* renderer){
 		is_initialized = true;
 	}
 }
-
+#include <iostream>
 void GameDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
 	
@@ -169,5 +170,33 @@ void GameDrawer::draw(SDL_Renderer* renderer){
 
 	board_drawer.draw(renderer);
 	
-	SDL_RenderCopy(renderer, board_drawer.get_texture().get(), NULL, NULL);
+	int x_margin = screen_width / 40;
+	int y_margin = screen_height / 20;
+	
+	SDL_Rect dst;
+	dst.x = x_margin - 1;
+	dst.y = y_margin - 1;
+	dst.w = screen_width/2 - 2*x_margin + 2;
+	dst.h = screen_height - 2*y_margin + 2;
+	
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_RenderFillRect(renderer, &dst);
+
+	dst.x += 1; dst.y += 1;
+	dst.w -= 2; dst.h -= 2;
+	SDL_RenderCopy(renderer, board_drawer.get_texture().get(), NULL, &dst);
+	
+	int dy = (screen_height - 2*y_margin) / view->get_scores().size();
+	
+	for(int i = 0; i < view->get_scores().size(); i++){
+		Msg(
+			to_string(view->get_scores()[i]).c_str(),
+			player_colors[i], FontType::NRM,
+			renderer
+		).render_centered(
+			screen_width/2 + x_margin,
+			y_margin + (2*i+1)*dy/2,
+			Align::LEFT
+		);
+	}
 }

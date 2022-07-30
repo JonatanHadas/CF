@@ -1,9 +1,11 @@
 #include "gui/game_gui.h"
+#include "gui/texts.h"
 #include "game/game.h"
 
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include "SDL_ttf.h"
 
 using namespace std;
 
@@ -29,6 +31,16 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	atexit(SDL_Quit);
+
+	if(TTF_Init() < 0){
+		cerr << "Error initializing SDL_ttf:" << endl << TTF_GetError() << endl;
+	}
+	atexit(TTF_Quit);
+
+	if(!load_fonts()){
+		cerr << "Error while loading fonts" << endl << SDL_GetError() << TTF_GetError() << endl;
+		return 1;
+	}
 
 	screen = SDL_CreateWindow(
 										"Curve Fever",
@@ -56,7 +68,11 @@ int main(int argc, char** argv){
 	
 	BoardSize board_size(100, 120);
 	
-	Game game(board_size, PLAYER_NUM, set<GameObserver*>());
+	vector<int> teams;
+	for(int i = 0; i < PLAYER_NUM; i++){
+		teams.push_back(i);
+	}
+	Game game(board_size, PLAYER_NUM, teams, set<GameObserver*>());
 	for(int i = 2; i < PLAYER_NUM; i++) game.get_player_interface(i).set_active(false);
 	
 	map<PlayerInterface*, KeySet> interfaces;
