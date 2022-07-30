@@ -7,12 +7,12 @@ DBG_FLAGS = -g
 
 ifeq ($(SYS), Linux)
 	CMP_FLAGS = -I"/usr/include/SDL2" $(DBG_FLAGS)
-	LNK_FLAGS = -lSDL2main -lSDL2 -lSDL2_ttf
+	LNK_FLAGS = -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image
 	EXEC_EXT = 
 else
 ifeq ($(findstring MINGW32, $(SYS)), MINGW32)
 	CMP_FLAGS = -I"C:\MinGW\include\SDL2" $(DBG_FLAGS)
-	LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
+	LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image
 	EXEC_EXT = .exe
 endif
 endif
@@ -27,23 +27,25 @@ GAME_DATA := game/game_data utils/serialization
 GAME_INTERFACES := game/game_observer game/game_view game/player_interface $(GAME_DATA)
 
 HEADS_game/game_data := $(GAME_DATA)
+HEADS_game/powerups := game/powerups $(GAME_DATA)
 HEADS_game/game_logic := game/game_logic $(GAME_DATA)
 HEADS_game/game_geometry := game/game_geometry game/game_logic game/collision_grid $(GAME_DATA)
 HEADS_game/cheese_maker := game/cheese_maker
-HEADS_game/game := game/game game/game_geometry game/game_logic game/cheese_maker game/collision_grid $(GAME_INTERFACES)
+HEADS_game/game := game/game game/powerups game/game_geometry game/game_logic game/cheese_maker game/collision_grid $(GAME_INTERFACES)
 
 # GUI objects
 
 HEADS_gui/texts := gui/texts
+HEADS_gui/images := gui/images
 HEADS_gui/gui_utils := gui/gui_utils gui/keyset
-HEADS_gui/game_drawer := gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset $(GAME_INTERFACES) utils/geometry
-HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset $(GAME_INTERFACES)
+HEADS_gui/game_drawer := gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES) utils/geometry
+HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES)
 
 # executables
 
-HEADS_test_main := gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/game_logic game/cheese_maker game/game_geometry game/collision_grid $(GAME_INTERFACES)
+HEADS_test_main := gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
 
-OBJECTS_test := game/game_data game/game_logic game/game gui/gui_utils gui/texts gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry test_main
+OBJECTS_test := game/game_data game/game_logic game/game game/powerups gui/gui_utils gui/texts gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry gui/images test_main
 
 EXECUTABLES := test
 

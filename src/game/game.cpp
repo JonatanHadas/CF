@@ -20,7 +20,12 @@ void Game::GamePlayerInterface::set_active(bool active){
 	game.player_active[player] = active;
 }
 
-Game::Game(const BoardSize& board, int team_num, const vector<int> teams, set<GameObserver*>&& observers) :
+Game::Game(
+	const BoardSize& board,
+	int team_num, const vector<int> teams,
+	const set<PowerUpDescriptor>& allowed_powerups,
+	set<GameObserver*>&& observers
+) :
 	board(board),
 	round_num(-1),
 	histories(teams.size(), vector<PlayerPosition>()),
@@ -32,6 +37,7 @@ Game::Game(const BoardSize& board, int team_num, const vector<int> teams, set<Ga
 	teams(teams),
 	scores(team_num, 0),
 	alive(team_num, false),
+	allowed_powerups(allowed_powerups.begin(), allowed_powerups.end()),
 	observers(observers) {
 		
 	for(int i = 0; i < teams.size(); i++) interfaces.push_back(GamePlayerInterface(*this, i));
@@ -53,6 +59,9 @@ void Game::new_round(){
 		
 	powerups.clear();
 	powerup_effects.clear();
+	
+	spawners.clear();
+	spawners.insert(make_unique<PowerUpSpawner>(false));
 	
 	vector<PlayerPosition> positions;
 	
@@ -213,6 +222,30 @@ void Game::step(){
 	}
 
 	for(auto observer: observers) observer->update_scores(scores);
+	
+	// TODO: Take powerups
+	
+	count_down_powerups(powerup_effects);
+	
+	// Spawn powerups
+	if(allowed_powerups.size()){
+		for(auto it = spawners.begin(); it != spawners.end();){
+			if((*it)->should_spawn()){
+				int id = next_powerup_id++;
+				PowerUp powerup(
+					allowed_powerups[rand() % allowed_powerups.size()],
+					random_number(POWERUP_RADIUS, board.w - POWERUP_RADIUS),
+					random_number(POWERUP_RADIUS, board.h - POWERUP_RADIUS)
+				);
+
+				powerups.insert({id, powerup});
+				for(auto observer: observers) observer->spawn_powerup(id, powerup);
+			}
+			
+			if((*it)->is_done()) spawners.erase(it++);
+			else ++it;
+		}
+	}
 	
 	// Update observers
 	vector<PlayerPosition> positions;

@@ -2,9 +2,14 @@
 
 #include "colors.h"
 #include "texts.h"
+#include "images.h"
 
 #include "../utils/geometry.h"
 #include "../game/game_logic.h"
+
+map<PowerUpType, Img> powerup_images({
+	{PowerUpType::INVERT, Img::INVERT},
+});
 
 BoardDrawer::BoardDrawer(const BoardSize& board, GameView* view) :
 	board(board),
@@ -22,7 +27,7 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 	}
 }
 
-#define CIRCLE_RAD 15
+#define CIRCLE_RAD 50
 
 void BoardDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
@@ -46,6 +51,22 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 	texture->do_with_texture(renderer, [&](){
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
+		
+		for(auto entry: view->get_powerups()){
+			SDL_Color color = powerup_colors[(int)entry.second.desc.affects];
+			SDL_SetTextureColorMod(circle_texture.get(),
+				color.r,
+				color.g,
+				color.b
+			);
+			dst.x = DRAW_SCALE * entry.second.x;
+			dst.y = DRAW_SCALE * entry.second.y;			
+			dst.w = dst.h = 2 * DRAW_SCALE * POWERUP_RADIUS;
+			dst.x -= dst.w/2; dst.y -= dst.h/2;
+			
+			SDL_RenderCopy(renderer, circle_texture.get(), NULL, &dst);
+			SDL_RenderCopy(renderer, get_img(powerup_images[entry.second.desc.type]), NULL, &dst);			
+		}
 		
 		for(int i = 0; i < view->get_histories().size(); i++){
 			auto player_history = view->get_histories()[i];
@@ -161,7 +182,7 @@ void GameDrawer::init(SDL_Renderer* renderer){
 		is_initialized = true;
 	}
 }
-#include <iostream>
+
 void GameDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
 	

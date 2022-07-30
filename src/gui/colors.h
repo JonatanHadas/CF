@@ -17,4 +17,10 @@ vector<SDL_Color> player_colors({
 	{96, 64, 0, 255},	
 });
 
+vector<SDL_Color> powerup_colors({
+	{32, 64, 255, 255},
+	{64, 255, 32, 255},
+	{255, 64, 32, 255},
+});
+
 #endif

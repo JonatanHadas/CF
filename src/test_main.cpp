@@ -1,11 +1,13 @@
 #include "gui/game_gui.h"
 #include "gui/texts.h"
+#include "gui/images.h"
 #include "game/game.h"
 
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
 #include "SDL_ttf.h"
+#include "SDL_image.h"
 
 using namespace std;
 
@@ -31,6 +33,12 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	atexit(SDL_Quit);
+
+	if(!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)){
+		cerr << "Error initializing SDL_image:" << endl << IMG_GetError() << endl;
+		return 1;
+	}
+	atexit(IMG_Quit);
 
 	if(TTF_Init() < 0){
 		cerr << "Error initializing SDL_ttf:" << endl << TTF_GetError() << endl;
@@ -62,9 +70,17 @@ int main(int argc, char** argv){
 		return 3;
 	}
 	atexit(close_rend);
+	
+	if(!load_images(renderer)){
+		cerr << "Error while loading images" << endl << SDL_GetError() << IMG_GetError() << endl;
+		return 0;
+	}
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
 
+	set<PowerUpDescriptor> allowed_powerups({
+		PowerUpDescriptor(PowerUpType::INVERT, PowerUpAffects::OTHERS),
+	});
 	
 	BoardSize board_size(100, 120);
 	
@@ -72,7 +88,7 @@ int main(int argc, char** argv){
 	for(int i = 0; i < PLAYER_NUM; i++){
 		teams.push_back(i);
 	}
-	Game game(board_size, PLAYER_NUM, teams, set<GameObserver*>());
+	Game game(board_size, PLAYER_NUM, teams, allowed_powerups, set<GameObserver*>());
 	for(int i = 2; i < PLAYER_NUM; i++) game.get_player_interface(i).set_active(false);
 	
 	map<PlayerInterface*, KeySet> interfaces;

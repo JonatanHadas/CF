@@ -79,6 +79,8 @@ public:
 	
 	void serialize(ostream& output) const;
 	static PowerUpDescriptor deserialize(istream& input);
+	
+	bool operator<(const PowerUpDescriptor& other) const;
 };
 
 class PowerUp{

@@ -127,3 +127,11 @@ PlayerPosition advance_player(
 double get_player_size(int size){
 	return apply_multiplier(WIDTH, WIDTH_MULTIPLIER, size);
 }
+
+void count_down_powerups(set<unique_ptr<PowerUpEffect>>& effects){
+	for(auto it = effects.begin(); it != effects.end();){
+		(*it)->timer--;
+		if((*it)->timer == 0) effects.erase(it++);
+		else ++it;
+	}
+}

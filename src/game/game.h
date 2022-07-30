@@ -6,6 +6,7 @@
 #include "game_observer.h"
 #include "player_interface.h"
 #include "collision_grid.h"
+#include "powerups.h"
 
 #include "cheese_maker.h"
 
@@ -53,13 +54,22 @@ class Game : public GameView{
 	vector<GamePlayerInterface> interfaces;
 	
 	vector<collision_grid> collision_grids;
+	
+	vector<PowerUpDescriptor> allowed_powerups;
+	set<unique_ptr<PowerUpSpawner>> spawners;
+	int next_powerup_id;
 		
 	void new_round();
 	
 	bool can_step();
 	void step();
 public:
-	Game(const BoardSize& board, int team_num, const vector<int> teams, set<GameObserver*>&& observers);
+	Game(
+		const BoardSize& board,
+		int team_num, const vector<int> teams,
+		const set<PowerUpDescriptor>& allowed_powerups,
+		set<GameObserver*>&& observers
+	);
 
 	void add_observer(GameObserver* observer);
 	void remove_observer(GameObserver* observer);

@@ -117,6 +117,11 @@ PowerUpDescriptor PowerUpDescriptor::deserialize(istream& input){
 	return PowerUpDescriptor(type, affects);
 }
 
+bool PowerUpDescriptor::operator<(const PowerUpDescriptor& other) const {
+	if(other.type == type) return affects < other.affects;
+	return type < other.type;
+}
+
 
 PowerUp::PowerUp(PowerUpDescriptor desc, double x, double y) :
 	desc(desc),

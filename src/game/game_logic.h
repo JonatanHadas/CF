@@ -9,6 +9,8 @@
 
 using namespace std;
 
+#define POWERUP_RADIUS 3.5
+
 void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int player, function<void(const PowerUpEffect&)> todo);
 
 int count_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
@@ -23,5 +25,7 @@ PlayerPosition advance_player(
 );
 
 double get_player_size(int size);
+
+void count_down_powerups(set<unique_ptr<PowerUpEffect>>& effects);
 
 #endif
