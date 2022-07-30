@@ -6,12 +6,12 @@ SYS = $(shell uname)
 DBG_FLAGS = -g
 
 ifeq ($(SYS), Linux)
-	CMP_FLAGS = -I"/usr/include/SDL2" $(DEBUG_FLAGS)
+	CMP_FLAGS = -I"/usr/include/SDL2" $(DBG_FLAGS)
 	LNK_FLAGS = -lSDL2main -lSDL2
 	EXEC_EXT = 
 else
 ifeq ($(findstring MINGW32, $(SYS)), MINGW32)
-	CMP_FLAGS = -I"C:\MinGW\include\SDL2" $(DEBUG_FLAGS)
+	CMP_FLAGS = -I"C:\MinGW\include\SDL2" $(DBG_FLAGS)
 	LNK_FLAGS = -L"C:\MinGW\lib" -lmingw32 -lSDL2main -lSDL2
 	EXEC_EXT = .exe
 endif

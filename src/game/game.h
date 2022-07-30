@@ -34,6 +34,8 @@ class Game : public GameView{
 	set<GameObserver*> observers;
 
 	vector<int> scores;
+	vector<int> teams;
+	vector<bool> alive;
 	
 	vector<CheeseMaker> cheese_makers;
 
@@ -50,13 +52,13 @@ class Game : public GameView{
 	vector<GamePlayerInterface> interfaces;
 	
 	vector<collision_grid> collision_grids;
-	
+		
 	void new_round();
 	
 	bool can_step();
 	void step();
 public:
-	Game(const BoardSize& board, int player_num, set<GameObserver*>&& observers);
+	Game(const BoardSize& board, int team_num, const vector<int> teams, set<GameObserver*>&& observers);
 
 	void add_observer(GameObserver* observer);
 	void remove_observer(GameObserver* observer);

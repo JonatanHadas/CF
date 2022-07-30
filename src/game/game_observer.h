@@ -9,7 +9,7 @@ using namespace std;
 
 class GameObserver{
 public:
-	virtual void init(const vector<vector<PlayerPosition>>& histories) = 0;
+	virtual void init(const vector<vector<PlayerPosition>>& histories, int round_timer) = 0;
 	
 	virtual void new_round(int round) = 0;
 	virtual void update_scores(const vector<int>& addition) = 0;

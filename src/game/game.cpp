@@ -20,19 +20,21 @@ void Game::GamePlayerInterface::set_active(bool active){
 	game.player_active[player] = active;
 }
 
-
-Game::Game(const BoardSize& board, int player_num, set<GameObserver*>&& observers) :
+Game::Game(const BoardSize& board, int team_num, const vector<int> teams, set<GameObserver*>&& observers) :
 	board(board),
 	round_num(-1),
-	histories(player_num, vector<PlayerPosition>()),
-	states(player_num, PlayerState(0)),
-	pending_inputs(player_num, deque<int>()),
-	player_active(player_num, true),
-	cheese_makers(player_num, CheeseMaker()),
-	collision_grids(player_num, create_collision_grid(board)),
+	histories(teams.size(), vector<PlayerPosition>()),
+	states(teams.size(), PlayerState(0)),
+	pending_inputs(teams.size(), deque<int>()),
+	player_active(teams.size(), true),
+	cheese_makers(teams.size(), CheeseMaker()),
+	collision_grids(teams.size(), create_collision_grid(board)),
+	teams(teams),
+	scores(team_num, 0),
+	alive(team_num, false),
 	observers(observers) {
 		
-	for(int i = 0; i < player_num; i++) interfaces.push_back(GamePlayerInterface(*this, i));
+	for(int i = 0; i < teams.size(); i++) interfaces.push_back(GamePlayerInterface(*this, i));
 
 	new_round();
 }
@@ -52,6 +54,8 @@ void Game::new_round(){
 	powerup_effects.clear();
 	
 	vector<PlayerPosition> positions;
+	
+	alive = vector<bool>(true, scores.size());
 	
 	for(auto& player_history: histories){
 		player_history.clear();
@@ -88,7 +92,7 @@ void Game::add_observer(GameObserver* observer){
 	for(auto powerup: powerups) observer->spawn_powerup(powerup.first, powerup.second);
 	for(auto& effect: powerup_effects) observer->activate_powerup(-1, *effect);
 	
-	observer->init(histories);
+	observer->init(histories, starting_timer);
 	
 	observers.insert(observer);
 }
@@ -177,7 +181,28 @@ void Game::step(){
 			)) break;
 		}
 	}
-
+	
+	// Update scores
+	vector<bool> new_alive(scores.size(), false);
+	for(int player = 0; player < teams.size(); player++){
+		if(histories[player].back().alive){
+			new_alive[teams[player]] = true;
+		}
+	}
+	
+	int dead_count = 0;
+	for(int team = 0; team < scores.size(); team++){
+		if(alive[team] && !new_alive[team]) dead_count++;
+		alive[team] = new_alive[team];
+	}
+	if(dead_count){
+		for(int team = 0; team < scores.size(); team++){
+			if(alive[team]) scores[team] += dead_count;
+		}
+	}
+	
+	for(auto observer: observers) observer->update_scores(scores);
+	
 	// Update observers
 	vector<PlayerPosition> positions;
 	for(const auto& player_history: histories) positions.push_back(player_history.back());
