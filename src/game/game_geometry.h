@@ -30,4 +30,11 @@ bool check_border_collision(  // Return whether further checking is possible.
 	PlayerPosition& position	
 );
 
+bool check_powerup_collision(
+	const BoardSize& board,
+	const PlayerPosition& last_position,
+	const PlayerPosition& position,
+	const PowerUp& powerup
+);
+
 #endif

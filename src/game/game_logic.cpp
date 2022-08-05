@@ -6,7 +6,10 @@
 
 void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int player, function<void(const PowerUpEffect&)> todo){
 	for(const unique_ptr<PowerUpEffect>& effect: effects){
-		if((player != effect->player) ^ effect->affects_taker){
+		if(
+			effect->desc.affects == PowerUpAffects::ALL ||
+			(effect->desc.affects == PowerUpAffects::OTHERS ^ effect->player == player)
+		){
 			todo(*effect);
 		}
 	}
@@ -15,7 +18,7 @@ void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int playe
 int count_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
 	int count = 0;
 	applying_to_player(effects, player, [type, &count](const PowerUpEffect& effect) {
-		if(effect.type == type) count++;
+		if(effect.desc.type == type) count++;
 	});
 	
 	return count;

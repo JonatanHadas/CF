@@ -223,8 +223,25 @@ void Game::step(){
 
 	for(auto observer: observers) observer->update_scores(scores);
 	
-	// TODO: Take powerups
-	
+	// Take powerups
+	for(int player = 0; player < histories.size(); player++){
+		for(auto it = powerups.begin(); it != powerups.end();){
+			if(check_powerup_collision(board, histories[player][histories[player].size() - 2], histories[player].back(), it->second)){
+				auto effect = make_unique<PowerUpEffect>(
+					powerup_times[it->second.desc],
+					it->second.desc,
+					player
+				);
+				
+				for(auto observer: observers) observer->activate_powerup(it->first, *effect);
+				powerup_effects.insert(move(effect));
+				
+				powerups.erase(it++);
+			}
+			else ++it;
+		}
+	}
+
 	count_down_powerups(powerup_effects);
 	
 	// Spawn powerups

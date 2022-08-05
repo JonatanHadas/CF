@@ -40,8 +40,8 @@ void do_with_colliding_squares(
 	double max_x = max(position.x, prev_x) + radius;
 	double max_y = max(position.y, prev_y) + radius;
 	
-	for(int warp_x = min(-position.warp_x, 0); warp_x <= max(position.warp_x, 0); warp_x += 1){
-		for(int warp_y = min(-position.warp_y, 0); warp_y <= max(position.warp_y, 0); warp_y += 1){
+	for(int warp_x = min(position.warp_x, 0); warp_x <= max(position.warp_x, 0); warp_x += 1){
+		for(int warp_y = min(position.warp_y, 0); warp_y <= max(position.warp_y, 0); warp_y += 1){
 			int start_x = max(0.0, min_x + board.w * warp_x)/GRID_SIZE;
 			int end_x = min(board.w, max_x + board.w * warp_x)/GRID_SIZE;
 			int start_y = max(0.0, min_y + board.h * warp_y)/GRID_SIZE;
@@ -188,7 +188,7 @@ bool check_border_collision(  // Return whether further checking is possible.
 	const PlayerPosition& last_position,
 	PlayerPosition& position	
 ){
-	if(position.warp_x || position.warp_y) return true;  // Warping means we do not collide with the border
+	if(position.warp_x || position.warp_y) return false;  // Warping means we do not collide with the border
 	double radius = get_player_size(position.size) / 2;
 	
 	bool at_begining = false;
@@ -205,4 +205,35 @@ bool check_border_collision(  // Return whether further checking is possible.
 		position.hovering = true;
 	}
 	return at_begining;
+}
+
+bool check_powerup_collision(
+	const BoardSize& board,
+	const PlayerPosition& last_position,
+	const PlayerPosition& position,
+	const PowerUp& powerup
+) {
+	bool at_begining;
+	double x, y;
+	
+	double radius = get_player_size(position.size) / 2;
+	
+	double prev_x = last_position.x;
+	if(position.warping_x) prev_x -= board.w * position.warp_x;
+	double prev_y = last_position.y;
+	if(position.warping_y) prev_y -= board.h * position.warp_y;	
+	
+	for(int warp_x = min(position.warp_x, 0); warp_x <= max(position.warp_x, 0); warp_x += 1){
+		for(int warp_y = min(position.warp_y, 0); warp_y <= max(position.warp_y, 0); warp_y += 1){
+			if(find_circle_collision(
+				powerup.x - warp_x, powerup.y - warp_x,
+				position.x, position.y,
+				last_position.x, last_position.y,
+				radius + POWERUP_RADIUS,
+				x, y, at_begining
+			)) return true;
+		}
+	}
+	
+	return false;
 }

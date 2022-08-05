@@ -143,24 +143,21 @@ PowerUp PowerUp::deserialize(istream& input){
 }
 
 
-PowerUpEffect::PowerUpEffect(int timer, PowerUpType type, bool affects_taker, int player) :
+PowerUpEffect::PowerUpEffect(int timer, const PowerUpDescriptor& desc, int player) :
 	timer(timer),
-	type(type),
-	affects_taker(affects_taker),
+	desc(desc),
 	player(player) {}
 
 void PowerUpEffect::serialize(ostream& output) const {
 	write_raw(output, timer);
-	write_raw(output, type);
+	desc.serialize(output);
 	write_raw(output, player);
-	write_raw(output, affects_taker);
 }
 
 PowerUpEffect PowerUpEffect::deserialize(istream& input){
 	auto timer = read_raw<int>(input);
-	auto type = read_raw<PowerUpType>(input);
+	auto desc = PowerUpDescriptor::deserialize(input);
 	auto player = read_raw<int>(input);
-	auto affects_taker = read_raw<bool>(input);
 	
-	return PowerUpEffect(timer, type, affects_taker, player);
+	return PowerUpEffect(timer, desc, player);
 }

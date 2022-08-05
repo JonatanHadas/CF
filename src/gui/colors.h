@@ -23,4 +23,10 @@ vector<SDL_Color> powerup_colors({
 	{255, 64, 32, 255},
 });
 
+vector<SDL_Color> powerup_ring_colors({
+	{199, 207, 255, 128},
+	{207, 255, 199, 128},
+	{255, 207, 199, 128},
+});
+
 #endif

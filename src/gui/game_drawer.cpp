@@ -1,4 +1,5 @@
 #include "game_drawer.h"
+#include "../game/powerups.h"
 
 #include "colors.h"
 #include "texts.h"
@@ -28,6 +29,11 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 }
 
 #define CIRCLE_RAD 50
+
+#define RING_RATIO 2.0
+#define RING_WIDTH 0.4
+#define RING_INTERVAL 0.8
+#define RING_PART 0.01
 
 void BoardDrawer::draw(SDL_Renderer* renderer){
 	init(renderer);
@@ -112,8 +118,8 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 					SDL_RenderCopy(renderer, circle_texture.get(), NULL, &dst);
 				}
 				
-				for(int warp_x = min(-player_history[j].warp_x, 0); warp_x <= max(player_history[j].warp_x, 0); warp_x += 1){
-					for(int warp_y = min(-player_history[j].warp_y, 0); warp_y <= max(player_history[j].warp_y, 0); warp_y += 1){
+				for(int warp_x = min(player_history[j].warp_x, 0); warp_x <= max(player_history[j].warp_x, 0); warp_x += 1){
+					for(int warp_y = min(player_history[j].warp_y, 0); warp_y <= max(player_history[j].warp_y, 0); warp_y += 1){
 						int index = vertices.size();
 						vertex.position = {
 							.x = (float)(DRAW_SCALE * (prev_x - sin(prev_direction)*(width/2) + warp_x * board.w)),
@@ -154,6 +160,44 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 			dst.y = DRAW_SCALE * player_history.back().y - dst.h / 2.0;
 			SDL_RenderCopy(renderer, circle_texture.get(), NULL, &dst);
 		}
+		
+		vector<SDL_Vertex> vertices;
+		vector<int> indices;
+		SDL_Vertex vertex;
+		for(int player = 0; player < view->get_histories().size(); player++){
+			if(!view->get_histories()[player].back().alive) continue;
+			double radius = RING_RATIO * get_player_size(view->get_histories()[player].back().size);
+			double x = view->get_histories()[player].back().x, y = view->get_histories()[player].back().y;
+			applying_to_player(view->get_powerup_effects(), player, [&](const PowerUpEffect& effect){
+				double angle = M_PI * 2 * effect.timer / powerup_times[effect.desc];
+				int parts = angle / RING_PART;
+				vertex.color = powerup_ring_colors[(int)effect.desc.affects];
+				for(int i = 0; i < parts; i++){
+					if(i){
+						indices.push_back(vertices.size()-2);
+						indices.push_back(vertices.size()-1);
+						indices.push_back(vertices.size());
+						indices.push_back(vertices.size()-1);
+						indices.push_back(vertices.size());
+						indices.push_back(vertices.size()+1);
+					}
+					
+					vertex.position = {
+						.x = (float)(DRAW_SCALE * (x + sin(angle*i/parts)*(radius - RING_WIDTH/2))),
+						.y = (float)(DRAW_SCALE * (y - cos(angle*i/parts)*(radius - RING_WIDTH/2))),
+					};
+					vertices.push_back(vertex);
+					vertex.position = {
+						.x = (float)(DRAW_SCALE * (x + sin(angle*i/parts)*(radius + RING_WIDTH/2))),
+						.y = (float)(DRAW_SCALE * (y - cos(angle*i/parts)*(radius + RING_WIDTH/2))),
+					};
+					vertices.push_back(vertex);
+				}
+				radius += RING_INTERVAL;
+			});
+		}
+		
+		SDL_RenderGeometry(renderer, NULL, vertices.data(), vertices.size(), indices.data(), indices.size());
 	});
 }
 

@@ -97,12 +97,10 @@ public:
 
 class PowerUpEffect{
 public:
-	PowerUpEffect(int timer, PowerUpType type, bool affects_taker, int player);
+	PowerUpEffect(int timer, const PowerUpDescriptor& desc, int player);
 
 	int timer;
-	PowerUpType type;
-	
-	bool affects_taker;
+	PowerUpDescriptor desc;
 	int player;
 
 	void serialize(ostream& output) const;
