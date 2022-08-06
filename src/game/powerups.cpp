@@ -3,22 +3,22 @@
 #include "stdlib.h"
 
 map<PowerUpDescriptor, int> powerup_times({
-	{ PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::YOU), 180 },
+	{ PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::YOU), 240 },
 	{ PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::OTHERS), 180 },
-	{ PowerUpDescriptor(PowerUpType::SLOW_DOWN, PowerUpAffects::YOU), 180 },
-	{ PowerUpDescriptor(PowerUpType::SLOW_DOWN, PowerUpAffects::OTHERS), 180 },
-	{ PowerUpDescriptor(PowerUpType::NARROW, PowerUpAffects::YOU), 180 },
-	{ PowerUpDescriptor(PowerUpType::THICKEN, PowerUpAffects::OTHERS), 180 },
-	{ PowerUpDescriptor(PowerUpType::NARROW_TURN, PowerUpAffects::YOU), 180 },
-	{ PowerUpDescriptor(PowerUpType::WIDE_TURN, PowerUpAffects::OTHERS), 180 },
-	{ PowerUpDescriptor(PowerUpType::RIGHT_TURN, PowerUpAffects::YOU), 180 },
-	{ PowerUpDescriptor(PowerUpType::INVERT, PowerUpAffects::OTHERS), 180 },
-	{ PowerUpDescriptor(PowerUpType::WARP_AROUND, PowerUpAffects::YOU), 180 },
-	{ PowerUpDescriptor(PowerUpType::WARP_AROUND, PowerUpAffects::ALL), 180 },
+	{ PowerUpDescriptor(PowerUpType::SLOW_DOWN, PowerUpAffects::YOU), 420 },
+	{ PowerUpDescriptor(PowerUpType::SLOW_DOWN, PowerUpAffects::OTHERS), 330 },
+	{ PowerUpDescriptor(PowerUpType::NARROW, PowerUpAffects::YOU), 390 },
+	{ PowerUpDescriptor(PowerUpType::THICKEN, PowerUpAffects::OTHERS), 330 },
+	{ PowerUpDescriptor(PowerUpType::NARROW_TURN, PowerUpAffects::YOU), 300 },
+	{ PowerUpDescriptor(PowerUpType::WIDE_TURN, PowerUpAffects::OTHERS), 300 },
+	{ PowerUpDescriptor(PowerUpType::RIGHT_TURN, PowerUpAffects::YOU), 720 },
+	{ PowerUpDescriptor(PowerUpType::INVERT, PowerUpAffects::OTHERS), 300 },
+	{ PowerUpDescriptor(PowerUpType::WARP_AROUND, PowerUpAffects::YOU), 420 },
+	{ PowerUpDescriptor(PowerUpType::WARP_AROUND, PowerUpAffects::ALL), 420 },
 	{ PowerUpDescriptor(PowerUpType::ERASER, PowerUpAffects::YOU), 1 },
 	{ PowerUpDescriptor(PowerUpType::ERASER, PowerUpAffects::ALL), 1 },
-	{ PowerUpDescriptor(PowerUpType::HOVER, PowerUpAffects::YOU), 180 },
-	{ PowerUpDescriptor(PowerUpType::SPAWN_POWERUPS, PowerUpAffects::ALL), 180 },
+	{ PowerUpDescriptor(PowerUpType::HOVER, PowerUpAffects::YOU), 360 },
+	{ PowerUpDescriptor(PowerUpType::SPAWN_POWERUPS, PowerUpAffects::ALL), 1 },
 });
 
 #define MIN_REGULAR_TIME 600

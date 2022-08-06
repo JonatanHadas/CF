@@ -15,10 +15,37 @@ void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int playe
 	}
 }
 
+void apply_to_players(PowerUpAffects affects, int player, int player_num, function<void(int)> todo){
+	if(affects == PowerUpAffects::YOU) todo(player);
+	else{
+		for(int i = 0; i < player_num; i++){
+			if(affects == PowerUpAffects::ALL || i != player) todo(i);
+		}
+	}
+}
+
 int count_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
 	int count = 0;
 	applying_to_player(effects, player, [type, &count](const PowerUpEffect& effect) {
 		if(effect.desc.type == type) count++;
+	});
+	
+	return count;
+}
+
+int count_self_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
+	int count = 0;
+	applying_to_player(effects, player, [type, &count](const PowerUpEffect& effect) {
+		if(effect.desc.type == type && effect.desc.affects == PowerUpAffects::YOU) count++;
+	});
+	
+	return count;
+}
+
+int count_others_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
+	int count = 0;
+	applying_to_player(effects, player, [type, &count](const PowerUpEffect& effect) {
+		if(effect.desc.type == type && effect.desc.affects == PowerUpAffects::OTHERS) count++;
 	});
 	
 	return count;
@@ -32,10 +59,11 @@ double apply_multiplier(double start, double multiplier, int amount){
 
 
 #define SPEED (0.3)
-#define SPEED_MULTIPLIER 1.5
+#define SPEED_MULTIPLIER 2.0
 
 #define TURN (M_PI / 60)
-#define TURN_MULTIPLIER 1.5
+#define NARROW_TURN_MULTIPLIER 1.2
+#define WIDE_TURN_MULTIPLIER 2.0
 
 #define STARTING_HOVER 60
 
@@ -58,10 +86,15 @@ PlayerPosition advance_player(
 		}
 	}
 	else{
-		int turn_size = count_powerups(player, PowerUpType::NARROW_TURN, effects) - 
-					    count_powerups(player, PowerUpType::WIDE_TURN, effects);
+		int narrow_turns = count_powerups(player, PowerUpType::NARROW_TURN, effects);
+		int wide_turns = count_powerups(player, PowerUpType::WIDE_TURN, effects);
 						
-		turn = real_turn_state * apply_multiplier(TURN, TURN_MULTIPLIER, turn_size) / 2;
+		int size_turn_size = count_self_powerups(player, PowerUpType::SPEED_UP, effects) - 
+							 count_others_powerups(player, PowerUpType::SLOW_DOWN, effects);
+						
+		turn = real_turn_state * apply_multiplier(TURN, SPEED_MULTIPLIER, size_turn_size)
+							   * apply_multiplier(1, NARROW_TURN_MULTIPLIER, narrow_turns)
+							   * apply_multiplier(1, WIDE_TURN_MULTIPLIER, wide_turns) / 2;
 
 		direction += turn;
 	}

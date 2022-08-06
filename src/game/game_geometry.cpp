@@ -188,7 +188,6 @@ bool check_border_collision(  // Return whether further checking is possible.
 	const PlayerPosition& last_position,
 	PlayerPosition& position	
 ){
-	if(position.warp_x || position.warp_y) return false;  // Warping means we do not collide with the border
 	double radius = get_player_size(position.size) / 2;
 	
 	bool at_begining = false;

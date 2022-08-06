@@ -5,6 +5,17 @@
 
 enum class Img{
 	INVERT,
+	SPEED,
+	TURTLE,
+	ERASER,
+	THICKEN,
+	NARROW,
+	CORNER,
+	HOVER,
+	SPAWN,
+	NARROW_TURN,
+	WIDE_TURN,
+	WARP,
 };
 
 bool load_images(SDL_Renderer* rend);

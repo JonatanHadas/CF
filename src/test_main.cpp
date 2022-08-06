@@ -80,6 +80,21 @@ int main(int argc, char** argv){
 
 	set<PowerUpDescriptor> allowed_powerups({
 		PowerUpDescriptor(PowerUpType::INVERT, PowerUpAffects::OTHERS),
+		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::OTHERS),
+		PowerUpDescriptor(PowerUpType::SLOW_DOWN, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::SLOW_DOWN, PowerUpAffects::OTHERS),
+		PowerUpDescriptor(PowerUpType::NARROW, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::THICKEN, PowerUpAffects::OTHERS),
+		PowerUpDescriptor(PowerUpType::NARROW_TURN, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::WIDE_TURN, PowerUpAffects::OTHERS),
+//		PowerUpDescriptor(PowerUpType::ERASER, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::ERASER, PowerUpAffects::ALL),
+		PowerUpDescriptor(PowerUpType::RIGHT_TURN, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::HOVER, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::SPAWN_POWERUPS, PowerUpAffects::ALL),
+//		PowerUpDescriptor(PowerUpType::WARP_AROUND, PowerUpAffects::YOU),
+		PowerUpDescriptor(PowerUpType::WARP_AROUND, PowerUpAffects::ALL),
 	});
 	
 	BoardSize board_size(100, 120);
@@ -108,6 +123,8 @@ int main(int argc, char** argv){
 	int last_round = -1;
 	int starting_timer = 0;
 	
+	bool paused = false;
+	
 	while(true){
 		gui.draw(renderer);
 
@@ -117,15 +134,18 @@ int main(int argc, char** argv){
 				
 		while(SDL_PollEvent(&event)){
 			if(event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)) return 0;
+			if(event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN) paused = !paused;
 			gui.handle_event(event);
 		}
 		
-		if(last_round != game.get_round()){
-			last_round = game.get_round();
-			starting_timer = 30;
+		if(!paused){
+			if(last_round != game.get_round()){
+				last_round = game.get_round();
+				starting_timer = 30;
+			}
+			if(starting_timer) starting_timer--;
+			else gui.step();
 		}
-		if(starting_timer) starting_timer--;
-		else gui.step();
 		
 		game.advance();
 		

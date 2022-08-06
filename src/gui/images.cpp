@@ -16,6 +16,7 @@ void free_images(){
 	for(auto entry: textures){
 		SDL_DestroyTexture(entry.second);
 	}
+	textures.clear();
 }
 
 bool load_texture(SDL_Renderer* renderer, const char* name, Img id){
@@ -35,6 +36,17 @@ bool load_images(SDL_Renderer* renderer){
 	atexit(free_images);
 	
 	if(load_texture(renderer, DIR POWERUPS "invert" PNG, Img::INVERT))
+	if(load_texture(renderer, DIR POWERUPS "speed" PNG, Img::SPEED))
+	if(load_texture(renderer, DIR POWERUPS "turtle" PNG, Img::TURTLE))
+	if(load_texture(renderer, DIR POWERUPS "eraser" PNG, Img::ERASER))
+	if(load_texture(renderer, DIR POWERUPS "thicken" PNG, Img::THICKEN))
+	if(load_texture(renderer, DIR POWERUPS "narrow" PNG, Img::NARROW))
+	if(load_texture(renderer, DIR POWERUPS "corners" PNG, Img::CORNER))
+	if(load_texture(renderer, DIR POWERUPS "hover" PNG, Img::HOVER))
+	if(load_texture(renderer, DIR POWERUPS "spawn" PNG, Img::SPAWN))
+	if(load_texture(renderer, DIR POWERUPS "narrow_turn" PNG, Img::NARROW_TURN))
+	if(load_texture(renderer, DIR POWERUPS "wide_turn" PNG, Img::WIDE_TURN))
+	if(load_texture(renderer, DIR POWERUPS "warp" PNG, Img::WARP))
 		return true;
 	return false;
 }

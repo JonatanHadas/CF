@@ -176,11 +176,13 @@ void Game::step(){
 		if(!histories[player].back().alive) continue;  // Do not check the dead.
 		if(histories[player].back().hovering) continue;  // Cannot collide wile hovering.		
 		
-		if(check_border_collision(
-			board,
-			histories[player][histories[player].size()-2],
-			histories[player].back()
-		)) continue;
+		if(count_powerups(player, PowerUpType::WARP_AROUND, powerup_effects) == 0){
+			if(check_border_collision(
+				board,
+				histories[player][histories[player].size()-2],
+				histories[player].back()
+			)) continue;
+		}
 		
 		for(int other_player = 0; other_player < states.size(); other_player++){
 			if(!check_curve_collision(
@@ -223,8 +225,11 @@ void Game::step(){
 
 	for(auto observer: observers) observer->update_scores(scores);
 	
+	set<int> erased;
+	
 	// Take powerups
 	for(int player = 0; player < histories.size(); player++){
+		if(!histories[player].back().alive) continue;  // Do not check the dead.
 		for(auto it = powerups.begin(); it != powerups.end();){
 			if(check_powerup_collision(board, histories[player][histories[player].size() - 2], histories[player].back(), it->second)){
 				auto effect = make_unique<PowerUpEffect>(
@@ -233,6 +238,17 @@ void Game::step(){
 					player
 				);
 				
+				switch(it->second.desc.type){
+					case PowerUpType::ERASER:
+						apply_to_players(it->second.desc.affects, player, teams.size(), [&](int player){
+							erased.insert(player);
+						});
+						break;
+					case PowerUpType::SPAWN_POWERUPS:
+						spawners.insert(make_unique<PowerUpSpawner>(true));
+						break;
+				}
+				
 				for(auto observer: observers) observer->activate_powerup(it->first, *effect);
 				powerup_effects.insert(move(effect));
 				
@@ -240,6 +256,15 @@ void Game::step(){
 			}
 			else ++it;
 		}
+	}
+	
+	// Erase
+	for(auto player: erased){
+		auto position = histories[player].back();
+		histories[player].clear();
+		histories[player].push_back(position);
+		
+		clear_collision_grid(collision_grids[player]);
 	}
 
 	count_down_powerups(powerup_effects);

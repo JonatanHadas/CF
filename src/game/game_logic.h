@@ -13,7 +13,13 @@ using namespace std;
 
 void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int player, function<void(const PowerUpEffect&)> todo);
 
+void apply_to_players(PowerUpAffects affects, int player, int player_num, function<void(int)> todo);
+
 int count_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
+
+int count_self_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
+
+int count_others_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
 
 double apply_multiplier(double start, double multiplier, int amount);
 
