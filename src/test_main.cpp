@@ -98,12 +98,13 @@ int main(int argc, char** argv){
 	});
 	
 	BoardSize board_size(100, 120);
+	ScoreSettings settings(WinCriterion::BY_SCORE, 2, 2);
 	
 	vector<int> teams;
 	for(int i = 0; i < PLAYER_NUM; i++){
 		teams.push_back(i);
 	}
-	Game game(board_size, PLAYER_NUM, teams, allowed_powerups, set<GameObserver*>());
+	Game game(board_size, settings, PLAYER_NUM, teams, allowed_powerups, set<GameObserver*>());
 	for(int i = 2; i < PLAYER_NUM; i++) game.get_player_interface(i).set_active(false);
 	
 	map<PlayerInterface*, KeySet> interfaces;
@@ -140,6 +141,15 @@ int main(int argc, char** argv){
 		
 		if(!paused){
 			if(last_round != game.get_round()){
+				if(game.is_over()){
+					cout << "scores: ";
+					for(auto score: game.get_scores()){
+						cout << score << " ";
+					}
+					cout << endl;
+					return 0;
+				}
+				
 				last_round = game.get_round();
 				starting_timer = 30;
 			}

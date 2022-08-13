@@ -22,11 +22,13 @@ void Game::GamePlayerInterface::set_active(bool active){
 
 Game::Game(
 	const BoardSize& board,
+		const ScoreSettings& score_settings,
 	int team_num, const vector<int> teams,
 	const set<PowerUpDescriptor>& allowed_powerups,
 	set<GameObserver*>&& observers
 ) :
 	board(board),
+	score_settings(score_settings),
 	round_num(-1),
 	histories(teams.size(), vector<PlayerPosition>()),
 	states(teams.size(), PlayerState(0)),
@@ -303,5 +305,36 @@ void Game::step(){
 	}
 	else if(end_timer == 0){
 		new_round();
+	}
+}
+
+bool Game::is_over() const{
+	if(scores.size() <= 1) return false;
+
+	int max_score = -1;
+	int second_max = -1;
+	for(auto score: scores){
+		if(score > max_score){
+			second_max = max_score;
+			max_score = score;
+		}
+		else if(score > second_max){
+			second_max = score;
+		}
+	}
+	
+	if(second_max + score_settings.tie_break_threshold > max_score){
+		return false;
+	}
+	
+	switch(score_settings.criterion){
+	case WinCriterion::BY_SCORE:
+		return max_score >= score_settings.amount;
+	case WinCriterion::BY_ROUND:
+		return round_num >= score_settings.amount;
+	case WinCriterion::NEVER:
+		return false;
+	default:
+		return true;
 	}
 }

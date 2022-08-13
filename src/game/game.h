@@ -20,6 +20,7 @@ using namespace std;
 
 class Game : public GameView{
 	const BoardSize board;
+	const ScoreSettings score_settings;
 
 	int round_num;
 	int starting_timer;
@@ -66,6 +67,7 @@ class Game : public GameView{
 public:
 	Game(
 		const BoardSize& board,
+		const ScoreSettings& score_settings,
 		int team_num, const vector<int> teams,
 		const set<PowerUpDescriptor>& allowed_powerups,
 		set<GameObserver*>&& observers
@@ -86,6 +88,8 @@ public:
 	const set<unique_ptr<PowerUpEffect>>& get_powerup_effects() const;
 
 	void advance();
+	
+	bool is_over() const;
 };
 
 #endif

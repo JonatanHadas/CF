@@ -107,4 +107,22 @@ public:
 	static PowerUpEffect deserialize(istream& input);	
 };
 
+enum class WinCriterion : char{
+	BY_SCORE,
+	BY_ROUND,
+	NEVER,
+};
+
+class ScoreSettings{
+public:
+	WinCriterion criterion;
+	int tie_break_threshold;
+	int amount;
+	
+	ScoreSettings(WinCriterion criterion, int amount, int tie_break_threshold);
+	
+	void serialize(ostream& output) const;
+	static ScoreSettings deserialize(istream& input);
+};
+
 #endif

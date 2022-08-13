@@ -161,3 +161,23 @@ PowerUpEffect PowerUpEffect::deserialize(istream& input){
 	
 	return PowerUpEffect(timer, desc, player);
 }
+
+
+ScoreSettings::ScoreSettings(WinCriterion criterion, int amount, int tie_break_threshold) :
+	criterion(criterion),
+	amount(amount),
+	tie_break_threshold(tie_break_threshold) {}
+	
+void ScoreSettings::serialize(ostream& output) const{
+	write_raw(output, amount);
+	write_raw(output, criterion);
+	write_raw(output, tie_break_threshold);
+}
+
+ScoreSettings ScoreSettings::deserialize(istream& input){
+	auto amount = read_raw<int>(input);
+	auto criterion = read_raw<WinCriterion>(input);
+	auto tie_break_threshold = read_raw<int>(input);
+	
+	return ScoreSettings(criterion, amount, tie_break_threshold);
+}
