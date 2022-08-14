@@ -44,6 +44,8 @@ HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_
 # Network objects
 
 HEADS_network/network := network/network
+HEADS_network/client := network/client network/network
+HEADS_network/server := network/server network/network
 
 # executables
 
