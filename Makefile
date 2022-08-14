@@ -41,6 +41,10 @@ HEADS_gui/gui_utils := gui/gui_utils gui/keyset
 HEADS_gui/game_drawer := gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES) utils/geometry
 HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES)
 
+# Network objects
+
+HEADS_network/network := network/network
+
 # executables
 
 HEADS_test_main := gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
