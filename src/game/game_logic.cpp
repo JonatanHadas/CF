@@ -171,3 +171,13 @@ void count_down_powerups(set<unique_ptr<PowerUpEffect>>& effects){
 		else ++it;
 	}
 }
+
+#define BASE_WIDTH 70
+#define BASE_HEIGHT 85
+
+BoardSize get_board_size(int player_num){
+	return BoardSize(
+		BASE_WIDTH * sqrt(player_num),
+		BASE_HEIGHT * sqrt(player_num)
+	);
+}

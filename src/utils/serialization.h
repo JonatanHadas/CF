@@ -42,4 +42,27 @@ vector<T> read_vector(istream& input, function<T(istream&)> read_function){
 	return value;
 }
 
+void write_string(ostream& output, const string& value);
+
+string read_string(istream& input);
+
+template<typename T>
+function<void(ostream&, const vector<T>&)> vector_write_function(function<void(ostream&, const T&)> write_function){
+	return [write_function](ostream& output, const vector<T>& value){
+		write_vector<T>(output, value, write_function);
+	};
+}
+
+template<typename T>
+function<vector<T>(istream&)> vector_read_function(function<T(istream&)> read_function){
+	return [read_function](istream& input){
+		return read_vector<T>(input, read_function);
+	};
+}
+
+template<typename T>
+void write_serializable(ostream& output, const T& value){
+	value.serialize(output);
+}
+
 #endif

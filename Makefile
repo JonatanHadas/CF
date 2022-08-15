@@ -20,11 +20,14 @@ endif
 # Util objects
 
 HEADS_utils/geometry := utils/geometry
+HEADS_utils/serialization := utils/serialization
 
 # Game objects
 
 GAME_DATA := game/game_data utils/serialization
 GAME_INTERFACES := game/game_observer game/game_view game/player_interface $(GAME_DATA)
+GAME_SETTINGS := game/game_settings $(GAME_DATA)
+GAME_SETTINGS_INTERFACES := game/game_settings_view game/game_settings_observer game/game_settings_manipulator $(GAME_SETTINGS)
 
 HEADS_game/game_data := $(GAME_DATA)
 HEADS_game/powerups := game/powerups $(GAME_DATA)
@@ -32,6 +35,8 @@ HEADS_game/game_logic := game/game_logic $(GAME_DATA)
 HEADS_game/game_geometry := game/game_geometry game/game_logic game/collision_grid $(GAME_DATA)
 HEADS_game/cheese_maker := game/cheese_maker
 HEADS_game/game := game/game game/powerups game/game_geometry game/game_logic game/cheese_maker game/collision_grid $(GAME_INTERFACES)
+HEADS_game/game_settings := $(GAME_SETTINGS)
+HEADS_game/game_settings_manager := game/game_settings_manager utils/utils $(GAME_SETTINGS_INTERFACES)
 
 # GUI objects
 

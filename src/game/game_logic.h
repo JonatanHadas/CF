@@ -34,4 +34,6 @@ double get_player_size(int size);
 
 void count_down_powerups(set<unique_ptr<PowerUpEffect>>& effects);
 
+BoardSize get_board_size(int player_num);
+
 #endif
