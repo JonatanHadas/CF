@@ -25,7 +25,7 @@ HEADS_utils/serialization := utils/serialization
 # Game objects
 
 GAME_DATA := game/game_data utils/serialization
-GAME_INTERFACES := game/game_observer game/game_view game/player_interface $(GAME_DATA)
+GAME_INTERFACES := game/game_advancer game/game_observer game/game_view game/player_interface $(GAME_DATA)
 GAME_SETTINGS := game/game_settings $(GAME_DATA)
 GAME_SETTINGS_INTERFACES := game/game_settings_view game/game_settings_observer game/game_settings_manipulator $(GAME_SETTINGS)
 
@@ -40,17 +40,19 @@ HEADS_game/game_settings_manager := game/game_settings_manager utils/utils $(GAM
 
 # GUI objects
 
+HEADS_gui/clock := gui/clock
+HEADS_gui/gui := gui/gui gui/clock
 HEADS_gui/texts := gui/texts
 HEADS_gui/images := gui/images
 HEADS_gui/gui_utils := gui/gui_utils gui/keyset
 HEADS_gui/game_drawer := gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES) utils/geometry
-HEADS_gui/game_gui := gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES)
+HEADS_gui/game_gui := gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES)
 
 # executables
 
-HEADS_test_main := gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
+HEADS_test_main := gui/gui gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
 
-OBJECTS_test := game/game_data game/game_logic game/game game/powerups gui/gui_utils gui/texts gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry gui/images test_main
+OBJECTS_test := gui/gui gui/clock utils/serialization game/game_data game/game_logic game/game game/powerups gui/gui_utils gui/texts gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry gui/images test_main
 
 EXECUTABLES := test
 

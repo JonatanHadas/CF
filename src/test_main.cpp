@@ -117,50 +117,17 @@ int main(int argc, char** argv){
 		.right = SDL_SCANCODE_X
 	};
 	
-	GameGui gui(board_size, &game, interfaces);
+	GameGui gui(board_size, &game, &game, interfaces);
 	
-	auto next_tick = SDL_GetTicks() + TICK_LEN;
+	mainloop(gui, renderer);
 	
-	int last_round = -1;
-	int starting_timer = 0;
-	
-	bool paused = false;
-	
-	while(true){
-		gui.draw(renderer);
-
-		SDL_RenderPresent(renderer);
-		
-		SDL_Event event;
-				
-		while(SDL_PollEvent(&event)){
-			if(event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)) return 0;
-			if(event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN) paused = !paused;
-			gui.handle_event(event);
+	if(game.is_over()){
+		cout << "scores: ";
+		for(auto score: game.get_scores()){
+			cout << score << " ";
 		}
-		
-		if(!paused){
-			if(last_round != game.get_round()){
-				if(game.is_over()){
-					cout << "scores: ";
-					for(auto score: game.get_scores()){
-						cout << score << " ";
-					}
-					cout << endl;
-					return 0;
-				}
-				
-				last_round = game.get_round();
-				starting_timer = 30;
-			}
-			if(starting_timer) starting_timer--;
-			else gui.step();
-		}
-		
-		game.advance();
-		
-		auto time = SDL_GetTicks();
-		if(next_tick > time) SDL_Delay(next_tick - time);
-		next_tick = SDL_GetTicks() + TICK_LEN;
+		cout << endl;
 	}
+	
+	return 0;
 }

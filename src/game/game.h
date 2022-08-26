@@ -4,6 +4,7 @@
 #include "game_data.h"
 #include "game_view.h"
 #include "game_observer.h"
+#include "game_advancer.h"
 #include "player_interface.h"
 #include "collision_grid.h"
 #include "powerups.h"
@@ -18,7 +19,7 @@
 
 using namespace std;
 
-class Game : public GameView{
+class Game : public GameView, public GameAdvancer{
 	const BoardSize board;
 	const ScoreSettings score_settings;
 
