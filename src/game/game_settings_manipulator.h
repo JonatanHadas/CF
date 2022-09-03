@@ -8,6 +8,7 @@
 using namespace std;
 
 class GameSettingsManipulator{
+public:
 	virtual void add_player() = 0;
 	virtual void remove_player(int index) = 0;
 	

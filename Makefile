@@ -21,6 +21,7 @@ endif
 
 HEADS_utils/geometry := utils/geometry
 HEADS_utils/serialization := utils/serialization
+HEADS_utils/utf8 := utils/utf8
 
 # Game objects
 
@@ -42,17 +43,27 @@ HEADS_game/game_settings_manager := game/game_settings_manager utils/utils $(GAM
 
 HEADS_gui/clock := gui/clock
 HEADS_gui/gui := gui/gui gui/clock
+HEADS_gui/subview := gui/subview
+HEADS_gui/button := gui/button gui/subview
+HEADS_gui/textbox := gui/textbox gui/subview gui/texts utils/utf8
+HEADS_gui/key_choice_button := gui/key_choice_button gui/subview gui/texts gui/keyset
+HEADS_gui/subview_manager := gui/subview_manager gui/subview
+HEADS_gui/player_settings := gui/player_settings
+HEADS_gui/players_subview := gui/player_settings gui/players_subview gui/subview_manager gui/button gui/subview gui/colors gui/textbox gui/key_choice_button gui/keyset
+HEADS_gui/game_menu := gui/player_settings gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/textbox gui/key_choice_button gui/keyset
+HEADS_gui/colors := gui/colors
 HEADS_gui/texts := gui/texts
 HEADS_gui/images := gui/images
-HEADS_gui/gui_utils := gui/gui_utils gui/keyset
+HEADS_gui/keyset := gui/keyset utils/serialization utils/utils
+HEADS_gui/gui_utils := gui/gui_utils
 HEADS_gui/game_drawer := gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES) utils/geometry
 HEADS_gui/game_gui := gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES)
 
 # executables
 
-HEADS_test_main := gui/gui gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
+HEADS_test_main := gui/key_choice_button gui/player_settings gui/textbox gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/gui gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
 
-OBJECTS_test := gui/gui gui/clock utils/serialization game/game_data game/game_logic game/game game/powerups gui/gui_utils gui/texts gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry gui/images test_main
+OBJECTS_test := gui/key_choice_button gui/keyset gui/player_settings utils/utf8 gui/textbox gui/colors gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/gui gui/clock utils/serialization game/game_settings game/game_settings_manager game/game_data game/game_logic game/game game/powerups gui/gui_utils gui/texts gui/game_drawer gui/game_gui utils/geometry game/cheese_maker game/game_geometry gui/images test_main
 
 EXECUTABLES := test
 

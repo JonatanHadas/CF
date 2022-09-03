@@ -3,6 +3,8 @@
 #include "gui/images.h"
 #include "game/game.h"
 
+#include "gui/game_menu.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
@@ -75,10 +77,12 @@ int main(int argc, char** argv){
 		cerr << "Error while loading images" << endl << SDL_GetError() << IMG_GetError() << endl;
 		return 0;
 	}
-
+	
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
 
-	set<PowerUpDescriptor> allowed_powerups({
+	KeySetManager key_manager("game_data/keys");
+
+	/*set<PowerUpDescriptor> allowed_powerups({
 		PowerUpDescriptor(PowerUpType::INVERT, PowerUpAffects::OTHERS),
 		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::YOU),
 		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::OTHERS),
@@ -127,7 +131,15 @@ int main(int argc, char** argv){
 			cout << score << " ";
 		}
 		cout << endl;
-	}
+	}*/
+	
+	int screen_w, screen_h;
+	SDL_GetRendererOutputSize(renderer, &screen_w, &screen_h);
+	SDL_RenderSetLogicalSize(renderer, screen_w, screen_h);
+
+	GameMenu gui(screen_w, screen_h, key_manager);
+	
+	mainloop(gui, renderer);
 	
 	return 0;
 }

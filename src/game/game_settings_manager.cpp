@@ -1,7 +1,7 @@
 #include "game_settings_manager.h"
 
 #include "../utils/utils.h"
-
+#include <iostream>
 GameSettingsManager::Peer::Peer(GameSettingsManager& manager) :
 	manager(manager),
 	ready(false) {}
@@ -9,10 +9,11 @@ GameSettingsManager::Peer::Peer(GameSettingsManager& manager) :
 GameSettingsManager::Peer::~Peer(){
 	observers.clear();
 	
-	vector<int> old_players;
-	players.clear();
-	
-	for(auto player: old_players) manager.remove_player(player);
+	while(players.size()){
+		int player = players.back();
+		players.pop_back();
+		manager.remove_player(player);
+	}
 }
 
 // Manipulator
@@ -260,11 +261,11 @@ void GameSettingsManager::remove_player(int player){
 			if(peer_player > player) peer_player--;
 		}
 	}
-	
+
 	remove_index(settings.teams, player);
 	remove_index(settings.names, player);
 	remove_index(settings.colors, player);
-	
+
 	do_with_observers([&](GameSettingsObserver& observer){
 		observer.remove_player(player);
 	});

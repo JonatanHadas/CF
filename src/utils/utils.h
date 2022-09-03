@@ -2,6 +2,7 @@
 #define _UTILS_H
 
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -15,6 +16,11 @@ T pop_index(vector<T>& container, int index){
 	T value = move(container[index]);
 	remove_index(container, index);
 	return value;
+}
+
+template<typename T>
+size_t count(const vector<T>& container, const T& value){
+	return count(container.begin(), container.end(), value);
 }
 
 #endif
