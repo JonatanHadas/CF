@@ -10,6 +10,8 @@ using namespace std;
 class SubViewManager{
 	map<SubView*, bool> subviews;
 	SubView* focus;
+	
+	int mouse_x, mouse_y;
 public:
 	SubViewManager();
 	

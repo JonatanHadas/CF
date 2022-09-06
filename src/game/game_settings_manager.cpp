@@ -350,6 +350,7 @@ void GameSettingsManager::set_win_criterion(WinCriterion criterion){
 
 void GameSettingsManager::set_win_amount(int amount){
 	reset_all_ready();
+	if(amount < 0) return;
 	settings.scores.amount = amount;
 	
 	do_with_observers([&](GameSettingsObserver& observer){
@@ -359,6 +360,7 @@ void GameSettingsManager::set_win_amount(int amount){
 
 void GameSettingsManager::set_tie_break(int threshold){
 	reset_all_ready();
+	if(threshold < 0) return;
 	settings.scores.tie_break_threshold = threshold;
 	
 	do_with_observers([&](GameSettingsObserver& observer){

@@ -10,11 +10,15 @@ bool SubView::handle_event(SDL_Event event){
 	case SDL_MOUSEMOTION:
 		event.motion.x -= rect.x;
 		event.motion.y -= rect.y;
+		mouse_x = event.motion.x;
+		mouse_y = event.motion.y;
 		break;
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
 		event.button.x -= rect.x;
 		event.button.y -= rect.y;
+		mouse_x = event.button.x;
+		mouse_y = event.button.y;
 		break;
 	}
 	
@@ -51,7 +55,7 @@ void SubView::move(int x, int y){
 	rect.y = y;
 }
 
-void SubView::fill_back(SDL_Renderer* renderer, const SDL_Color& color){
+void SubView::fill_back(SDL_Renderer* renderer, const SDL_Color& color) const {
 	SDL_Rect rect = get_rect();
 	rect.x = rect.y = 0;
 	
@@ -59,7 +63,7 @@ void SubView::fill_back(SDL_Renderer* renderer, const SDL_Color& color){
 	SDL_RenderFillRect(renderer, &rect);
 }
 
-void SubView::draw_frame(SDL_Renderer* renderer, const SDL_Color& color){
+void SubView::draw_frame(SDL_Renderer* renderer, const SDL_Color& color) const {
 	SDL_Rect rect = get_rect();
 	rect.x = rect.y = 0;
 	

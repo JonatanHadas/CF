@@ -20,4 +20,6 @@ extern SDL_Color active_color;
 
 extern SDL_Color clear_color;
 
+extern SDL_Color text_color;
+
 #endif

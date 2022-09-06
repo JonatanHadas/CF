@@ -45,12 +45,34 @@ void SubViewManager::draw(SDL_Renderer* renderer){
 }
 
 bool SubViewManager::handle_event(const SDL_Event& event){
-	if(event.type == SDL_MOUSEBUTTONDOWN){
-		SubView* new_focus = get_position(event.button.x, event.button.y);
-		
-		if(new_focus != focus) lose_focus();
-		focus = new_focus;
-		
+	switch(event.type){
+	case SDL_MOUSEMOTION:
+		{
+			mouse_x = event.motion.x;
+			mouse_y = event.motion.y;
+
+			bool handled = false;
+			for(auto& entry: subviews){
+				handled |= entry.first->handle_event(event);
+			}
+			return handled;
+		}
+	case SDL_MOUSEWHEEL:
+		{
+			SubView* view = get_position(mouse_x, mouse_y);
+			if(view != nullptr) return view->handle_event(event);
+		}
+	case SDL_MOUSEBUTTONDOWN:
+		{
+			mouse_x = event.button.x;
+			mouse_y = event.button.y;
+
+			SubView* new_focus = get_position(event.button.x, event.button.y);
+			
+			if(new_focus != focus) lose_focus();
+			focus = new_focus;
+		}
+		break;
 	}
 	if(focus != nullptr) return focus->handle_event(event);
 	

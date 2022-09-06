@@ -27,3 +27,5 @@ SDL_Color line_color2 = {255, 255, 255, 255};
 SDL_Color active_color = {64, 64, 64, 255};
 
 SDL_Color clear_color = {0, 0, 0, 0};
+
+SDL_Color text_color = {96, 96, 96, 255};

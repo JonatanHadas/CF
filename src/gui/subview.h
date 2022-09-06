@@ -11,12 +11,11 @@ class SubView{
 	unique_ptr<Texture> texture;
 	SDL_Rect rect;
 	bool translucent;
+	
+	int mouse_x, mouse_y;
 protected:
 	virtual bool on_event(const SDL_Event& event) = 0;
 	virtual void draw_content(SDL_Renderer* renderer) = 0;
-	
-	void fill_back(SDL_Renderer* renderer, const SDL_Color& color);
-	void draw_frame(SDL_Renderer* renderer, const SDL_Color& color);
 public:
 	SubView(const SDL_Rect& rect, bool translucent);
 	
@@ -30,6 +29,9 @@ public:
 
 	const SDL_Rect& get_rect() const;
 	void move(int x, int y);
+
+	void fill_back(SDL_Renderer* renderer, const SDL_Color& color) const;
+	void draw_frame(SDL_Renderer* renderer, const SDL_Color& color) const;
 };
 
 #endif

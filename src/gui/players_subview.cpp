@@ -78,7 +78,7 @@ PlayerNameBox::PlayerNameBox(const SDL_Rect& rect, int margin, PlayerSubView& vi
 	rect, false,
 	FontType::NRM,
 	margin,
-	{96, 96, 96, 255}, {72, 72, 72, 32}
+	text_color, {72, 72, 72, 32}
 	),
 	view(view) {}
 
@@ -106,7 +106,7 @@ PlayerKeyButton::PlayerKeyButton(
 ) :
 	KeyChoiceButton(
 		rect, false,
-		FontType::NRM, {96, 96, 96, 255},
+		FontType::NRM, text_color,
 		choose_key_const(view.get_keys(), key_choice)
 	),
 	key_choice(key_choice),
