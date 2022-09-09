@@ -4,6 +4,7 @@
 #include "game_settings_view.h"
 #include "game_settings_manipulator.h"
 #include "game_settings_observer.h"
+#include "game_settings_observer_accumulator.h"
 
 #include <memory>
 #include <functional>
@@ -12,16 +13,16 @@ using namespace std;
 
 class GameSettingsManager{
 public:
-	class Peer : public GameSettingsView, public GameSettingsManipulator{
+	class Peer : public GameSettingsView, public GameSettingsManipulator, public GameSettingsObserverAccumulator{
 		friend GameSettingsManager;
 		
 		GameSettingsManager& manager;
 		
 		vector<int> players;
 
-		set<GameSettingsObserver*> observers;
-		
-		bool ready;		
+		bool ready;	
+	protected:
+		void init_observer(GameSettingsObserver* observer);
 	public:
 		Peer(GameSettingsManager& manager);
 
@@ -66,9 +67,6 @@ public:
 		set<int> get_ready() const;
 		
 		const bool am_i_host() const;
-		
-		void add_observer(GameSettingsObserver* observer);
-		void remove_observer(GameSettingsObserver* observer);
 	};
 private:
 	friend GameSettingsManager::Peer;

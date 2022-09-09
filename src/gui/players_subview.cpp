@@ -3,39 +3,6 @@
 #include "colors.h"
 #include "../utils/utils.h"
 
-#include <stdio.h>
-
-unique_ptr<Texture> make_cross(SDL_Renderer* renderer, int size, double ratio){
-	auto texture = make_unique<Texture>(renderer,
-		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-		size, size
-	);
-	
-	SDL_SetTextureBlendMode(texture->get(), SDL_BLENDMODE_BLEND);
-
-	texture->do_with_texture(renderer, [&](){
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0 ,0);
-
-		SDL_Rect rect;
-		rect.w = rect.h = size;
-		rect.x = rect.y = 0;
-
-		SDL_RenderFillRect(renderer, &rect);
-
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		
-		rect.w = size * ratio; rect.x = (size - rect.w) / 2;
-		rect.h = size; rect.y = 0;
-		SDL_RenderFillRect(renderer, &rect);
-
-		rect.h = size * ratio; rect.y = (size - rect.h) / 2;
-		rect.w = size; rect.x = 0;
-		SDL_RenderFillRect(renderer, &rect);
-	});
-
-	return texture;
-}
-
 #define REMOVE_CROSS_RATIO (1.0/3.0)
 
 PlayerRemoveButton::PlayerRemoveButton(const SDL_Rect& rect, PlayerSubView& view) :

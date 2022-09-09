@@ -20,7 +20,7 @@ class TextBox : public SubView {
 	
 	int margin;
 	
-	bool updated, typing;
+	bool updated, typing, active;
 protected:
 	bool on_event(const SDL_Event& event);
 	void draw_content(SDL_Renderer* renderer);
@@ -41,6 +41,10 @@ public:
 	
 	void set_color(const SDL_Color& color, const SDL_Color& back_color);
 	void set_text(const string& text);
+	
+	void set_active(bool is_active);
+	
+	int get_text_width();
 	
 	void update();
 };

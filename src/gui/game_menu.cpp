@@ -33,7 +33,7 @@ bool GameMenu::handle_event(const SDL_Event& event){
 			peer = settings.create_peer();
 			players->attach_settings(peer, peer);
 			
-			settings_menu = make_unique<GameSettingsMenu>(settings_rect, peer, peer, true);
+			settings_menu = make_unique<GameSettingsMenu>(settings_rect, peer, peer, peer, true);
 			view_manager.add_view(settings_menu.get());				
 		}
 		else{

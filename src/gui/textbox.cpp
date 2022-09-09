@@ -10,9 +10,10 @@ TextBox::TextBox(
 	font(font),
 	margin(margin),
 	color(color), back_color(color),
-	updated(true), typing(false) {}
+	updated(true), typing(false), active(true) {}
 
 bool TextBox::on_event(const SDL_Event& event){
+	if(!active) return false;
 	switch(event.type){
 	case SDL_MOUSEBUTTONDOWN:
 		if(!typing){
@@ -105,6 +106,18 @@ void TextBox::set_text(const string& text){
 		if(text != this->text) updated = true;
 		this->text = text;
 	}
+}
+
+void TextBox::set_active(bool is_active){
+	active = is_active;
+	if(!active){
+		lose_focus();
+	}
+}
+
+int TextBox::get_text_width(){
+	if(msg.get() == nullptr) return 0;
+	return msg->get_width();
 }
 
 void TextBox::update(){

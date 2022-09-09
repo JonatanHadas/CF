@@ -6,6 +6,8 @@
 #include "powerup_images.h"
 #include "../game/powerups.h"
 
+#include "../utils/utils.h"
+
 WinCriterionMenu::WinCriterionMenu(
 	const SDL_Rect& rect, int x_margin,
 	GameSettingsView* view, GameSettingsManipulator* manipulator
@@ -308,6 +310,437 @@ void GameSettingsSubView::step(){
 	view_manager.step();
 }
 
+TeamChangeButton::TeamChangeButton(
+	const SDL_Rect& rect,
+	bool direction,
+	PlayerView& view
+) : Button(rect, false),
+	direction(direction),
+	view(view) {}
+
+void TeamChangeButton::draw_arrow(SDL_Renderer* renderer, const SDL_Color& color){
+	SDL_SetRenderDrawColor(renderer, clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+	SDL_RenderClear(renderer);
+	
+	SDL_Vertex vertices[3] = {
+		{
+			.position = {
+				.x = (float)(0.5 * get_rect().w),
+				.y = (float)(direction ? 0 : get_rect().h),
+			},
+			.color = color,
+		},
+		{
+			.position = {
+				.x = (float)(get_rect().w),
+				.y = (float)(direction ? get_rect().h : 0),
+			},
+			.color = color,
+		},
+		{
+			.position = {
+				.x = 0.0f,
+				.y = (float)(direction ? get_rect().h : 0),
+			},
+			.color = color,
+		},
+	};
+	
+	SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
+}
+
+void TeamChangeButton::draw_pressed(SDL_Renderer* renderer){
+	draw_arrow(renderer, text_color);
+}
+
+void TeamChangeButton::draw_released(SDL_Renderer* renderer){
+	draw_arrow(renderer, line_color);
+}
+
+void TeamChangeButton::draw_inactive(SDL_Renderer* renderer){
+	draw_arrow(renderer, clear_color);
+}
+
+void TeamChangeButton::on_pressed(){
+	view.set_team(view.get_team() + (direction ? -1 : 1));
+}
+
+#define LINE_MARGIN 0.01
+
+#define PLAYER_NAME_X 0.04
+#define TEAM_NAME_X 0.02
+#define PLAYER_STATUS_X 0.95
+
+#define TEAM_CHANGE_H 0.4
+#define TEAM_CHANGE_W 0.02
+#define TEAM_CHANGE_X 0.96
+#define TEAM_CHANGE_DY 0.05
+
+PlayerView::PlayerView(
+	const SDL_Rect& rect,
+	int player,
+	GameSettingsView* view, GameSettingsManipulator* manipulator,
+	bool multi_peer
+) : SubView(rect, true),
+	player(player),
+	view(view), manipulator(manipulator),
+	multi_peer(multi_peer) {
+		
+	SDL_Rect button_rect;
+	button_rect.x = rect.w * TEAM_CHANGE_X;
+	button_rect.w = rect.w * TEAM_CHANGE_W;
+	button_rect.h = rect.h * TEAM_CHANGE_H;
+	
+	button_rect.y = rect.h * (0.5 + TEAM_CHANGE_DY);
+	inc = make_unique<TeamChangeButton>(button_rect, false, *this);
+	view_manager.add_view(inc.get());
+
+	button_rect.y = rect.h * (0.5 - TEAM_CHANGE_DY) - button_rect.h;
+	dec = make_unique<TeamChangeButton>(button_rect, true, *this);
+	view_manager.add_view(dec.get());
+}
+	
+void PlayerView::sync_display(){
+	bool change_teams = false;
+	for(auto my_player: view->get_my_players()){
+		if(player == my_player) change_teams = true;
+	}
+	change_teams &= view->get_settings().using_teams;
+	
+	int team = view->get_settings().teams[player];
+	
+	inc->set_active(change_teams && team < view->get_settings().team_names.size() -1);
+	dec->set_active(change_teams && team > 0);
+}
+
+void PlayerView::draw_content(SDL_Renderer* renderer){
+	sync_display();
+	if(
+		name_label.get() == nullptr ||
+		color != view->get_settings().colors[player] ||
+		name != view->get_settings().names[player]
+	){
+		name = view->get_settings().names[player];
+		color = view->get_settings().colors[player];
+		
+		char name_buffer[50];
+		snprintf(name_buffer, 50, "player-%d", player);
+
+		name_label = make_unique<Msg>(
+			name.size() ? name.c_str() : name_buffer,
+			player_colors[color], FontType::NRM,
+			renderer
+		);
+	}
+	
+	if(host_label.get() == nullptr) host_label = make_unique<Msg>(
+		"Host",
+		text_color, FontType::NRM,
+		renderer
+	);
+
+	if(ready_label.get() == nullptr) ready_label = make_unique<Msg>(
+		"Ready",
+		text_color, FontType::NRM,
+		renderer
+	);
+
+	fill_back(renderer, clear_color);
+	
+	int text_x = get_rect().w * (view->get_settings().using_teams ? PLAYER_NAME_X : TEAM_NAME_X);
+	name_label->render_centered(text_x, get_rect().h / 2, Align::LEFT);
+	
+	int line_start_x = text_x + name_label->get_width() + (get_rect().w * LINE_MARGIN);
+	
+	text_x = get_rect().w * PLAYER_STATUS_X;
+	
+	int line_end_x = text_x - (get_rect().w * LINE_MARGIN);
+	if(multi_peer){
+		if(count(view->get_host_players(), player)){
+			host_label->render_centered(text_x, get_rect().h / 2, Align::RIGHT);
+			line_end_x -= host_label->get_width();
+		} else if (view->get_ready().count(player)) {
+			ready_label->render_centered(text_x, get_rect().h / 2, Align::RIGHT);
+			line_end_x -= ready_label->get_width();
+		}
+	}
+	
+	SDL_SetRenderDrawColor(renderer, active_color.r, active_color.g, active_color.b, active_color.a);
+	SDL_RenderDrawLine(
+		renderer,
+		line_start_x, get_rect().h / 2,
+		line_end_x, get_rect().h / 2
+	);
+	
+	view_manager.draw(renderer);
+}
+
+bool PlayerView::on_event(const SDL_Event& event){
+	sync_display();
+	return view_manager.handle_event(event);
+}
+
+void PlayerView::lose_focus(){
+	sync_display();
+	view_manager.lose_focus();
+}
+
+void PlayerView::step(){
+	sync_display();
+	view_manager.step();
+}
+
+int PlayerView::get_player(){
+	return player;
+}
+
+void PlayerView::set_player(int player){
+	if(name.size() == 0 && this->player != player) name_label = nullptr;
+	this->player = player;
+}
+
+int PlayerView::get_team(){
+	return view->get_settings().teams[player];
+}
+
+void PlayerView::set_team(int team){
+	for(int i = 0; i < view->get_my_players().size(); i++){
+		if(view->get_my_players()[i] == player) manipulator->set_player_team(i, team);
+	}
+}
+
+TeamNameBox::TeamNameBox(
+	const SDL_Rect& rect, int margin,
+	TeamSeparator& view
+) : TextBox(
+		rect, true,
+		FontType::NRM,
+		margin,
+		text_color, {72, 72, 72, 32}
+	),
+	view(view) {}
+
+void TeamNameBox::draw_back(SDL_Renderer* renderer, bool typing){
+	fill_back(renderer, clear_color);
+}
+
+void TeamNameBox::on_set(const string& text){
+	view.set_name(text);
+}
+
+string TeamNameBox::get_default_text(){
+	char name[50];
+	snprintf(name, 50, "team-%d", view.get_team());
+	return name;
+}
+
+#define REMOVE_CROSS_RATIO (1.0/3.0)
+
+TeamRemoveButton::TeamRemoveButton(const SDL_Rect& rect, TeamSeparator& view) : Button(rect, true), view(view) {}
+
+void TeamRemoveButton::init(SDL_Renderer* renderer){
+	if(cross.get() == nullptr) cross = make_cross(renderer, get_rect().w, REMOVE_CROSS_RATIO);
+}
+
+void TeamRemoveButton::draw_cross(SDL_Renderer* renderer){
+	fill_back(renderer, clear_color);
+	SDL_RenderCopyEx(renderer, cross->get(), NULL, NULL, 45.0, NULL, SDL_FLIP_NONE);
+}
+
+void TeamRemoveButton::draw_pressed(SDL_Renderer* renderer){
+	init(renderer);
+	SDL_SetTextureColorMod(cross->get(), 64, 0, 0);
+	draw_cross(renderer);
+}
+
+void TeamRemoveButton::draw_released(SDL_Renderer* renderer){
+	init(renderer);
+	SDL_SetTextureColorMod(cross->get(), 128, 0, 0);
+	draw_cross(renderer);
+}
+
+void TeamRemoveButton::draw_inactive(SDL_Renderer* renderer){
+	init(renderer);
+	SDL_SetTextureColorMod(cross->get(), 128, 64, 64);
+	draw_cross(renderer);
+}
+
+void TeamRemoveButton::on_pressed(){
+	view.remove();
+}
+
+#define TEAM_REMOVE_BUTTON_SIZE 0.5
+#define TEAM_REMOVE_BUTTON_X 0.98
+
+TeamSeparator::TeamSeparator(
+	const SDL_Rect& rect,
+	int team,
+	GameSettingsView* view, GameSettingsManipulator* manipulator
+) : SubView(rect, true),
+	team(team),
+	view(view), manipulator(manipulator) {
+
+	SDL_Rect view_rect;
+	view_rect.x = view_rect.y = 0;
+	view_rect.h = rect.h;
+	view_rect.w = rect.w * (TEAM_REMOVE_BUTTON_X - LINE_MARGIN) - rect.h / 2;
+	
+	name = make_unique<TeamNameBox>(view_rect, rect.w * TEAM_NAME_X, *this);
+	view_manager.add_view(name.get());
+}
+
+void TeamSeparator::sync_display(){
+	if(view->am_i_host() && remove_button.get() == nullptr){
+		SDL_Rect rect;
+		rect.w = rect.h = get_rect().h * TEAM_REMOVE_BUTTON_SIZE;
+		rect.y = (get_rect().h - rect.h) / 2;
+		rect.x = get_rect().w * TEAM_REMOVE_BUTTON_X - rect.w / 2;
+
+		remove_button = make_unique<TeamRemoveButton>(rect, *this);
+		view_manager.add_view(remove_button.get());			
+	}
+	else if(!view->am_i_host() && remove_button.get() != nullptr){
+		view_manager.remove_view(remove_button.get());
+		remove_button = nullptr;
+	}
+	
+	bool is_my_team = false;
+	for(auto player: view->get_my_players()){
+		if(view->get_settings().teams[player] == team) is_my_team = true;
+	}
+	name->set_active(is_my_team);
+}
+
+void TeamSeparator::draw_content(SDL_Renderer* renderer){
+	sync_display();
+
+	fill_back(renderer, clear_color);
+	view_manager.draw(renderer);
+
+	int end_x = get_rect().w * TEAM_REMOVE_BUTTON_X;
+	if(view->am_i_host()) end_x -= get_rect().h / 2;
+
+	SDL_SetRenderDrawColor(renderer, line_color.r, line_color.g, line_color.b, line_color.a);
+	SDL_RenderDrawLine(renderer,
+		get_rect().w * (TEAM_NAME_X + LINE_MARGIN) + name->get_text_width(), get_rect().h / 2,
+		end_x, get_rect().h / 2
+	);
+}
+
+bool TeamSeparator::on_event(const SDL_Event& event){
+	sync_display();
+	return view_manager.handle_event(event);
+}
+
+void TeamSeparator::lose_focus(){
+	sync_display();
+	view_manager.lose_focus();
+}
+
+void TeamSeparator::step(){
+	sync_display();
+	view_manager.step();
+}
+
+int TeamSeparator::get_team(){
+	return team;
+}
+
+void TeamSeparator::set_team(int team){
+	if(team != this->team) name->update();
+	this->team = team;
+}
+
+void TeamSeparator::set_name(string name){
+	manipulator->set_team_name(team, name);
+}
+
+void TeamSeparator::remove(){
+	manipulator->remove_team(team);
+}
+
+TeamsButton::TeamsButton(
+	const SDL_Rect& rect,
+	GameSettingsView* view, GameSettingsManipulator* manipulator
+) : Button(rect, false), view(view), manipulator(manipulator) {}
+
+void TeamsButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
+	fill_back(renderer, color);
+	draw_frame(renderer, line_color);
+	
+	if(label.get() == nullptr || state != view->get_settings().using_teams) {
+		state = view->get_settings().using_teams;
+		
+		label = make_unique<Msg>(
+			state ? "Single player" : "Teams",
+			text_color,
+			FontType::NRM,
+			renderer
+		);
+	}
+	
+	label->render_centered(get_rect().w / 2, get_rect().h / 2, Align::CENTER);
+}
+
+void TeamsButton::draw_pressed(SDL_Renderer* renderer){
+	draw_button(renderer, active_color);
+}
+
+void TeamsButton::draw_released(SDL_Renderer* renderer){
+	draw_button(renderer, bg_color);
+}
+
+void TeamsButton::draw_inactive(SDL_Renderer* renderer){
+	draw_button(renderer, bg_color);
+}
+
+void TeamsButton::on_pressed(){
+	manipulator->set_teams(!view->get_settings().using_teams);
+}
+
+TeamAddButton::TeamAddButton(
+	const SDL_Rect& rect,
+	GameSettingsManipulator* manipulator
+) : Button(rect, false), manipulator(manipulator) {}
+
+void TeamAddButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
+	fill_back(renderer, color);
+	draw_frame(renderer, line_color);
+	
+	if(label.get() == nullptr) label = make_unique<Msg>(
+		"Add Team",
+		text_color,
+		FontType::NRM,
+		renderer
+	);
+	
+	label->render_centered(get_rect().w / 2, get_rect().h / 2, Align::CENTER);
+}
+
+void TeamAddButton::draw_pressed(SDL_Renderer* renderer){
+	draw_button(renderer, active_color);
+}
+
+void TeamAddButton::draw_released(SDL_Renderer* renderer){
+	draw_button(renderer, bg_color);
+}
+
+void TeamAddButton::draw_inactive(SDL_Renderer* renderer){
+	draw_button(renderer, bg_color);
+}
+
+void TeamAddButton::on_pressed(){
+	manipulator->add_team();
+}
+
+#define PLAYER_VIEW_H 0.07
+#define TEAM_VIEW_H 0.05
+
+#define PLAYERS_SPACE 0.03
+
+#define TEAMS_BUTTON_MARGIN 0.02
+#define TEAMS_BUTTON_H 0.07
+
 PlayersView::PlayersView(
 	const SDL_Rect& rect,
 	GameSettingsView* view, GameSettingsManipulator* manipulator,
@@ -316,33 +749,197 @@ PlayersView::PlayersView(
 	view(view), manipulator(manipulator),
 	multi_peer(multi_peer) {}
 
+void PlayersView::sync_displays(){
+	SDL_Rect rect;
+	rect.x = 0;
+	rect.w = get_rect().w;
+	rect.y = get_rect().h;
+	
+	rect.h = get_rect().h * PLAYER_VIEW_H;
+	for(int i = 0; i < players.size(); i++){
+		players[i]->set_player(i);
+	}
+	while(players.size() < view->get_settings().teams.size()){
+		players.push_back(make_unique<PlayerView>(
+			rect,
+			players.size(),
+			view, manipulator,
+			multi_peer
+		));
+		view_manager.add_view(players.back().get());
+	}
+
+	if(view->get_settings().using_teams){
+		rect.h = get_rect().h * TEAM_VIEW_H;
+		for(int i = 0; i < teams.size(); i++){
+			teams[i]->set_team(i);
+		}
+		while(teams.size() < view->get_settings().team_names.size()){
+			teams.push_back(make_unique<TeamSeparator>(
+				rect,
+				teams.size(),
+				view, manipulator
+			));
+			view_manager.add_view(teams.back().get());
+		}
+	}
+	else{
+		for(auto& team: teams) view_manager.remove_view(team.get());
+		teams.clear();
+	}
+	
+	if(view->am_i_host() && using_teams_button.get() == nullptr){		
+		rect.x = get_rect().w * TEAMS_BUTTON_MARGIN;
+		rect.w = get_rect().w - rect.x * 2;
+		rect.h = get_rect().h * TEAMS_BUTTON_H;
+		rect.y = -rect.h;
+
+		using_teams_button = make_unique<TeamsButton>(rect, view, manipulator);
+		view_manager.add_view(using_teams_button.get());
+	}
+	else if(!view->am_i_host() && using_teams_button.get() != nullptr){
+		view_manager.remove_view(using_teams_button.get());
+		using_teams_button = nullptr;
+	}
+
+	if(view->am_i_host() && view->get_settings().using_teams && add_team_button.get() == nullptr){		
+		rect.x = get_rect().w * TEAMS_BUTTON_MARGIN;
+		rect.w = get_rect().w - rect.x * 2;
+		rect.h = get_rect().h * TEAMS_BUTTON_H;
+		rect.y = get_rect().h;
+
+		add_team_button = make_unique<TeamAddButton>(rect, manipulator);
+		view_manager.add_view(add_team_button.get());
+	}
+	else if(!(view->am_i_host() && view->get_settings().using_teams) && add_team_button.get() != nullptr){
+		view_manager.remove_view(add_team_button.get());
+		add_team_button = nullptr;
+	}
+}
+
 bool PlayersView::on_event(const SDL_Event& event){
-	return false;
+	sync_displays();
+	return view_manager.handle_event(event);
 }
 
 void PlayersView::draw_content(SDL_Renderer* renderer){
+	sync_displays();
 	fill_back(renderer, bg_color);
+	
+	vector<SubView*> views;
+	
+	if(view->get_settings().using_teams){
+		vector<vector<int>> team_players(teams.size());
+		
+		for(int i = 0; i < view->get_settings().teams.size(); i++){
+			team_players[view->get_settings().teams[i]].push_back(i);
+		}
+		
+		for(int i = 0; i < teams.size(); i++){
+			views.push_back(teams[i].get());
+			for(auto player: team_players[i]){
+				views.push_back(players[player].get());
+			}
+		}
+		
+	}
+	else{
+		for(auto& view: players) views.push_back(view.get());
+	}
+	
+	int y = get_rect().h * PLAYERS_SPACE;
+
+	if(view->am_i_host()){
+		using_teams_button->move(using_teams_button->get_rect().x, y);
+		
+		y += get_rect().h * PLAYERS_SPACE + using_teams_button->get_rect().h;
+	}
+
+	for(auto view: views){
+		view->move(0, y);
+		y += view->get_rect().h;
+	}
+	
+	if(view->am_i_host() && view->get_settings().using_teams){
+		y += get_rect().h * PLAYERS_SPACE;
+		
+		add_team_button->move(add_team_button->get_rect().x, y);
+	}
+
+	view_manager.draw(renderer);
 }
 
-void PlayersView::lose_focus(){}
+void PlayersView::lose_focus(){
+	sync_displays();
+	view_manager.lose_focus();
+}
 
-void PlayersView::step(){}
+void PlayersView::step(){
+	sync_displays();
+
+	removed_players.clear();
+	removed_teams.clear();
+
+	view_manager.step();
+}
+
+void PlayersView::remove_player(int player_num){
+	removed_players.push_back(pop_index(players, player_num));
+	view_manager.remove_view(removed_players.back().get());
+	
+	sync_displays();
+}
+
+
+void PlayersView::remove_team(int team_num) {
+	if(team_num < teams.size()) {
+		removed_teams.push_back(pop_index(teams, team_num));
+		view_manager.remove_view(removed_teams.back().get());
+	}
+	sync_displays();
+}
+
+void PlayersView::init(const GameSettings& settings){};
+void PlayersView::add_player(int team, int color){}
+void PlayersView::add_team() {}
+void PlayersView::set_player_index(int index, int player) {}
+void PlayersView::set_player_name(int player, string name) {}
+void PlayersView::set_player_color(int player, int color) {}
+void PlayersView::set_teams(bool using_teams) {}
+void PlayersView::set_player_team(int player, int team) {}
+void PlayersView::set_team_name(int team, string name) {}
+void PlayersView::set_allowed_powerup(PowerUpDescriptor desc, bool allowed) {}
+void PlayersView::set_win_criterion(WinCriterion criterion) {}
+void PlayersView::set_win_amount(int amount) {}
+void PlayersView::set_tie_break(int threshold) {}
+void PlayersView::set_host_player(int player) {}
+void PlayersView::set_host() {}
+void PlayersView::player_ready(int player, bool is_ready) {}
+void PlayersView::reset_all_ready() {}
+void PlayersView::start_countdown() {}
 
 #define MENU_H 0.05
 
 GameSettingsMenu::GameSettingsMenu(
 	const SDL_Rect& rect,
-	GameSettingsView* view, GameSettingsManipulator* manipulator,
+	GameSettingsView* view, GameSettingsManipulator* manipulator, GameSettingsObserverAccumulator* accumulator,
 	bool multi_peer
-) : view(view), manipulator(manipulator), multi_peer(multi_peer),
+) : view(view), manipulator(manipulator), accumulator(accumulator), multi_peer(multi_peer),
 	TabView(
 		rect, rect.h * MENU_H, false,
 		FontType::NRM, ::text_color, 20
 	) {}
+	
+GameSettingsMenu::~GameSettingsMenu(){
+	if(players.get() != nullptr){
+		accumulator->remove_observer(players.get());
+	}
+}
 
 vector<TabView::ViewDescriptor> GameSettingsMenu::init_subviews(const SDL_Rect& rect){
 	settings = make_unique<GameSettingsSubView>(rect, view, manipulator);
 	players = make_unique<PlayersView>(rect, view, manipulator, multi_peer);
+	accumulator->add_observer(players.get());
 
 	return vector<TabView::ViewDescriptor>({
 		{
@@ -374,3 +971,5 @@ void GameSettingsMenu::draw_button_back(SDL_Renderer* renderer, const SubView& v
 		break;
 	}
 }
+
+

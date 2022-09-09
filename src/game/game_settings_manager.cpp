@@ -1,13 +1,13 @@
 #include "game_settings_manager.h"
 
 #include "../utils/utils.h"
-#include <iostream>
+
 GameSettingsManager::Peer::Peer(GameSettingsManager& manager) :
 	manager(manager),
 	ready(false) {}
 
 GameSettingsManager::Peer::~Peer(){
-	observers.clear();
+	clear_observers();
 	
 	while(players.size()){
 		int player = players.back();
@@ -33,7 +33,7 @@ void GameSettingsManager::Peer::add_player(){
 		observer.set_host_player(player);
 	});
 
-	for(auto observer: observers){
+	for(auto observer: get_observers()){
 		observer->set_player_index(index, player);
 	}
 }
@@ -84,6 +84,8 @@ void GameSettingsManager::Peer::remove_team(int team){
 void GameSettingsManager::Peer::set_player_team(int index, int team){
 	if(index < players.size()){
 		set_ready(false);
+		
+		manager.set_player_team(players[index], team);
 	}
 }
 
@@ -164,7 +166,7 @@ const bool GameSettingsManager::Peer::am_i_host() const{
 	return manager.host == this;
 }
 
-void GameSettingsManager::Peer::add_observer(GameSettingsObserver* observer){
+void GameSettingsManager::Peer::init_observer(GameSettingsObserver* observer){
 	observer->init(manager.settings);
 	
 	for(int i = 0; i < players.size(); i++){
@@ -179,10 +181,6 @@ void GameSettingsManager::Peer::add_observer(GameSettingsObserver* observer){
 	for(auto player: manager.host->players){
 		observer->set_host_player(player);
 	}
-}
-
-void GameSettingsManager::Peer::remove_observer(GameSettingsObserver* observer){
-	observers.erase(observer);
 }
 
 
@@ -209,7 +207,7 @@ void GameSettingsManager::remove_peer(GameSettingsManager::Peer* peer){
 			if(host == nullptr && peers.size()){
 				host = peers.begin()->get();
 				
-				for(auto observer: host->observers) observer->set_host();
+				for(auto observer: host->get_observers()) observer->set_host();
 				
 				for(auto player: host->players){
 					do_with_observers([&](GameSettingsObserver& observer){
@@ -225,7 +223,7 @@ void GameSettingsManager::remove_peer(GameSettingsManager::Peer* peer){
 
 void GameSettingsManager::do_with_observers(function<void(GameSettingsObserver&)> todo){
 	for(auto& peer: peers){
-		for(auto observer: peer->observers){
+		for(auto observer: peer->get_observers()){
 			todo(*observer);
 		}
 	}
@@ -242,6 +240,8 @@ int get_free_color(const vector<int>& colors){
 int GameSettingsManager::add_player(){
 	int player = settings.teams.size();
 	int color = get_free_color(settings.colors);
+	
+	if(!settings.team_names.size()) settings.team_names.push_back("");
 	int team = settings.team_names.size() - 1;
 	
 	settings.teams.push_back(team);
@@ -304,6 +304,8 @@ void GameSettingsManager::add_team(){
 }
 
 void GameSettingsManager::remove_team(int team){
+	if(settings.team_names.size() <= 1) return;
+
 	remove_index(settings.team_names, team);
 	for(auto& player_team: settings.teams){
 		if(player_team > team) player_team--;
