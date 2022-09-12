@@ -22,8 +22,8 @@ void Game::GamePlayerInterface::set_active(bool active){
 
 Game::Game(
 	const BoardSize& board,
-		const ScoreSettings& score_settings,
-	int team_num, const vector<int> teams,
+	const ScoreSettings& score_settings,
+	int team_num, const vector<int>& teams,
 	const set<PowerUpDescriptor>& allowed_powerups,
 	set<GameObserver*>&& observers
 ) :
@@ -114,6 +114,10 @@ void Game::remove_observer(GameObserver* observer){
 
 PlayerInterface& Game::get_player_interface(int player){
 	return interfaces[player];
+}
+
+const BoardSize& Game::get_board_size() const {
+	return board;
 }
 
 int Game::get_round() const{

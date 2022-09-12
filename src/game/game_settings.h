@@ -32,6 +32,7 @@ public:
 	vector<string> names;
 	vector<int> colors;
 	
+	int get_team_num() const;
 	vector<int> get_teams() const;
 	
 	void serialize(ostream& output) const;

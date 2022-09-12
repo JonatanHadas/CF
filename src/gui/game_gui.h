@@ -24,7 +24,6 @@ class GameGui : public Gui{
 	int starting_timer;
 public:
 	GameGui(
-		const BoardSize& board,
 		GameView* view,
 		GameAdvancer* advancer,
 		const map<PlayerInterface*, KeySet>& interfaces

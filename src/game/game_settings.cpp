@@ -18,8 +18,12 @@ GameSettings::GameSettings(
 	allowed_powerups(allowed_powerups),
 	names(names),
 	colors(colors) {}
+	
+int GameSettings::get_team_num() const {
+	return (using_teams ? team_names : names).size();
+}
 
-vector<int> GameSettings::get_teams() const{
+vector<int> GameSettings::get_teams() const {
 	if(using_teams){
 		return teams;
 	}
@@ -30,7 +34,7 @@ vector<int> GameSettings::get_teams() const{
 	return non_teams;
 }
 
-void GameSettings::serialize(ostream& output) const{
+void GameSettings::serialize(ostream& output) const {
 	scores.serialize(output);
 	
 	write_raw(output, using_teams);

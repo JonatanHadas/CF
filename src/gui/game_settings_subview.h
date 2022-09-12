@@ -341,6 +341,7 @@ public:
 	void player_ready(int player, bool is_ready);
 	void reset_all_ready();
 	void start_countdown();
+	void start_game();
 };
 
 class GameSettingsMenu : public TabView {

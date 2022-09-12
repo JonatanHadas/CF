@@ -917,6 +917,7 @@ void PlayersView::set_host() {}
 void PlayersView::player_ready(int player, bool is_ready) {}
 void PlayersView::reset_all_ready() {}
 void PlayersView::start_countdown() {}
+void PlayersView::start_game() {}
 
 #define MENU_H 0.05
 

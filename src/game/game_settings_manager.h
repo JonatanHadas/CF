@@ -21,6 +21,7 @@ public:
 		vector<int> players;
 
 		bool ready;	
+		bool starting;
 	protected:
 		void init_observer(GameSettingsObserver* observer);
 	public:
@@ -66,7 +67,10 @@ public:
 		const vector<int>& get_host_players() const;
 		set<int> get_ready() const;
 		
-		const bool am_i_host() const;
+		bool am_i_host() const;
+		bool am_i_ready() const;
+		
+		bool is_counting_down() const;
 	};
 private:
 	friend GameSettingsManager::Peer;
@@ -74,6 +78,8 @@ private:
 	
 	set<unique_ptr<GameSettingsManager::Peer>> peers;
 	GameSettingsManager::Peer* host;
+	
+	bool counting_down;
 	
 	void do_with_observers(function<void(GameSettingsObserver&)> todo);
 	
@@ -102,10 +108,15 @@ private:
 
 	bool check_ready();
 public:
-	GameSettingsManager(GameSettings&& settings);
+	GameSettingsManager(const GameSettings& settings);
 
 	GameSettingsManager::Peer* create_peer();
 	void remove_peer(GameSettingsManager::Peer* peer);
+	
+	bool get_all_starting() const;
+	void start_all();
+	
+	const GameSettings& get_settings() const;
 };
 
 #endif

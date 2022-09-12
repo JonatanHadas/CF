@@ -15,7 +15,9 @@ public:
 	virtual const vector<int>& get_host_players() const = 0;
 	virtual set<int> get_ready() const = 0;
 	
-	virtual const bool am_i_host() const = 0;
+	virtual bool am_i_host() const = 0;
+	virtual bool am_i_ready() const = 0;
+	virtual bool is_counting_down() const = 0;
 };
 
 #endif

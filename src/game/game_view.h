@@ -11,6 +11,8 @@
 
 class GameView{
 public:
+	virtual const BoardSize& get_board_size() const = 0;
+
 	virtual int get_round() const = 0;
 	virtual const vector<int>& get_scores() const = 0;
 	virtual bool is_over() const = 0;

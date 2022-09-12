@@ -208,6 +208,8 @@ public:
 	void detach_settings();
 	
 	void add_player();
+	
+	vector<KeySet> get_keys() const;
 };
 
 #endif

@@ -17,7 +17,7 @@ class BoardDrawer{
 
 	void init(SDL_Renderer* renderer);
 public:
-	BoardDrawer(const BoardSize& board, GameView* view);
+	BoardDrawer(GameView* view);
 	
 	void draw(SDL_Renderer* renderer);
 	
@@ -35,7 +35,7 @@ class GameDrawer{
 	
 	void init(SDL_Renderer* renderer);
 public:
-	GameDrawer(const BoardSize& board, GameView* view);
+	GameDrawer(GameView* view);
 	
 	void draw(SDL_Renderer* renderer);
 };

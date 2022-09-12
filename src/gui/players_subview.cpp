@@ -517,3 +517,13 @@ void PlayersSubView::detach_settings(){
 void PlayersSubView::add_player(){
 	settings.add_player();
 }
+
+vector<KeySet> PlayersSubView::get_keys() const {
+	vector<KeySet> keys;
+	
+	for(auto& view: views){
+		keys.push_back(view->get_keys());
+	}
+	
+	return keys;
+}

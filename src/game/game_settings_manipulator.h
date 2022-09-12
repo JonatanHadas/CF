@@ -30,6 +30,7 @@ public:
 	
 	virtual void set_ready(bool is_ready) = 0;
 	virtual void start_countdown() = 0;
+	virtual void start_game() = 0;
 };
 
 #endif

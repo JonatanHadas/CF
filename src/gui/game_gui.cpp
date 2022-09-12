@@ -3,7 +3,6 @@
 #define START_DELAY 30
 
 GameGui::GameGui(
-	const BoardSize& board,
 	GameView* view,
 	GameAdvancer* advancer,
 	const map<PlayerInterface*, KeySet>& interfaces
@@ -11,7 +10,7 @@ GameGui::GameGui(
 	last_round(-1),
 	starting_timer(0),
 	paused(false),
-	drawer(board, view),
+	drawer(view),
 	view(view),
 	advancer(advancer),
 	interfaces(interfaces) {}

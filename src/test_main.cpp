@@ -82,7 +82,7 @@ int main(int argc, char** argv){
 
 	KeySetManager key_manager("game_data/keys");
 
-	set<PowerUpDescriptor> allowed_powerups({
+	/*set<PowerUpDescriptor> allowed_powerups({
 		PowerUpDescriptor(PowerUpType::INVERT, PowerUpAffects::OTHERS),
 		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::YOU),
 		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::OTHERS),
@@ -117,7 +117,7 @@ int main(int argc, char** argv){
 		allowed_powerups,
 		vector<string>(),
 		vector<int>()
-	);
+	);*/
 	
 	/*Game game(board_size, settings, PLAYER_NUM, teams, allowed_powerups, set<GameObserver*>());
 	for(int i = 2; i < PLAYER_NUM; i++) game.get_player_interface(i).set_active(false);
@@ -148,7 +148,7 @@ int main(int argc, char** argv){
 	SDL_GetRendererOutputSize(renderer, &screen_w, &screen_h);
 	SDL_RenderSetLogicalSize(renderer, screen_w, screen_h);
 
-	GameMenu gui(screen_w, screen_h, key_manager, move(gsettings));
+	GameMenu gui(screen_w, screen_h, key_manager);
 	
 	mainloop(gui, renderer);
 	

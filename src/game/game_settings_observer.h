@@ -33,6 +33,7 @@ public:
 	virtual void player_ready(int player, bool is_ready) = 0;
 	virtual void reset_all_ready() = 0;
 	virtual void start_countdown() = 0;
+	virtual void start_game() = 0;
 };
 
 #endif

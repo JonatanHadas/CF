@@ -10,8 +10,8 @@
 
 #include "powerup_images.h"
 
-BoardDrawer::BoardDrawer(const BoardSize& board, GameView* view) :
-	board(board),
+BoardDrawer::BoardDrawer(GameView* view) :
+	board(view->get_board_size()),
 	view(view),
 	texture(nullptr) {}
 	
@@ -204,10 +204,10 @@ Texture& BoardDrawer::get_texture() const{
 }
 
 
-GameDrawer::GameDrawer(const BoardSize& board, GameView* view) :
+GameDrawer::GameDrawer(GameView* view) :
 	view(view),
-	board(board),
-	board_drawer(board, view),
+	board(view->get_board_size()),
+	board_drawer(view),
 	is_initialized(false) {}
 
 void GameDrawer::init(SDL_Renderer* renderer){

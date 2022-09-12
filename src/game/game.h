@@ -69,7 +69,7 @@ public:
 	Game(
 		const BoardSize& board,
 		const ScoreSettings& score_settings,
-		int team_num, const vector<int> teams,
+		int team_num, const vector<int>& teams,
 		const set<PowerUpDescriptor>& allowed_powerups,
 		set<GameObserver*>&& observers
 	);
@@ -78,6 +78,8 @@ public:
 	void remove_observer(GameObserver* observer);
 
 	PlayerInterface& get_player_interface(int player);
+
+	const BoardSize& get_board_size() const;
 
 	int get_round() const;
 	const vector<int>& get_scores() const;

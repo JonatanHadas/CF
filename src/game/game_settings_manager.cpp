@@ -4,7 +4,7 @@
 
 GameSettingsManager::Peer::Peer(GameSettingsManager& manager) :
 	manager(manager),
-	ready(false) {}
+	ready(false), starting(false) {}
 
 GameSettingsManager::Peer::~Peer(){
 	clear_observers();
@@ -124,6 +124,7 @@ void GameSettingsManager::Peer::set_tie_break(int threshold){
 
 void GameSettingsManager::Peer::set_ready(bool is_ready){
 	ready = is_ready;
+	if(!ready) manager.counting_down = false;
 	
 	for(auto player: players){
 		manager.set_player_ready(player, is_ready);
@@ -134,6 +135,10 @@ void GameSettingsManager::Peer::start_countdown(){
 	if(manager.host == this){
 		manager.start_countdown();
 	}
+}
+
+void GameSettingsManager::Peer::start_game(){
+	starting = true;
 }
 
 // View
@@ -153,17 +158,25 @@ set<int> GameSettingsManager::Peer::get_ready() const{
 	set<int> players;
 
 	for(auto& peer: manager.peers){
-		if(!peer->ready) continue;
+		if(peer.get() != manager.host && !peer->ready) continue;
 		for(auto player: peer->players){
 			players.insert(player);
 		}
 	}
-
+	
 	return players;
 }
 
-const bool GameSettingsManager::Peer::am_i_host() const{
+bool GameSettingsManager::Peer::am_i_host() const{
 	return manager.host == this;
+}
+
+bool GameSettingsManager::Peer::am_i_ready() const{
+	return ready || am_i_host();
+}
+
+bool GameSettingsManager::Peer::is_counting_down() const{
+	return manager.counting_down;
 }
 
 void GameSettingsManager::Peer::init_observer(GameSettingsObserver* observer){
@@ -184,15 +197,19 @@ void GameSettingsManager::Peer::init_observer(GameSettingsObserver* observer){
 }
 
 
-GameSettingsManager::GameSettingsManager(GameSettings&& settings) :
-	settings(move(settings)),
+GameSettingsManager::GameSettingsManager(const GameSettings& settings) :
+	settings(settings),
+	counting_down(false),
 	host(nullptr) {}
 
 GameSettingsManager::Peer* GameSettingsManager::create_peer(){
 	auto peer = make_unique<GameSettingsManager::Peer>(*this);
 	auto ptr = peer.get();
 	
-	if(host == nullptr) host = ptr;
+	if(host == nullptr) {
+		host = ptr;
+		peer->ready = true;
+	}
 	
 	peers.insert(move(peer));
 	return ptr;
@@ -206,6 +223,7 @@ void GameSettingsManager::remove_peer(GameSettingsManager::Peer* peer){
 			
 			if(host == nullptr && peers.size()){
 				host = peers.begin()->get();
+				host->ready = true;
 				
 				for(auto observer: host->get_observers()) observer->set_host();
 				
@@ -256,6 +274,8 @@ int GameSettingsManager::add_player(){
 }
 
 void GameSettingsManager::remove_player(int player){
+	counting_down = false;
+	
 	for(auto& peer: peers){
 		for(auto& peer_player: peer->players){
 			if(peer_player > player) peer_player--;
@@ -371,6 +391,8 @@ void GameSettingsManager::set_tie_break(int threshold){
 }
 
 void GameSettingsManager::reset_all_ready(){
+	counting_down = false;
+	
 	for(auto& peer: peers){
 		peer->ready = false;
 	}
@@ -387,6 +409,8 @@ void GameSettingsManager::set_player_ready(int player, bool is_ready){
 }
 
 void GameSettingsManager::start_countdown(){
+	counting_down = true;
+	
 	if(check_ready()) do_with_observers([&](GameSettingsObserver& observer){
 		observer.start_countdown();
 	});
@@ -397,4 +421,24 @@ bool GameSettingsManager::check_ready(){
 		if(peer->players.size() && !peer->ready) return false;
 	}
 	return true;
+}
+
+bool GameSettingsManager::get_all_starting() const{
+	for(auto& peer: peers){
+		if(!peer->starting) return false;
+	}
+	return counting_down;
+}
+
+void GameSettingsManager::start_all(){
+	counting_down = false;
+	reset_all_ready();
+	
+	do_with_observers([&](GameSettingsObserver& observer){
+		observer.start_game();
+	});
+}
+
+const GameSettings& GameSettingsManager::get_settings() const{
+	return settings;
 }
