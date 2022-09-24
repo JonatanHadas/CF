@@ -69,6 +69,8 @@ void add_to_grid(
 	});
 }
 
+#include <iostream>
+
 bool check_curve_collision(
 	const BoardSize& board,
 	const PlayerPosition& last_position,
@@ -92,10 +94,27 @@ bool check_curve_collision(
 		for(max_index = history.size() - 1; max_index > 0; max_index--){
 			double other_radius = get_player_size(history[max_index].size) / 2;
 			
-			if(
-				distance(position.x, position.y, history[max_index].x, history[max_index].y) >= radius + other_radius &&
-				distance(last_position.x, last_position.y, history[max_index].x, history[max_index].y) >= radius + other_radius
-			) break;
+			bool collides = false;
+			
+			for(int warp_x = min(position.warp_x, 0) - max(history[max_index].warp_x, 0); warp_x <= max(position.warp_x, 0) - min(history[max_index].warp_x, 0); warp_x++){
+				for(int warp_y = min(position.warp_y, 0) - max(history[max_index].warp_y, 0); warp_y <= max(position.warp_y, 0) - min(history[max_index].warp_y, 0); warp_y++){
+					double x = position.x + warp_x * board.w;
+					double y = position.y + warp_y * board.h;
+					double last_x = prev_x + warp_x * board.w;
+					double last_y = prev_y + warp_y * board.h;
+					
+					if(
+						distance(x, y, history[max_index].x, history[max_index].y) <= radius + other_radius ||
+						distance(last_x, last_y, history[max_index].x, history[max_index].y) <= radius + other_radius
+					) {
+						collides = true;
+						break;
+					}
+				}
+				if(collides) break;
+			}
+			
+			if(!collides) break;
 		}
 	}
 	
