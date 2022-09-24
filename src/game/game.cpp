@@ -22,14 +22,15 @@ void Game::GamePlayerInterface::set_active(bool active){
 
 Game::Game(
 	const BoardSize& board,
-		const ScoreSettings& score_settings,
-	int team_num, const vector<int> teams,
+	const ScoreSettings& score_settings,
+	int team_num, const vector<int>& teams,
 	const set<PowerUpDescriptor>& allowed_powerups,
 	set<GameObserver*>&& observers
 ) :
 	board(board),
 	score_settings(score_settings),
 	round_num(-1),
+	tie_break_round(false),
 	histories(teams.size(), vector<PlayerPosition>()),
 	states(teams.size(), PlayerState(0)),
 	pending_inputs(teams.size(), deque<int>()),
@@ -86,6 +87,8 @@ void Game::new_round(){
 		state.turn_state = 0;
 	}
 	
+	tie_break_round |= check_tie_break();
+	
 	for(auto observer: observers){
 		observer->new_round(round_num);
 		observer->update(positions, states);
@@ -114,6 +117,10 @@ void Game::remove_observer(GameObserver* observer){
 
 PlayerInterface& Game::get_player_interface(int player){
 	return interfaces[player];
+}
+
+const BoardSize& Game::get_board_size() const {
+	return board;
 }
 
 int Game::get_round() const{
@@ -337,4 +344,35 @@ bool Game::is_over() const{
 	default:
 		return true;
 	}
+}
+
+bool Game::check_tie_break(){
+	int max_score = -1;
+	int second_max = -1;
+	for(auto score: scores){
+		if(score > max_score){
+			second_max = max_score;
+			max_score = score;
+		}
+		else if(score > second_max){
+			second_max = score;
+		}
+	}
+	
+	if(second_max + score_settings.tie_break_threshold <= max_score) return false;
+	
+	switch(score_settings.criterion){
+	case WinCriterion::BY_SCORE:
+		return max_score >= score_settings.amount;
+	case WinCriterion::BY_ROUND:
+		return round_num >= score_settings.amount;
+	case WinCriterion::NEVER:
+		return false;
+	default:
+		return false;
+	}
+}
+
+bool Game::is_tie_break() const {
+	return tie_break_round;
 }

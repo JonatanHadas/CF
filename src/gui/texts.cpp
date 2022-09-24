@@ -101,3 +101,11 @@ void Msg::render_centered(int x, int y, Align a){
 bool Msg::exists(){
 	return img != NULL;
 }
+
+int Msg::get_width() const {
+	return w;
+}
+
+int Msg::get_height() const {
+	return h;
+}

@@ -3,6 +3,8 @@
 #include "gui/images.h"
 #include "game/game.h"
 
+#include "gui/game_menu.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
@@ -75,10 +77,12 @@ int main(int argc, char** argv){
 		cerr << "Error while loading images" << endl << SDL_GetError() << IMG_GetError() << endl;
 		return 0;
 	}
-
+	
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
 
-	set<PowerUpDescriptor> allowed_powerups({
+	KeySetManager key_manager("game_data/keys");
+
+	/*set<PowerUpDescriptor> allowed_powerups({
 		PowerUpDescriptor(PowerUpType::INVERT, PowerUpAffects::OTHERS),
 		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::YOU),
 		PowerUpDescriptor(PowerUpType::SPEED_UP, PowerUpAffects::OTHERS),
@@ -104,7 +108,18 @@ int main(int argc, char** argv){
 	for(int i = 0; i < PLAYER_NUM; i++){
 		teams.push_back(i);
 	}
-	Game game(board_size, settings, PLAYER_NUM, teams, allowed_powerups, set<GameObserver*>());
+	
+	GameSettings gsettings(
+		settings,
+		false,
+		vector<string>(),
+		vector<int>(),
+		allowed_powerups,
+		vector<string>(),
+		vector<int>()
+	);*/
+	
+	/*Game game(board_size, settings, PLAYER_NUM, teams, allowed_powerups, set<GameObserver*>());
 	for(int i = 2; i < PLAYER_NUM; i++) game.get_player_interface(i).set_active(false);
 	
 	map<PlayerInterface*, KeySet> interfaces;
@@ -117,50 +132,25 @@ int main(int argc, char** argv){
 		.right = SDL_SCANCODE_X
 	};
 	
-	GameGui gui(board_size, &game, interfaces);
+	GameGui gui(board_size, &game, &game, interfaces);
 	
-	auto next_tick = SDL_GetTicks() + TICK_LEN;
+	mainloop(gui, renderer);
 	
-	int last_round = -1;
-	int starting_timer = 0;
+	if(game.is_over()){
+		cout << "scores: ";
+		for(auto score: game.get_scores()){
+			cout << score << " ";
+		}
+		cout << endl;
+	}*/
 	
-	bool paused = false;
-	
-	while(true){
-		gui.draw(renderer);
+	int screen_w, screen_h;
+	SDL_GetRendererOutputSize(renderer, &screen_w, &screen_h);
+	SDL_RenderSetLogicalSize(renderer, screen_w, screen_h);
 
-		SDL_RenderPresent(renderer);
-		
-		SDL_Event event;
-				
-		while(SDL_PollEvent(&event)){
-			if(event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)) return 0;
-			if(event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN) paused = !paused;
-			gui.handle_event(event);
-		}
-		
-		if(!paused){
-			if(last_round != game.get_round()){
-				if(game.is_over()){
-					cout << "scores: ";
-					for(auto score: game.get_scores()){
-						cout << score << " ";
-					}
-					cout << endl;
-					return 0;
-				}
-				
-				last_round = game.get_round();
-				starting_timer = 30;
-			}
-			if(starting_timer) starting_timer--;
-			else gui.step();
-		}
-		
-		game.advance();
-		
-		auto time = SDL_GetTicks();
-		if(next_tick > time) SDL_Delay(next_tick - time);
-		next_tick = SDL_GetTicks() + TICK_LEN;
-	}
+	GameMenu gui(screen_w, screen_h, key_manager);
+	
+	mainloop(gui, renderer);
+	
+	return 0;
 }

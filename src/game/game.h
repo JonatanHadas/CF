@@ -4,6 +4,7 @@
 #include "game_data.h"
 #include "game_view.h"
 #include "game_observer.h"
+#include "game_advancer.h"
 #include "player_interface.h"
 #include "collision_grid.h"
 #include "powerups.h"
@@ -18,13 +19,15 @@
 
 using namespace std;
 
-class Game : public GameView{
+class Game : public GameView, public GameAdvancer{
 	const BoardSize board;
 	const ScoreSettings score_settings;
 
 	int round_num;
 	int starting_timer;
 	int end_timer;
+	
+	bool tie_break_round;
 
 	vector<vector<PlayerPosition>> histories;
 	vector<PlayerState> states;
@@ -59,7 +62,8 @@ class Game : public GameView{
 	vector<PowerUpDescriptor> allowed_powerups;
 	set<unique_ptr<PowerUpSpawner>> spawners;
 	int next_powerup_id;
-		
+	
+	bool check_tie_break();
 	void new_round();
 	
 	bool can_step();
@@ -68,7 +72,7 @@ public:
 	Game(
 		const BoardSize& board,
 		const ScoreSettings& score_settings,
-		int team_num, const vector<int> teams,
+		int team_num, const vector<int>& teams,
 		const set<PowerUpDescriptor>& allowed_powerups,
 		set<GameObserver*>&& observers
 	);
@@ -77,6 +81,8 @@ public:
 	void remove_observer(GameObserver* observer);
 
 	PlayerInterface& get_player_interface(int player);
+
+	const BoardSize& get_board_size() const;
 
 	int get_round() const;
 	const vector<int>& get_scores() const;
@@ -90,6 +96,7 @@ public:
 	void advance();
 	
 	bool is_over() const;
+	bool is_tie_break() const;
 };
 
 #endif

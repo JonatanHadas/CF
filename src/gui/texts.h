@@ -27,6 +27,9 @@ public:
 	
 	void render_centered(int x, int y, Align a);
 	bool exists();
+	
+	int get_width() const;
+	int get_height() const;
 };
 
 #endif

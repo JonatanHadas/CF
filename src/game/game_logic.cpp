@@ -63,7 +63,8 @@ double apply_multiplier(double start, double multiplier, int amount){
 
 #define TURN (M_PI / 60)
 #define NARROW_TURN_MULTIPLIER 1.2
-#define WIDE_TURN_MULTIPLIER 2.0
+#define WIDE_TURN_MULTIPLIER 0.7
+#define SPEED_TURN_MULTIPLIER 1.3
 
 #define STARTING_HOVER 60
 
@@ -89,10 +90,13 @@ PlayerPosition advance_player(
 		int narrow_turns = count_powerups(player, PowerUpType::NARROW_TURN, effects);
 		int wide_turns = count_powerups(player, PowerUpType::WIDE_TURN, effects);
 						
-		int size_turn_size = count_self_powerups(player, PowerUpType::SPEED_UP, effects) - 
-							 count_others_powerups(player, PowerUpType::SLOW_DOWN, effects);
+		int speed_turn_size = count_self_powerups(player, PowerUpType::SPEED_UP, effects) - 
+							  count_others_powerups(player, PowerUpType::SLOW_DOWN, effects);
+							 
+		int other_speed_turn_size = count_others_powerups(player, PowerUpType::SPEED_UP, effects);
 						
-		turn = real_turn_state * apply_multiplier(TURN, SPEED_MULTIPLIER, size_turn_size)
+		turn = real_turn_state * apply_multiplier(TURN, SPEED_MULTIPLIER, speed_turn_size)
+							   * apply_multiplier(1, SPEED_TURN_MULTIPLIER, other_speed_turn_size)
 							   * apply_multiplier(1, NARROW_TURN_MULTIPLIER, narrow_turns)
 							   * apply_multiplier(1, WIDE_TURN_MULTIPLIER, wide_turns) / 2;
 
@@ -170,4 +174,14 @@ void count_down_powerups(set<unique_ptr<PowerUpEffect>>& effects){
 		if((*it)->timer == 0) effects.erase(it++);
 		else ++it;
 	}
+}
+
+#define BASE_WIDTH 70
+#define BASE_HEIGHT 85
+
+BoardSize get_board_size(int player_num){
+	return BoardSize(
+		BASE_WIDTH * sqrt(player_num),
+		BASE_HEIGHT * sqrt(player_num)
+	);
 }

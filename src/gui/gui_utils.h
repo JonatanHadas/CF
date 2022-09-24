@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <functional>
+#include <memory>
 
 using namespace std;
 
@@ -28,5 +29,7 @@ public:
 };
 
 void draw_circle(SDL_Renderer* renderer, int x, int y, double radius);
+
+unique_ptr<Texture> make_cross(SDL_Renderer* renderer, int size, double ratio);
 
 #endif
