@@ -21,8 +21,8 @@ map<PowerUpDescriptor, int> powerup_times({
 	{ PowerUpDescriptor(PowerUpType::SPAWN_POWERUPS, PowerUpAffects::ALL), 1 },
 });
 
-#define MIN_REGULAR_TIME 600
-#define MAX_REGULAR_TIME 1200
+#define MIN_REGULAR_TIME 300
+#define MAX_REGULAR_TIME 600
 
 #define EXTRA_SPAWN_COUNT 3
 
