@@ -26,6 +26,7 @@ public:
 	GameGui(
 		GameView* view,
 		GameAdvancer* advancer,
+		const GameSettings& settings,
 		const map<PlayerInterface*, KeySet>& interfaces
 	);
 	

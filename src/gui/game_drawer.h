@@ -3,6 +3,9 @@
 
 #include "gui_utils.h"
 #include "../game/game_view.h"
+#include "../game/game_settings.h"
+
+#include "texts.h"
 
 #include <memory>
 #include <SDL.h>
@@ -24,20 +27,55 @@ public:
 	Texture& get_texture() const;
 };
 
+class ScoreDrawer{
+	GameView* view;
+	const GameSettings& settings;
+	
+	unique_ptr<Msg> title, threshold;
+	bool tie_break;
+	int amount;
+	
+	vector<Msg> names;
+	
+	vector<int> scores;
+	vector<Msg> score_texts;
+	
+	vector<vector<Msg>> player_names;
+	
+	vector<int> order;
+	vector<int> ys;
+	
+	int x, w, h;
+	
+	void init(SDL_Renderer* renderer);
+public:
+	ScoreDrawer(
+		GameView* view,
+		const GameSettings& settings,
+		int x, int w, int h
+	);
+	
+	void draw(SDL_Renderer* renderer);
+	void step();
+};
+
 class GameDrawer{
 	GameView* view;
 	const BoardSize board;
+	const GameSettings& settings;
 	
 	BoardDrawer board_drawer;
+	unique_ptr<ScoreDrawer> score_drawer;
 
 	bool is_initialized;
 	int screen_width, screen_height;
 	
 	void init(SDL_Renderer* renderer);
 public:
-	GameDrawer(GameView* view);
+	GameDrawer(GameView* view, const GameSettings& settings);
 	
 	void draw(SDL_Renderer* renderer);
+	void step();
 };
 
 #endif

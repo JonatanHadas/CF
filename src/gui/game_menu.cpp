@@ -65,6 +65,7 @@ void GameMenu::sync_display(){
 		game_gui = make_unique<GameGui>(
 			game->get_view(),
 			game->get_advancer(),
+			game_creator->get_view()->get_settings(),
 			keys_map
 		);
 	}

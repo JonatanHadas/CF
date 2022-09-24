@@ -65,8 +65,8 @@ HEADS_gui/texts := gui/texts
 HEADS_gui/images := gui/images
 HEADS_gui/keyset := gui/keyset utils/serialization utils/utils
 HEADS_gui/gui_utils := gui/gui_utils
-HEADS_gui/game_drawer := gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES) utils/geometry
-HEADS_gui/game_gui := gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic $(GAME_INTERFACES)
+HEADS_gui/game_drawer := gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings $(GAME_INTERFACES) utils/geometry
+HEADS_gui/game_gui := gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings $(GAME_INTERFACES)
 
 # executables
 

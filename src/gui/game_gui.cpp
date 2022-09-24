@@ -5,12 +5,13 @@
 GameGui::GameGui(
 	GameView* view,
 	GameAdvancer* advancer,
+	const GameSettings& settings,
 	const map<PlayerInterface*, KeySet>& interfaces
 ) :
 	last_round(-1),
 	starting_timer(0),
 	paused(false),
-	drawer(view),
+	drawer(view, settings),
 	view(view),
 	advancer(advancer),
 	interfaces(interfaces) {}
