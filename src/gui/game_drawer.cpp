@@ -12,9 +12,10 @@
 
 #include <algorithm>
 
-BoardDrawer::BoardDrawer(GameView* view) :
+BoardDrawer::BoardDrawer(GameView* view, const GameSettings& settings) :
 	board(view->get_board_size()),
 	view(view),
+	settings(settings),
 	texture(nullptr) {}
 
 #define DRAW_SCALE 8.0
@@ -78,22 +79,22 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 			auto player_history = view->get_histories()[i];
 
 			SDL_SetRenderDrawColor(renderer, 
-				player_colors[i].r,
-				player_colors[i].g,
-				player_colors[i].b,
-				player_colors[i].a
+				player_colors[settings.colors[i]].r,
+				player_colors[settings.colors[i]].g,
+				player_colors[settings.colors[i]].b,
+				player_colors[settings.colors[i]].a
 			);
 
 			SDL_SetTextureColorMod(circle_texture.get(), 
-				player_colors[i].r,
-				player_colors[i].g,
-				player_colors[i].b
+				player_colors[settings.colors[i]].r,
+				player_colors[settings.colors[i]].g,
+				player_colors[settings.colors[i]].b
 			);
 
 			vector<SDL_Vertex> vertices;
 			vector<int> indices;
 			SDL_Vertex vertex = {
-				.color = player_colors[i]
+				.color = player_colors[settings.colors[i]]
 			};
 
 			for(int j = 1; j < player_history.size(); j++){
@@ -209,7 +210,7 @@ Texture& BoardDrawer::get_texture() const{
 #define TITLE_Y 0.03
 #define SCORES_Y 0.13
 #define TEXT_X 0.05
-#define PLAYER_NAME_X 0.04
+#define PLAYER_NAME_X 0.07
 #define SCORES_X 0.98
 #define SCORES_DY 0.07
 
@@ -414,7 +415,7 @@ GameDrawer::GameDrawer(GameView* view, const GameSettings& settings) :
 	view(view),
 	settings(settings),
 	board(view->get_board_size()),
-	board_drawer(view),
+	board_drawer(view, settings),
 	is_initialized(false) {}
 
 void GameDrawer::init(SDL_Renderer* renderer){

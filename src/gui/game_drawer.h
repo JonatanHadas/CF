@@ -14,13 +14,14 @@ using namespace std;
 
 class BoardDrawer{
 	GameView* view;
+	const GameSettings& settings;
 	const BoardSize board;
 	
 	unique_ptr<Texture> texture;
 
 	void init(SDL_Renderer* renderer);
 public:
-	BoardDrawer(GameView* view);
+	BoardDrawer(GameView* view, const GameSettings& settings);
 	
 	void draw(SDL_Renderer* renderer);
 	

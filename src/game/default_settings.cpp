@@ -19,7 +19,7 @@ const set<PowerUpDescriptor> allowed_powerups({
 	PowerUpDescriptor(PowerUpType::WARP_AROUND, PowerUpAffects::ALL),
 });
 	
-const ScoreSettings score_settings(WinCriterion::BY_SCORE, 2, 2);
+const ScoreSettings score_settings(WinCriterion::BY_SCORE, 10, 2);
 	
 const GameSettings default_settings(
 	score_settings,
