@@ -194,6 +194,9 @@ void GameSettingsManager::Peer::init_observer(GameSettingsObserver* observer){
 	for(auto player: manager.host->players){
 		observer->set_host_player(player);
 	}
+	
+	if(manager.host == this) observer->set_host();
+	if(manager.counting_down) observer->start_countdown();
 }
 
 
@@ -328,7 +331,7 @@ void GameSettingsManager::remove_team(int team){
 
 	remove_index(settings.team_names, team);
 	for(auto& player_team: settings.teams){
-		if(player_team > team) player_team--;
+		if(player_team >= team) player_team--;
 	}
 	
 	do_with_observers([&](GameSettingsObserver& observer){
@@ -409,23 +412,24 @@ void GameSettingsManager::set_player_ready(int player, bool is_ready){
 }
 
 void GameSettingsManager::start_countdown(){
-	counting_down = true;
-	
-	if(check_ready()) do_with_observers([&](GameSettingsObserver& observer){
-		observer.start_countdown();
-	});
+	if(check_ready()){
+		counting_down = true;
+		do_with_observers([&](GameSettingsObserver& observer){
+			observer.start_countdown();
+		});
+	}
 }
 
 bool GameSettingsManager::check_ready(){
 	for(auto& peer: peers){
-		if(peer->players.size() && !peer->ready) return false;
+		if(peer->players.size() && !(peer->ready || peer.get() == host)) return false;
 	}
 	return true;
 }
 
 bool GameSettingsManager::get_all_starting() const{
 	for(auto& peer: peers){
-		if(!peer->starting) return false;
+		if(peer->players.size() && !peer->starting) return false;
 	}
 	return counting_down;
 }

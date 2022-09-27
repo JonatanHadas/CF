@@ -4,7 +4,7 @@
 #include "network.h"
 
 class Server{
-	Host host;
+	unique_ptr<Host> host;
 public:
 	Server(unsigned short port, channel_id_t channels);
 	

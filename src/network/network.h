@@ -102,6 +102,7 @@ class Host{
 	ENetHost* host;
 
 	map<ENetPeer*, unique_ptr<Peer>> peers;
+	map<ENetPeer*, unique_ptr<Peer>> connecting_peers;
 
 	void destory();
 

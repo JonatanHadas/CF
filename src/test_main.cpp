@@ -30,6 +30,12 @@ void close_window(){
 int main(int argc, char** argv){
 	srand(time(NULL));
 	
+	if(enet_initialize() != 0){
+		cerr << "Error while initializing enet" << endl;
+		return 4;
+	}
+	atexit(enet_deinitialize);
+
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		cerr << "Error initializing SDL:" << endl << SDL_GetError() << endl;
 		return 1;

@@ -23,4 +23,13 @@ size_t count(const vector<T>& container, const T& value){
 	return count(container.begin(), container.end(), value);
 }
 
+template<typename T>
+void erase(vector<T>& container, const T& value){
+	int found = 0;
+	for(auto element: container){
+		if(element != value) container[found++] = element;
+	}
+	while(container.size() > found) container.pop_back();
+}
+
 #endif

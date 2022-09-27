@@ -1,5 +1,7 @@
 #include "network.h"
 
+#include <iostream>
+
 void Peer::disconnect_now(unsigned int data){
 	if(peer != nullptr) enet_peer_disconnect_now(peer, data);
 	peer = nullptr;
@@ -16,6 +18,7 @@ Peer::Peer(Peer&& src) : peer(src.peer){
 
 Peer::~Peer(){
 	disconnect_now(0);
+	host->flush();
 }
 
 Peer& Peer::operator=(Peer&& src){
@@ -117,7 +120,11 @@ Host::Host(const ENetAddress& address, channel_id_t channels) : Host(&address, c
 
 Host::Host(channel_id_t channels) : Host(nullptr, channels) {}
 
-Host::Host(Host&& src) : host(src.host), peers(move(peers)){
+Host::Host(Host&& src) : host(src.host){
+	for(auto& entry: src.peers){
+		peers[entry.first] = std::move(entry.second);
+	}
+	src.peers.clear();
 	src.host = nullptr;
 }
 
@@ -141,7 +148,7 @@ void Host::flush(){
 NetEvent Host::get_event(unsigned int timeout){
 	ENetEvent event;
 	int code = enet_host_service(host, &event, timeout);
-
+	
 	if(code < 0){
 		return NetEvent(EventType::NET_ERROR, 0, nullptr);
 	}
@@ -151,8 +158,17 @@ NetEvent Host::get_event(unsigned int timeout){
 
 	switch(event.type){
 	case ENET_EVENT_TYPE_CONNECT:
-		peers.insert({event.peer, make_unique<Peer>(event.peer, this)});
-		return NetEvent(EventType::CONNECT, event.data, peers[event.peer].get());
+		{
+			unique_ptr<Peer> peer;
+			if(connecting_peers.count(event.peer)){
+				peer = std::move(connecting_peers[event.peer]);
+				connecting_peers.erase(event.peer);
+			}
+			else peer = make_unique<Peer>(event.peer, this);
+			
+			peers.insert({event.peer, std::move(peer)});
+			return NetEvent(EventType::CONNECT, event.data, peers[event.peer].get());
+		}
 	case ENET_EVENT_TYPE_DISCONNECT:
 		{
 			auto peer = move(peers[event.peer]);
@@ -179,9 +195,9 @@ Peer* Host::connect(const ENetAddress& address, channel_id_t channels, unsigned 
 
 	if(nullptr == peer) return nullptr;
 
-	peers.insert({peer, make_unique<Peer>(peer, this)});
-
-	return peers[peer].get();
+	connecting_peers.insert({peer, make_unique<Peer>(peer, this)});
+	
+	return connecting_peers[peer].get();
 }
 
 set<Peer*> Host::get_peers(){

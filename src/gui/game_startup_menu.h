@@ -3,11 +3,14 @@
 
 #include "subview.h"
 #include "button.h"
+#include "textbox.h"
 #include "subview_manager.h"
 
 #include "texts.h"
 
 #include "../game/game_creator.h"
+
+#include "../network/client.h"
 
 #include <memory>
 #include <functional>
@@ -72,8 +75,48 @@ public:
 	);
 };
 
+class ConnectionState{
+	int text_x, text_y;
+	
+	unique_ptr<Client> client;
+	
+	bool has_error;
+	unique_ptr<string> error;
+	unique_ptr<Msg> error_msg;
+
+	unique_ptr<Msg> connecting_msg;
+public:
+	ConnectionState(int text_x, int text_y);
+
+	void connect(const string& hostname);
+	
+	bool is_active();
+	bool is_connected();
+	
+	void draw(SDL_Renderer* renderer);
+	void step();
+	
+	void set_error(const string& message);
+	void clear_error();
+	
+	unique_ptr<Client>&& get_client();
+};
+
+class HostTextBox : public TextBox {
+	ConnectionState& connection;
+protected:
+	void draw_back(SDL_Renderer* renderer, bool typing);
+	void on_set(const string& text);
+	string get_default_text();
+public:
+	HostTextBox(const SDL_Rect& rect, int margin, ConnectionState& connection);
+};
+
 class GameStartupMenu : public SubView {
 	unique_ptr<LocalGameButton> local_game;
+	
+	unique_ptr<HostTextBox> host_box;
+	ConnectionState connection;
 	
 	unique_ptr<LeaveGameButton> leave_game;
 	unique_ptr<ReadyButton> ready;

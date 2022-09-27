@@ -38,9 +38,10 @@ void GameMenu::sync_display(){
 		}
 		
 		game_creator = new_creator;
-		game_creator->get_accumulator()->add_observer(this);
 		
 		if(game_creator.get() != nullptr){
+			game_creator->get_accumulator()->add_observer(this);
+
 			players->attach_settings(
 				game_creator->get_view(),
 				game_creator->get_manipulator()
@@ -70,7 +71,6 @@ void GameMenu::sync_display(){
 		);
 	}
 }
-
 
 bool GameMenu::step(){
 	sync_display();

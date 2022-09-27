@@ -2,7 +2,12 @@
 
 #include "../game/local_game_creator.h"
 
+#include "../game_network/protocol.h"
+#include "../game_network/remote_game_creator.h"
+
 #include "colors.h"
+
+#include <enet/enet.h>
 
 SimpleButton::SimpleButton(const SDL_Rect& rect, string text) : Button(rect, false), text(text) {}
 
@@ -132,6 +137,113 @@ void ReadyButton::on_pressed(){
 	}
 }
 
+ConnectionState::ConnectionState(int text_x, int text_y) :
+	text_x(text_x), text_y(text_y),
+	has_error(false) {}
+
+void ConnectionState::connect(const string& hostname){
+	clear_error();
+	
+	ENetAddress address;
+	if(enet_address_set_host(&address, hostname.c_str()) < 0){
+		set_error("Could not resolve host");
+		return;
+	}
+	
+	address.port = PORT;
+	
+	client = make_unique<Client>(address, CHANNEL_NUM);
+}
+
+bool ConnectionState::is_active(){
+	return client.get() != nullptr && client->is_open();
+}
+
+bool ConnectionState::is_connected(){
+	return client.get() != nullptr && client->is_connected();
+}
+
+void ConnectionState::draw(SDL_Renderer* renderer){
+	if(connecting_msg.get() == nullptr) connecting_msg = make_unique<Msg>(
+		"Connecting...",
+		text_color,
+		FontType::NRM,
+		renderer
+	);
+	
+	if(error.get() != nullptr){
+		error_msg = make_unique<Msg>(
+			error->c_str(),
+			SDL_Color({128, 0, 0, 255}),
+			FontType::NRM,
+			renderer
+		);
+		
+		error = nullptr;
+	}
+	
+	if(has_error){
+		error_msg->render_centered(text_x, text_y, Align::LEFT);
+	}
+	if(is_active() && !is_connected()) connecting_msg->render_centered(text_x, text_y, Align::LEFT);
+}
+
+void ConnectionState::step() {
+	ReceivedMsg msg;
+	bool idle;
+	while(is_active() && !is_connected() && !idle) client->recv(0, msg, idle);
+	
+	if(client.get() != nullptr && !is_active()) {
+		set_error("Could not connect");
+		client = nullptr;
+	}
+}
+
+void ConnectionState::set_error(const string& message){
+	error = make_unique<string>(message);
+	has_error = true;
+}
+
+void ConnectionState::clear_error(){
+	has_error = false;
+}
+
+unique_ptr<Client>&& ConnectionState::get_client(){
+	return std::move(client);
+}
+
+HostTextBox::HostTextBox(const SDL_Rect& rect, int margin, ConnectionState& connection) :
+	TextBox(
+		rect, false,
+		FontType::NRM,
+		margin,
+		text_color, {72, 72, 72, 32}
+	),
+	connection(connection) {}
+
+void HostTextBox::draw_back(SDL_Renderer* renderer, bool typing){
+	fill_back(renderer, typing ? active_color : bg_color);
+	draw_frame(renderer, line_color);
+}
+
+void HostTextBox::on_set(const string& text){
+	connection.connect(text);
+	set_active(false);
+}
+
+string HostTextBox::get_default_text(){
+	return "Enter host name";
+}
+
+#define HOST_X 0.02
+#define HOST_Y 0.1
+#define HOST_W 0.96
+#define HOST_H 0.2
+#define HOST_MARGIN 0.02
+
+#define ERROR_X 0.15
+#define ERROR_Y 0.65
+
 #define BUTTON_Y 0.4
 #define BUTTON_H 0.5
 #define BUTTON_W 0.1
@@ -142,7 +254,8 @@ void ReadyButton::on_pressed(){
 
 #define SECOND_LENGTH 60
 
-GameStartupMenu::GameStartupMenu(const SDL_Rect& rect) : SubView(rect, false) {
+GameStartupMenu::GameStartupMenu(const SDL_Rect& rect) : SubView(rect, false),
+	connection(rect.w * ERROR_X, rect.h * ERROR_Y) {
 	SDL_Rect button_rect;
 	button_rect.w = rect.w * BUTTON_W;
 	button_rect.h = rect.h * BUTTON_H;
@@ -154,9 +267,28 @@ GameStartupMenu::GameStartupMenu(const SDL_Rect& rect) : SubView(rect, false) {
 
 	button_rect.x = rect.w * LOCAL_BUTTON_X;
 	leave_game = make_unique<LeaveGameButton>(button_rect, *this);
+	
+	button_rect.x = rect.w * HOST_X;
+	button_rect.y = rect.h * HOST_Y;
+	button_rect.w = rect.w * HOST_W;
+	button_rect.h = rect.h * HOST_H;
+	host_box = make_unique<HostTextBox>(button_rect, rect.w * HOST_MARGIN, connection);
+	view_manager.add_view(host_box.get());
 }
 
 void GameStartupMenu::sync_display(){
+	if(connection.is_connected()){
+		auto client = std::move(connection.get_client());
+		
+		set_creator(make_shared<RemoteGameCreator>(
+			std::move(*client)
+		));
+	}
+	
+	if(game_creator.get() != nullptr) connection.clear_error();
+	
+	host_box->set_active(game_creator.get() == nullptr && !connection.is_active());
+	
 	if(game_creator.get() == nullptr){
 		if(ready.get() != nullptr){
 			view_manager.remove_view(ready.get());
@@ -197,6 +329,8 @@ void GameStartupMenu::draw_content(SDL_Renderer* renderer){
 	fill_back(renderer, bg_color);
 	draw_frame(renderer, line_color);
 	
+	connection.draw(renderer);
+	
 	view_manager.draw(renderer);
 }
 
@@ -221,6 +355,8 @@ void GameStartupMenu::lose_focus(){
 }
 
 void GameStartupMenu::step(){
+	connection.step();
+	
 	if(game_creator.get() == nullptr || !game_creator->get_view()->is_counting_down()){
 		countdown = -1;
 	}
