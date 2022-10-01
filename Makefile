@@ -89,18 +89,18 @@ HEADS_game_network/remote_game_creator := game_network/remote_game_creator game/
 
 # executables
 
-HEADS_test_main := gui/game_startup_menu game/game_creator game/game_settings_observer_accumulator gui/number_button gui/options_menu gui/game_settings_subview gui/tab_view gui/key_choice_button gui/player_settings gui/textbox gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/gui gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
+HEADS_client_main := gui/game_startup_menu game/game_creator game/game_settings_observer_accumulator gui/number_button gui/options_menu gui/game_settings_subview gui/tab_view gui/key_choice_button gui/player_settings gui/textbox gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/gui gui/game_gui gui/game_drawer gui/texts gui/gui_utils gui/colors gui/keyset game/game game/powerups game/game_logic game/cheese_maker game/game_geometry game/collision_grid gui/images $(GAME_INTERFACES)
 HEADS_server_main := game_network/game_settings_server network/server network/network game/default_settings $(GAME_SETTINGS_INTERFACES)
 
-CLIENT_OBJECTS := game/game_extrapolator game/composite_player_interface game_network/game_client network/client game_network/remote_game_creator game_network/game_settings_client game/observed_settings_view game/local_game_creator gui/game_startup_menu gui/powerup_images gui/number_button gui/options_menu gui/game_settings_subview gui/tab_view gui/key_choice_button gui/keyset gui/player_settings utils/utf8 gui/textbox gui/colors gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/gui gui/clock gui/gui_utils gui/texts gui/game_drawer gui/game_gui gui/images test_main
+CLIENT_OBJECTS := game/game_extrapolator game/composite_player_interface game_network/game_client network/client game_network/remote_game_creator game_network/game_settings_client game/observed_settings_view game/local_game_creator gui/game_startup_menu gui/powerup_images gui/number_button gui/options_menu gui/game_settings_subview gui/tab_view gui/key_choice_button gui/keyset gui/player_settings utils/utf8 gui/textbox gui/colors gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/gui gui/clock gui/gui_utils gui/texts gui/game_drawer gui/game_gui gui/images client_main
 SERVER_OBJECTS := game_network/game_server server_main game_network/game_settings_server network/server
 COMMON_OBJECTS := network/network game/default_settings game/game_data game/game_settings game/game_settings_observer_accumulator utils/serialization game/game_settings_manager game/game_logic game/game game/powerups utils/geometry game/cheese_maker game/game_geometry
 
-OBJECTS_test := $(COMMON_OBJECTS) $(CLIENT_OBJECTS)
+OBJECTS_game := $(COMMON_OBJECTS) $(CLIENT_OBJECTS)
 
 OBJECTS_server := $(COMMON_OBJECTS) $(SERVER_OBJECTS)
 
-EXECUTABLES := test server
+EXECUTABLES := game server
 
 # rules
 OBJECTS = $(COMMON_OBJECTS) $(SERVER_OBJECTS) $(CLIENT_OBJECTS)
