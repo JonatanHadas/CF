@@ -84,13 +84,19 @@ bool GameMenu::step(){
 		if(game.get() == nullptr) return false;
 
 		if(game_gui->step()){
+			winner_display = game_gui->get_score_display();
 			game = nullptr;
 		}
 		
 		return false;
-	}
-	
+	}	
 	if(game_creator.get() != nullptr) game_creator->update();
+
+	if(winner_display.get() != nullptr){
+		if(winner_display->step()) winner_display = nullptr;
+		
+		return false;
+	}
 
 	view_manager.step();
 
@@ -107,11 +113,17 @@ bool GameMenu::handle_event(const SDL_Event& event){
 		else if(exit_key){
 			game = nullptr;
 			startup->set_creator(nullptr);
+			return false;
 		}
 
 		if(game_gui->handle_event(event)){
+			winner_display = game_gui->get_score_display();
 			game = nullptr;
 		}
+		return false;
+	}
+	if(winner_display.get() != nullptr){
+		if(winner_display->handle_event(event)) winner_display = nullptr;
 		return false;
 	}
 	
@@ -132,6 +144,10 @@ void GameMenu::draw(SDL_Renderer* renderer){
 			game_gui->draw(renderer);
 			return;
 		}
+	}
+	if(winner_display.get() != nullptr){
+		winner_display->draw(renderer);
+		return;
 	}
 	
 	SDL_SetRenderDrawColor(renderer, 32, 32, 32, 0);

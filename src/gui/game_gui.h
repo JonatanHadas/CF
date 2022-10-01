@@ -3,6 +3,8 @@
 
 #include "gui.h"
 
+#include "winner_display.h"
+
 #include "game_drawer.h"
 #include "keyset.h"
 #include "../game/player_interface.h"
@@ -13,6 +15,7 @@
 using namespace std;
 
 class GameGui : public Gui{
+	const GameSettings& settings;
 	GameDrawer drawer;
 	
 	GameView* view;
@@ -33,6 +36,8 @@ public:
 	bool step();
 	bool handle_event(const SDL_Event& event);
 	void draw(SDL_Renderer* renderer);
+	
+	unique_ptr<WinnerDisplay> get_score_display();
 };
 
 #endif

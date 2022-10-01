@@ -8,6 +8,7 @@ GameGui::GameGui(
 	const GameSettings& settings,
 	const map<PlayerInterface*, KeySet>& interfaces
 ) :
+	settings(settings),
 	last_round(-1),
 	starting_timer(0),
 	paused(false),
@@ -60,4 +61,9 @@ bool GameGui::handle_event(const SDL_Event& event){
 
 void GameGui::draw(SDL_Renderer* renderer){
 	drawer.draw(renderer);
+}
+
+unique_ptr<WinnerDisplay> GameGui::get_score_display(){
+	if(!view->is_over()) return nullptr;
+	return make_unique<WinnerDisplay>(settings, view);
 }

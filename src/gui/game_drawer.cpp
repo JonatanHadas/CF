@@ -210,12 +210,12 @@ Texture& BoardDrawer::get_texture() const{
 }
 
 
-#define TITLE_Y 0.03
-#define SCORES_Y 0.13
+#define TITLE_Y 0.05
+#define SCORES_Y 0.10
 #define TEXT_X 0.05
 #define PLAYER_NAME_X 0.07
 #define SCORES_X 0.98
-#define SCORES_DY 0.07
+#define SCORES_DY 0.05
 
 
 ScoreDrawer::ScoreDrawer(

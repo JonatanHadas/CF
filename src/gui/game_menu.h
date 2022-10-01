@@ -26,6 +26,7 @@ class GameMenu : public Gui, public GameSettingsObserver{
 	unique_ptr<CreatedGame> game;
 	
 	unique_ptr<GameGui> game_gui;
+	unique_ptr<WinnerDisplay> winner_display;
 	
 	void sync_display();
 public:
