@@ -30,6 +30,7 @@ class GameMenu : public Gui, public GameSettingsObserver{
 	void sync_display();
 public:
 	GameMenu(int w, int h, KeySetManager& key_manager);
+	~GameMenu();
 
 	bool step();
 	bool handle_event(const SDL_Event& event);

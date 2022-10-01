@@ -93,7 +93,7 @@ void ReadyButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
 	);
 	
 	if(countdown[0].get() == nullptr) countdown[0] = make_unique<Msg>(
-		"Ready",
+		"Go!",
 		text_color,
 		FontType::NRM,
 		renderer

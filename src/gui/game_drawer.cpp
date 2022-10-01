@@ -77,6 +77,8 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 
 		for(int i = 0; i < view->get_histories().size(); i++){
 			auto player_history = view->get_histories()[i];
+			
+			if(player_history.empty()) continue;
 
 			SDL_SetRenderDrawColor(renderer, 
 				player_colors[settings.colors[i]].r,
@@ -166,6 +168,7 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 		vector<int> indices;
 		SDL_Vertex vertex;
 		for(int player = 0; player < view->get_histories().size(); player++){
+			if(view->get_histories()[player].empty()) continue;
 			if(!view->get_histories()[player].back().alive) continue;
 			double radius = RING_RATIO * get_player_size(view->get_histories()[player].back().size);
 			double x = view->get_histories()[player].back().x, y = view->get_histories()[player].back().y;

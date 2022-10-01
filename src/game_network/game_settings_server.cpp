@@ -1,5 +1,7 @@
 #include "game_settings_server.h"
 
+#include "game_server.h"
+
 #include "protocol.h"
 
 #include "../utils/serialization.h"
@@ -10,6 +12,7 @@ ServerSettingsObserver::ServerSettingsObserver(Peer& peer) : peer(peer) {}
 
 void ServerSettingsObserver::init(const GameSettings& settings){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::INIT);
 	
 	settings.serialize(packet);
@@ -19,6 +22,7 @@ void ServerSettingsObserver::init(const GameSettings& settings){
 
 void ServerSettingsObserver::add_player(int team, int color){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::ADD_PLAYER);
 	
 	write_raw(packet, team);
@@ -29,6 +33,7 @@ void ServerSettingsObserver::add_player(int team, int color){
 
 void ServerSettingsObserver::remove_player(int player){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::REMOVE_PLAYER);
 	
 	write_raw(packet, player);
@@ -38,6 +43,7 @@ void ServerSettingsObserver::remove_player(int player){
 
 void ServerSettingsObserver::set_player_index(int index, int player){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_PLAYER_INDEX);
 	
 	write_raw(packet, index);
@@ -48,6 +54,7 @@ void ServerSettingsObserver::set_player_index(int index, int player){
 
 void ServerSettingsObserver::set_player_name(int player, string name){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_PLAYER_NAME);
 	
 	write_raw(packet, player);
@@ -58,6 +65,7 @@ void ServerSettingsObserver::set_player_name(int player, string name){
 
 void ServerSettingsObserver::set_player_color(int player, int color){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_PLAYER_COLOR);
 
 	write_raw(packet, player);
@@ -68,6 +76,7 @@ void ServerSettingsObserver::set_player_color(int player, int color){
 
 void ServerSettingsObserver::set_teams(bool using_teams){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_TEAMS);
 	
 	write_raw(packet, using_teams);
@@ -77,6 +86,7 @@ void ServerSettingsObserver::set_teams(bool using_teams){
 
 void ServerSettingsObserver::add_team(){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::ADD_TEAM);
 	
 	send(packet.str());
@@ -84,6 +94,7 @@ void ServerSettingsObserver::add_team(){
 
 void ServerSettingsObserver::remove_team(int team_num){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::REMOVE_TEAM);
 	
 	write_raw(packet, team_num);
@@ -93,6 +104,7 @@ void ServerSettingsObserver::remove_team(int team_num){
 
 void ServerSettingsObserver::set_player_team(int player, int team){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_PLAYER_TEAM);
 	
 	write_raw(packet, player);
@@ -103,6 +115,7 @@ void ServerSettingsObserver::set_player_team(int player, int team){
 
 void ServerSettingsObserver::set_team_name(int team, string name){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_TEAM_NAME);
 	
 	write_raw(packet, team);
@@ -113,6 +126,7 @@ void ServerSettingsObserver::set_team_name(int team, string name){
 
 void ServerSettingsObserver::set_allowed_powerup(PowerUpDescriptor desc, bool allowed){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_ALLOWED_POWERUP);
 	
 	desc.serialize(packet);
@@ -123,6 +137,7 @@ void ServerSettingsObserver::set_allowed_powerup(PowerUpDescriptor desc, bool al
 
 void ServerSettingsObserver::set_win_criterion(WinCriterion criterion){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_WIN_CRITERION);
 	
 	write_raw(packet, criterion);
@@ -132,6 +147,7 @@ void ServerSettingsObserver::set_win_criterion(WinCriterion criterion){
 
 void ServerSettingsObserver::set_win_amount(int amount){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_WIN_AMOUNT);
 	
 	write_raw(packet, amount);
@@ -141,6 +157,7 @@ void ServerSettingsObserver::set_win_amount(int amount){
 
 void ServerSettingsObserver::set_tie_break(int threshold){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_TIE_BREAK);
 	
 	write_raw(packet, threshold);
@@ -150,6 +167,7 @@ void ServerSettingsObserver::set_tie_break(int threshold){
 
 void ServerSettingsObserver::set_host_player(int player){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_HOST_PLAYER);
 	
 	write_raw(packet, player);
@@ -159,6 +177,7 @@ void ServerSettingsObserver::set_host_player(int player){
 
 void ServerSettingsObserver::set_host(){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::SET_HOST);
 	
 	send(packet.str());
@@ -166,6 +185,7 @@ void ServerSettingsObserver::set_host(){
 
 void ServerSettingsObserver::player_ready(int player, bool is_ready){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::PLAYER_READY);
 	
 	write_raw(packet, player);
@@ -176,12 +196,14 @@ void ServerSettingsObserver::player_ready(int player, bool is_ready){
 
 void ServerSettingsObserver::reset_all_ready(){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::RESET_ALL_READY);
 	
 	send(packet.str());
 }
 void ServerSettingsObserver::start_countdown(){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::START_COUNTDOWN);
 	
 	send(packet.str());
@@ -189,6 +211,7 @@ void ServerSettingsObserver::start_countdown(){
 
 void ServerSettingsObserver::start_game(){
 	ostringstream packet;
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsObserverMessageType::START_GAME);
 	
 	send(packet.str());
@@ -212,6 +235,7 @@ void GameSettingsServer::handle_connection(const NetEvent& event){
 
 void GameSettingsServer::handle_disconnection(const NetEvent& event){
 	peers[event.get_peer()]->remove_observer(peer_observers[event.get_peer()].get());
+	settings.remove_peer(peers[event.get_peer()]);
 	
 	peer_observers.erase(event.get_peer());
 	peers.erase(event.get_peer());
@@ -221,7 +245,7 @@ void GameSettingsServer::handle_message(const NetEvent& event){
 	istringstream packet(event.get_packet());
 	GameSettingsManipulator* manipulator = peers[event.get_peer()];
 	
-	if(read_raw<Client2ServerType>(packet) != Client2ServerType::SETTINGS) return;
+	if(read_raw<MessageType>(packet) != MessageType::SETTINGS) return;
 	
 	switch(read_raw<SettingsManipulatorMessageType>(packet)){
 	case SettingsManipulatorMessageType::ADD_PLAYER:
@@ -364,6 +388,25 @@ void GameSettingsServer::serve(int interval){
 			break;
 		case EventType::NET_ERROR:
 			return;
+		}
+		
+		if(settings.get_all_starting()){
+			map<Peer*, GameSettingsView*> views;
+			for(auto entry: peers) views[entry.first] = entry.second;
+			settings.start_all();
+			GameServer(
+				settings.get_settings(),
+				server,
+				views,
+				[&](const NetEvent& event){ 
+					handle_connection(event);
+					
+					peer_observers[event.get_peer()]->start_game();
+				},
+				[&](const NetEvent& event){
+					handle_disconnection(event);
+				}
+			).serve(interval);
 		}
 	}
 }

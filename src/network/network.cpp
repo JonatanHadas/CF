@@ -31,7 +31,7 @@ Peer& Peer::operator=(Peer&& src){
 }
 
 void Peer::send(channel_id_t channel, string msg, bool reliable){
-	enet_peer_send(peer, channel, enet_packet_create(msg.data(), msg.size(), reliable ? ENET_PACKET_FLAG_RELIABLE : 0));
+	if(peer != nullptr) enet_peer_send(peer, channel, enet_packet_create(msg.data(), msg.size(), reliable ? ENET_PACKET_FLAG_RELIABLE : 0));
 	host->flush();
 }
 

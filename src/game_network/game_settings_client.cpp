@@ -18,6 +18,8 @@ void GameSettingsClient::send(const string& message){
 
 bool GameSettingsClient::handle_message(const string& message){
 	istringstream packet(message);
+	if(read_raw<MessageType>(packet) != MessageType::SETTINGS) return false;
+
 	switch(read_raw<SettingsObserverMessageType>(packet)){
 	case SettingsObserverMessageType::INIT:
 		init(observer, packet);
@@ -88,7 +90,7 @@ bool GameSettingsClient::handle_message(const string& message){
 
 void GameSettingsClient::add_player(){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::ADD_PLAYER);
 	
 	send(packet.str());
@@ -96,7 +98,7 @@ void GameSettingsClient::add_player(){
 
 void GameSettingsClient::remove_player(int index){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::REMOVE_PLAYER);
 	
 	write_raw(packet, index);
@@ -106,7 +108,7 @@ void GameSettingsClient::remove_player(int index){
 
 void GameSettingsClient::set_player_name(int index, string name){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_PLAYER_NAME);
 	
 	write_raw(packet, index);
@@ -117,7 +119,7 @@ void GameSettingsClient::set_player_name(int index, string name){
 
 void GameSettingsClient::set_player_color(int index, int color){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_PLAYER_COLOR);
 	
 	write_raw(packet, index);
@@ -128,7 +130,7 @@ void GameSettingsClient::set_player_color(int index, int color){
 
 void GameSettingsClient::set_teams(bool using_teams){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_TEAMS);
 	
 	write_raw(packet, using_teams);
@@ -138,7 +140,7 @@ void GameSettingsClient::set_teams(bool using_teams){
 
 void GameSettingsClient::add_team(){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::ADD_TEAM);
 	
 	send(packet.str());
@@ -146,7 +148,7 @@ void GameSettingsClient::add_team(){
 
 void GameSettingsClient::remove_team(int team){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::REMOVE_TEAM);
 	
 	write_raw(packet, team);
@@ -156,7 +158,7 @@ void GameSettingsClient::remove_team(int team){
 
 void GameSettingsClient::set_player_team(int index, int team){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_PLAYER_TEAM);
 	
 	write_raw(packet, index);
@@ -167,7 +169,7 @@ void GameSettingsClient::set_player_team(int index, int team){
 
 void GameSettingsClient::set_team_name(int team, string name){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_TEAM_NAME);
 	
 	write_raw(packet, team);
@@ -178,7 +180,7 @@ void GameSettingsClient::set_team_name(int team, string name){
 
 void GameSettingsClient::set_allowed_powerup(PowerUpDescriptor desc, bool allowed){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_ALLOWED_POWERUP);
 	
 	desc.serialize(packet);
@@ -189,7 +191,7 @@ void GameSettingsClient::set_allowed_powerup(PowerUpDescriptor desc, bool allowe
 
 void GameSettingsClient::set_win_criterion(WinCriterion criterion){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_WIN_CRITERION);
 	
 	write_raw(packet, criterion);
@@ -199,7 +201,7 @@ void GameSettingsClient::set_win_criterion(WinCriterion criterion){
 
 void GameSettingsClient::set_win_amount(int amount){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_WIN_AMOUNT);
 	
 	write_raw(packet, amount);
@@ -209,7 +211,7 @@ void GameSettingsClient::set_win_amount(int amount){
 
 void GameSettingsClient::set_tie_break(int threshold){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_TIE_BREAK);
 	
 	write_raw(packet, threshold);
@@ -219,7 +221,7 @@ void GameSettingsClient::set_tie_break(int threshold){
 
 void GameSettingsClient::set_ready(bool is_ready){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::SET_READY);
 	
 	write_raw(packet, is_ready);
@@ -229,7 +231,7 @@ void GameSettingsClient::set_ready(bool is_ready){
 
 void GameSettingsClient::start_countdown(){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::START_COUNTDOWN);
 	
 	send(packet.str());
@@ -237,7 +239,7 @@ void GameSettingsClient::start_countdown(){
 
 void GameSettingsClient::start_game(){
 	ostringstream packet;
-	write_raw(packet, Client2ServerType::SETTINGS);
+	write_raw(packet, MessageType::SETTINGS);
 	write_raw(packet, SettingsManipulatorMessageType::START_GAME);
 	
 	send(packet.str());

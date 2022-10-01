@@ -6,7 +6,7 @@
 #define CHANNEL 0
 #define CHANNEL_NUM 1
 
-enum class Client2ServerType : unsigned char{
+enum class MessageType : unsigned char{
 	SETTINGS = 0,
 	GAME = 1,
 };
@@ -66,6 +66,20 @@ enum class SettingsManipulatorMessageType : unsigned char{
 	SET_READY = 0x50,
 	START_COUNTDOWN = 0x51,
 	START_GAME = 0x52,
+};
+
+enum class GameObserverMessageType : unsigned char {
+	INIT = 0x00,
+	NEW_ROUND = 0x10,
+	UPDATE_SCORES = 0x11,
+	UPDATE = 0x20,
+	SPAWN_POWERUP = 0x30,
+	ACTIVATE_POWERUP = 0x31,
+};
+
+enum class PlayerInterfaceMessageType : unsigned char {
+	STEP = 0x00,
+	SET_ACTIVE = 0x10,
 };
 
 #endif

@@ -38,6 +38,7 @@ bool GameGui::step(){
 		}
 	}
 	
+	advancer->allow_step();
 	advancer->advance();	
 	return false;
 }

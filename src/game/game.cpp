@@ -86,12 +86,16 @@ void Game::new_round(){
 	for(auto& state: states){
 		state.turn_state = 0;
 	}
+	for(auto& inputs: pending_inputs){
+		inputs.clear();
+	}
 	
 	tie_break_round |= check_tie_break();
+	game_over |= check_over();
 	
 	for(auto observer: observers){
 		observer->new_round(round_num);
-		observer->update(positions, states);
+		if(!game_over) observer->update(positions, states);
 	}
 }
 
@@ -148,7 +152,11 @@ void Game::advance(){
 	while(can_step()) step();
 }
 
+void Game::allow_step(){}
+
 bool Game::can_step(){
+	if(game_over) return false;
+
 	for(int i = 0; i < player_active.size(); i++){
 		if(player_active[i] && pending_inputs[i].empty()) return false;
 	}
@@ -315,62 +323,20 @@ void Game::step(){
 	}
 }
 
-bool Game::is_over() const{
+bool Game::check_over() const {
 	if(scores.size() <= 1) return false;
 
-	int max_score = -1;
-	int second_max = -1;
-	for(auto score: scores){
-		if(score > max_score){
-			second_max = max_score;
-			max_score = score;
-		}
-		else if(score > second_max){
-			second_max = score;
-		}
-	}
-	
-	if(second_max + score_settings.tie_break_threshold > max_score){
-		return false;
-	}
-	
-	switch(score_settings.criterion){
-	case WinCriterion::BY_SCORE:
-		return max_score >= score_settings.amount;
-	case WinCriterion::BY_ROUND:
-		return round_num >= score_settings.amount;
-	case WinCriterion::NEVER:
-		return false;
-	default:
-		return true;
-	}
+	return check_end_condition(score_settings, scores, round_num) && !check_tie(score_settings, scores);
 }
 
-bool Game::check_tie_break(){
-	int max_score = -1;
-	int second_max = -1;
-	for(auto score: scores){
-		if(score > max_score){
-			second_max = max_score;
-			max_score = score;
-		}
-		else if(score > second_max){
-			second_max = score;
-		}
-	}
-	
-	if(second_max + score_settings.tie_break_threshold <= max_score) return false;
-	
-	switch(score_settings.criterion){
-	case WinCriterion::BY_SCORE:
-		return max_score >= score_settings.amount;
-	case WinCriterion::BY_ROUND:
-		return round_num >= score_settings.amount;
-	case WinCriterion::NEVER:
-		return false;
-	default:
-		return false;
-	}
+bool Game::is_over() const {
+	return game_over;
+}
+
+bool Game::check_tie_break() const {
+	if(scores.size() <= 1) return false;
+
+	return check_end_condition(score_settings, scores, round_num) && check_tie(score_settings, scores);
 }
 
 bool Game::is_tie_break() const {

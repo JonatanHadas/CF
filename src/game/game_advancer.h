@@ -4,6 +4,7 @@
 class GameAdvancer{
 public:
 	virtual void advance() = 0;
+	virtual void allow_step() = 0;
 };
 
 #endif

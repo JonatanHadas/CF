@@ -2,6 +2,7 @@
 
 #define PLAYERS_WIDTH_RATIO 0.25
 #define CONNECTION_HEIGHT_RATIO 0.2
+#include <iostream>
 
 GameMenu::GameMenu(int w, int h, KeySetManager& key_manager) : settings_menu(nullptr), w(w), h(h){
 	SDL_Rect rect;
@@ -23,6 +24,12 @@ GameMenu::GameMenu(int w, int h, KeySetManager& key_manager) : settings_menu(nul
 	rect.h = settings_rect.y;
 	startup = make_unique<GameStartupMenu>(rect);
 	view_manager.add_view(startup.get());
+}
+
+GameMenu::~GameMenu(){
+	game_gui = nullptr;
+	game = nullptr;
+	game_creator = nullptr;
 }
 
 void GameMenu::sync_display(){
@@ -62,7 +69,7 @@ void GameMenu::sync_display(){
 		for(int i = 0; i < keys.size(); i++){
 			keys_map[game->get_interfaces()[i]] = keys[i];
 		}
-		
+
 		game_gui = make_unique<GameGui>(
 			game->get_view(),
 			game->get_advancer(),
@@ -74,30 +81,34 @@ void GameMenu::sync_display(){
 
 bool GameMenu::step(){
 	sync_display();
-	
 	if(game_gui.get() != nullptr){
 		if(game.get() == nullptr) return false;
 
 		if(game_gui->step()){
 			game = nullptr;
 		}
+		
 		return false;
 	}
 	
 	if(game_creator.get() != nullptr) game_creator->update();
 
 	view_manager.step();
-	
+
 	return false;
 }
 
-bool GameMenu::handle_event(const SDL_Event& event){	
+bool GameMenu::handle_event(const SDL_Event& event){
 	sync_display();
 	
 	bool exit_key = event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE;
-	
-	if(game_gui.get() != nullptr){
+
+	if(game_gui.get() != nullptr){		
 		if(game.get() == nullptr) return exit_key;
+		else if(exit_key){
+			game = nullptr;
+			startup->set_creator(nullptr);
+		}
 
 		if(game_gui->handle_event(event)){
 			game = nullptr;

@@ -28,6 +28,7 @@ class Game : public GameView, public GameAdvancer{
 	int end_timer;
 	
 	bool tie_break_round;
+	bool game_over;
 
 	vector<vector<PlayerPosition>> histories;
 	vector<PlayerState> states;
@@ -63,7 +64,8 @@ class Game : public GameView, public GameAdvancer{
 	set<unique_ptr<PowerUpSpawner>> spawners;
 	int next_powerup_id;
 	
-	bool check_tie_break();
+	bool check_tie_break() const;
+	bool check_over() const;
 	void new_round();
 	
 	bool can_step();
@@ -94,6 +96,7 @@ public:
 	const set<unique_ptr<PowerUpEffect>>& get_powerup_effects() const;
 
 	void advance();
+	void allow_step();
 	
 	bool is_over() const;
 	bool is_tie_break() const;

@@ -11,8 +11,6 @@ class GameSettingsClient : public GameSettingsManipulator{
 	GameSettingsObserver& observer;
 	
 	void send(const string& message);
-	
-	bool handle_message(const string& message);
 
     static void init(GameSettingsObserver& observer, istream& input);
 
@@ -70,6 +68,8 @@ public:
 	void start_game();
 	
 	void handle_messages();
+
+	bool handle_message(const string& message);
 };
 
 #endif

@@ -1,5 +1,7 @@
 #include "game_logic.h"
 
+#include <algorithm>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -184,4 +186,26 @@ BoardSize get_board_size(int player_num){
 		BASE_WIDTH * sqrt(player_num),
 		BASE_HEIGHT * sqrt(player_num)
 	);
+}
+
+bool check_end_condition(const ScoreSettings& settings, const vector<int>& scores, int round){
+	switch(settings.criterion){
+	case WinCriterion::BY_SCORE:
+		return settings.amount <= *max_element(scores.begin(), scores.end());
+	case WinCriterion::BY_ROUND:
+		return round > settings.amount;
+	default:
+		return false;
+	}
+}
+
+bool check_tie(const ScoreSettings& settings, const vector<int>& scores){
+	int max_score = -1;
+	int second_max = -3;
+	for(auto score: scores){
+		if(score > second_max) second_max = score;
+		if(second_max > max_score) swap(max_score, second_max);
+	}
+	
+	return second_max + settings.tie_break_threshold > max_score;
 }
