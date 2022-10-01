@@ -2,7 +2,6 @@
 
 #define PLAYERS_WIDTH_RATIO 0.25
 #define CONNECTION_HEIGHT_RATIO 0.2
-#include <iostream>
 
 GameMenu::GameMenu(int w, int h, KeySetManager& key_manager) : settings_menu(nullptr), w(w), h(h){
 	SDL_Rect rect;

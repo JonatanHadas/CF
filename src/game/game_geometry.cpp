@@ -69,8 +69,6 @@ void add_to_grid(
 	});
 }
 
-#include <iostream>
-
 bool check_curve_collision(
 	const BoardSize& board,
 	const PlayerPosition& last_position,

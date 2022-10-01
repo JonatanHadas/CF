@@ -169,7 +169,6 @@ void GameServer::set_active(PlayerInterface* player, istream& input){
 }
 
 void GameServer::serve(int interval){	
-	cout << this << " " << &game << endl;
 	while(true){
 		auto event = server.get_event(interval);
 		switch(event.get_type()){
