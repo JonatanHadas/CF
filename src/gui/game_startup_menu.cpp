@@ -137,6 +137,10 @@ void ReadyButton::on_pressed(){
 	}
 }
 
+#define SECOND_LENGTH 60
+
+#define CONNECTION_TIMEOUT (3*SECOND_LENGTH)
+
 ConnectionState::ConnectionState(int text_x, int text_y) :
 	text_x(text_x), text_y(text_y),
 	has_error(false) {}
@@ -153,6 +157,8 @@ void ConnectionState::connect(const string& hostname){
 	address.port = PORT;
 	
 	client = make_unique<Client>(address, CHANNEL_NUM);
+	
+	counter = CONNECTION_TIMEOUT;
 }
 
 bool ConnectionState::is_active(){
@@ -192,6 +198,14 @@ void ConnectionState::step() {
 	ReceivedMsg msg;
 	bool idle;
 	while(is_active() && !is_connected() && !idle) client->recv(0, msg, idle);
+	
+	if(is_active() && !is_connected()){
+		if(counter) counter--;
+		else{
+			set_error("Connection timed out");
+			client = nullptr;
+		}
+	}
 	
 	if(client.get() != nullptr && !is_active()) {
 		set_error("Could not connect");
@@ -251,8 +265,6 @@ string HostTextBox::get_default_text(){
 #define LOCAL_BUTTON_X 0.88
 #define LEAVE_BUTTON_X 0.88
 #define READY_BUTTON_X 0.02
-
-#define SECOND_LENGTH 60
 
 GameStartupMenu::GameStartupMenu(const SDL_Rect& rect) : SubView(rect, false),
 	connection(rect.w * ERROR_X, rect.h * ERROR_Y) {

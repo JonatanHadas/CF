@@ -78,6 +78,8 @@ public:
 class ConnectionState{
 	int text_x, text_y;
 	
+	int counter;
+	
 	unique_ptr<Client> client;
 	
 	bool has_error;

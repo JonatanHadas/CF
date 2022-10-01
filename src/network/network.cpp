@@ -1,7 +1,5 @@
 #include "network.h"
 
-#include <iostream>
-
 void Peer::disconnect_now(unsigned int data){
 	if(peer != nullptr) enet_peer_disconnect_now(peer, data);
 	peer = nullptr;
@@ -106,6 +104,7 @@ Peer* NetEvent::get_peer() const{
 
 void Host::destory(){
 	peers.clear();
+	connecting_peers.clear();
 
 	if(host != nullptr) enet_host_destroy(host);
 	host = nullptr;
@@ -125,6 +124,12 @@ Host::Host(Host&& src) : host(src.host){
 		peers[entry.first] = std::move(entry.second);
 	}
 	src.peers.clear();
+
+	for(auto& entry: src.connecting_peers){
+		connecting_peers[entry.first] = std::move(entry.second);
+	}
+	src.connecting_peers.clear();
+
 	src.host = nullptr;
 }
 
@@ -135,7 +140,16 @@ Host::~Host(){
 Host& Host::operator=(Host&& src){
 	destory();
 
-	peers = move(src.peers);
+	for(auto& entry: src.peers){
+		peers[entry.first] = std::move(entry.second);
+	}
+	src.peers.clear();
+
+	for(auto& entry: src.connecting_peers){
+		connecting_peers[entry.first] = std::move(entry.second);
+	}
+	src.connecting_peers.clear();
+
 	host = src.host;
 	src.host = nullptr;
 
