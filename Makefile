@@ -96,11 +96,11 @@ CLIENT_OBJECTS := game/game_extrapolator game/composite_player_interface game_ne
 SERVER_OBJECTS := game_network/game_server server_main game_network/game_settings_server network/server
 COMMON_OBJECTS := network/network game/default_settings game/game_data game/game_settings game/game_settings_observer_accumulator utils/serialization game/game_settings_manager game/game_logic game/game game/powerups utils/geometry game/cheese_maker game/game_geometry
 
-OBJECTS_game := $(COMMON_OBJECTS) $(CLIENT_OBJECTS)
+OBJECTS_curve_fever := $(COMMON_OBJECTS) $(CLIENT_OBJECTS)
 
 OBJECTS_server := $(COMMON_OBJECTS) $(SERVER_OBJECTS)
 
-EXECUTABLES := game server
+EXECUTABLES := curve_fever server
 
 # rules
 OBJECTS = $(COMMON_OBJECTS) $(SERVER_OBJECTS) $(CLIENT_OBJECTS)
