@@ -38,6 +38,7 @@ class GameClient{
 
     static void new_round(GameObserver& observer, istream& input);
     static void update_scores(GameObserver& observer, istream& input);
+	static void set_winners(GameObserver& observer, istream& input);
 
     static void update(GameObserver& observer, istream& input);
 

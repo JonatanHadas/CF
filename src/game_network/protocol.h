@@ -72,6 +72,7 @@ enum class GameObserverMessageType : unsigned char {
 	INIT = 0x00,
 	NEW_ROUND = 0x10,
 	UPDATE_SCORES = 0x11,
+	SET_WINNERS = 0x12,
 	UPDATE = 0x20,
 	SPAWN_POWERUP = 0x30,
 	ACTIVATE_POWERUP = 0x31,

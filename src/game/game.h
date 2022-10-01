@@ -44,6 +44,8 @@ class Game : public GameView, public GameAdvancer{
 	vector<int> teams;
 	vector<bool> alive;
 	
+	vector<int> round_winners;
+	
 	vector<CheeseMaker> cheese_makers;
 
 	class GamePlayerInterface : public PlayerInterface{
@@ -88,6 +90,9 @@ public:
 
 	int get_round() const;
 	const vector<int>& get_scores() const;
+
+	bool is_round_over() const;
+	const vector<int>& get_round_winners() const;
 
 	const vector<PlayerState>& get_states() const;
 	const vector<vector<PlayerPosition>>& get_histories() const;

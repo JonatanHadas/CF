@@ -25,6 +25,7 @@ public:
 	
 	void new_round(int round);
 	void update_scores(const vector<int>& addition);
+	void set_winners(const vector<int>& winners);
 
 	void update(const vector<PlayerPosition>& positions, const vector<PlayerState>& states);
 	

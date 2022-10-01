@@ -13,6 +13,7 @@ public:
 	
 	virtual void new_round(int round) = 0;
 	virtual void update_scores(const vector<int>& addition) = 0;
+	virtual void set_winners(const vector<int>& winners) = 0;
 
 	virtual void update(const vector<PlayerPosition>& positions, const vector<PlayerState>& states) = 0;
 	

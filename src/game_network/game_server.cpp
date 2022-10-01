@@ -50,6 +50,16 @@ void GameServerObserver::update_scores(const vector<int>& addition){
 	send(packet.str());
 }
 
+void GameServerObserver::set_winners(const vector<int>& winners){
+	ostringstream packet;
+	write_raw(packet, MessageType::GAME);
+	write_raw(packet, GameObserverMessageType::SET_WINNERS);
+	
+	write_vector<int>(packet, winners, write_raw<int>);
+	
+	send(packet.str());
+}
+
 void GameServerObserver::update(const vector<PlayerPosition>& positions, const vector<PlayerState>& states){
 	ostringstream packet;
 	write_raw(packet, MessageType::GAME);

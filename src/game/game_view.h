@@ -17,6 +17,9 @@ public:
 	virtual const vector<int>& get_scores() const = 0;
 	virtual bool is_over() const = 0;
 	virtual bool is_tie_break() const = 0;
+	
+	virtual bool is_round_over() const = 0;
+	virtual const vector<int>& get_round_winners() const = 0;
 
 	virtual const vector<PlayerState>& get_states() const = 0;
 	virtual const vector<vector<PlayerPosition>>& get_histories() const = 0;

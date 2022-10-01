@@ -94,6 +94,9 @@ bool GameClient::handle_message(const string& message){
 	case GameObserverMessageType::UPDATE:
 		update(observer, packet);
 		break;
+	case GameObserverMessageType::SET_WINNERS:
+		set_winners(observer, packet);
+		break;
 	case GameObserverMessageType::SPAWN_POWERUP:
 		spawn_powerup(observer, packet);
 		break;
@@ -125,6 +128,12 @@ void GameClient::update_scores(GameObserver& observer, istream& input){
 	auto addition = read_vector<int>(input, read_raw<int>);
 	
 	observer.update_scores(addition);
+}
+
+void GameClient::set_winners(GameObserver& observer, istream& input){
+	auto winners = read_vector<int>(input, read_raw<int>);
+	
+	observer.set_winners(winners);
 }
 
 void GameClient::update(GameObserver& observer, istream& input){

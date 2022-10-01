@@ -36,6 +36,9 @@ class GameExtrapolator : public GameView, public GameObserver, public GameAdvanc
 	set<unique_ptr<PowerUpEffect>> powerup_effects;
 	set<unique_ptr<PowerUpEffect>> extrapolated_powerup_effects;
 	
+	bool round_over;
+	vector<int> round_winners;
+
 	int round_timer;
 	
 	class ExtrapolatorPlayerInterface : public PlayerInterface{
@@ -74,6 +77,9 @@ public:
 	bool is_over() const;
 	bool is_tie_break() const;
 
+	bool is_round_over() const;
+	const vector<int>& get_round_winners() const;
+
 	const vector<PlayerState>& get_states() const;
 	const vector<vector<PlayerPosition>>& get_histories() const;
 
@@ -85,6 +91,7 @@ public:
 	
 	void new_round(int round);
 	void update_scores(const vector<int>& addition);
+	void set_winners(const vector<int>& winners);
 
 	void update(const vector<PlayerPosition>& positions, const vector<PlayerState>& states);
 	

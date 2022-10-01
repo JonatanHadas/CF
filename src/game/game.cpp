@@ -135,6 +135,14 @@ const vector<int>& Game::get_scores() const{
 	return scores;
 }
 
+bool Game::is_round_over() const{
+	return end_timer >= 0;
+}
+
+const vector<int>& Game::get_round_winners() const {
+	return round_winners;
+}
+
 const vector<PlayerState>& Game::get_states() const{
 	return states;
 }
@@ -222,22 +230,26 @@ void Game::step(){
 		}
 	}
 	
-	int dead_count = 0;
+	vector<int> newly_dead;
 	for(int team = 0; team < scores.size(); team++){
-		if(alive[team] && !new_alive[team]) dead_count++;
+		if(alive[team] && !new_alive[team]) newly_dead.push_back(team);
 		alive[team] = new_alive[team];
 	}
-	if(dead_count){
-		int living_count = 0;
+	if(newly_dead.size()){
+		vector<int> living;
 		for(int team = 0; team < scores.size(); team++){
 			if(alive[team]){
-				scores[team] += dead_count;
-				living_count++;
+				scores[team] += newly_dead.size();
+				living.push_back(team);
 			}
 		}
 
-		if(living_count <= 1 && end_timer < 0){
+		if(living.size() <= 1 && end_timer < 0){
+			if(living.size()) round_winners = living;
+			else round_winners = newly_dead;
 			end_timer = END_TIMER;
+			
+			for(auto observer: observers) observer->set_winners(round_winners);
 		}
 	}
 

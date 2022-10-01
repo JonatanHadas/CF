@@ -414,6 +414,116 @@ void ScoreDrawer::step(){
 }
 
 
+#define WINNER_MARGIN 0.07
+
+WinnerDrawer::WinnerDrawer(
+	GameView* view,
+	const GameSettings& settings,
+	int y, int h, int w
+) : view(view), settings(settings),
+	y(y), h(h), w(w) {}
+
+void WinnerDrawer::init(SDL_Renderer* renderer){
+	if(texture.get() == nullptr){
+		texture = make_unique<Texture>(renderer,
+			SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+			w, h
+		);
+		
+		SDL_SetTextureBlendMode(texture->get(), SDL_BLENDMODE_BLEND);
+	}
+}
+
+vector<string> WinnerDrawer::get_names(){
+	vector<string> names;
+	for(auto winner: winners){
+		string name = settings.using_teams ? settings.team_names[winner] : settings.names[winner];
+		if(!name.size()) name = get_default_name(settings.using_teams ? "team" : "player", winner);
+		
+		names.push_back(name);
+	}
+	
+	return names;
+}
+
+void WinnerDrawer::draw_msg(SDL_Renderer* renderer){
+	vector<int> new_winners = view->get_round_winners();
+	
+	if(msg.get() != nullptr && new_winners.size() == winners.size()){
+		bool same = true;
+		for(int i = 0; i < winners.size(); i++){
+			if(winners[i] != new_winners[i]){
+				same = false;
+				break;
+			}		
+		}
+		if(same) return;
+	}
+	
+	winners = new_winners;
+	auto names = get_names();
+	string text = "";
+	SDL_Color color = text_color;
+	if(winners.size() == 1){
+		text = settings.using_teams ? "Team " : "";
+		text += names[0];
+		if(!settings.using_teams){
+			color = player_colors[settings.colors[winners[0]]];
+		}
+		
+		text += " wins this round";
+	}
+	else{
+		text = settings.using_teams ? "Teams " : "";
+		for(int i = 0; i < winners.size(); i++){
+			if(i == winners.size() - 1) text += " and ";
+			else if(i > 0) text += ", ";
+			
+			text += names[i];
+		}
+		
+		text += " win this round";
+	}
+	
+	msg = make_unique<Msg>(
+		text.c_str(),
+		color,
+		FontType::NRM,
+		renderer
+	);
+	
+	texture->do_with_texture(renderer, [&](){
+		SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, 128);
+		SDL_RenderClear(renderer);
+		
+		msg->render_centered(w * WINNER_MARGIN, h / 2, Align::LEFT);
+	});
+}
+
+void WinnerDrawer::draw(SDL_Renderer* renderer){
+	init(renderer);
+	
+	if(view->is_round_over()){
+		draw_msg(renderer);
+		
+		SDL_Rect rect;
+		
+		rect.x = 0;
+		rect.y = y;
+		rect.w = w;
+		rect.h = h;
+		SDL_RenderCopy(renderer, texture->get(), NULL, &rect);
+	}
+}
+
+void WinnerDrawer::step(){
+	
+}
+
+
+#define WINNER_DRAWER_H 0.03
+
+
 GameDrawer::GameDrawer(GameView* view, const GameSettings& settings) :
 	view(view),
 	settings(settings),
@@ -438,6 +548,13 @@ void GameDrawer::init(SDL_Renderer* renderer){
 			view,
 			settings,
 			screen_width / 2, screen_width / 2, screen_height
+		);
+		
+		int h = screen_height * WINNER_DRAWER_H;
+		winner_drawer = make_unique<WinnerDrawer>(
+			view,
+			settings,
+			(screen_height - h)/2, h, screen_width/2
 		);
 	}
 }
@@ -469,8 +586,11 @@ void GameDrawer::draw(SDL_Renderer* renderer){
     dst.x += 1; dst.y += 1;
     dst.w -= 2; dst.h -= 2;
     SDL_RenderCopy(renderer, board_drawer.get_texture().get(), NULL, &dst);
+
+	winner_drawer->draw(renderer);
 }
 
 void GameDrawer::step(){
 	if(score_drawer.get() != nullptr) score_drawer->step();
+	if(winner_drawer.get() != nullptr) winner_drawer->step();
 }

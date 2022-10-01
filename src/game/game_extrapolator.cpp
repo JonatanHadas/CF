@@ -26,7 +26,7 @@ GameExtrapolator::GameExtrapolator(
 	round_num(-1),
 	round_timer(-1),
 	scores(team_num, 0),
-	game_over(false), tie_break_round(false),
+	game_over(false), tie_break_round(false), round_over(false),
 	states(player_num, PlayerState(0)),
 	extrapolated_states(player_num, PlayerState(0)),
 	histories(player_num, vector<PlayerPosition>()),
@@ -129,6 +129,14 @@ bool GameExtrapolator::is_tie_break() const {
 	return tie_break_round;
 }
 
+bool GameExtrapolator::is_round_over() const {
+	return round_over;
+}
+
+const vector<int>& GameExtrapolator::get_round_winners() const {
+	return round_winners;
+}
+
 const vector<PlayerState>& GameExtrapolator::get_states() const {
 	return extrapolated_states;
 }
@@ -170,10 +178,17 @@ void GameExtrapolator::new_round(int round){
 	
 	tie_break_round |= check_tie_break();
 	game_over |= check_over();
+	
+	round_over = false;
 }
 
 void GameExtrapolator::update_scores(const vector<int>& addition){
 	scores = addition;
+}
+
+void GameExtrapolator::set_winners(const vector<int>& winners){
+	round_over = true;
+	round_winners = winners;
 }
 
 void GameExtrapolator::update(const vector<PlayerPosition>& positions, const vector<PlayerState>& states){

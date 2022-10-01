@@ -60,6 +60,31 @@ public:
 	void step();
 };
 
+class WinnerDrawer{
+	GameView* view;
+	const GameSettings& settings;
+	
+	vector<int> winners;
+	unique_ptr<Msg> msg;
+	unique_ptr<Texture> texture;
+	
+	int y, h, w;
+	
+	vector<string> get_names();
+	
+	void init(SDL_Renderer* renderer);
+	void draw_msg(SDL_Renderer* renderer);
+public:
+	WinnerDrawer(
+		GameView* view,
+		const GameSettings& settings,
+		int y, int h, int w
+	);
+
+	void draw(SDL_Renderer* renderer);
+	void step();
+};
+
 class GameDrawer{
 	GameView* view;
 	const BoardSize board;
@@ -67,6 +92,7 @@ class GameDrawer{
 	
 	BoardDrawer board_drawer;
 	unique_ptr<ScoreDrawer> score_drawer;
+	unique_ptr<WinnerDrawer> winner_drawer;
 
 	bool is_initialized;
 	int screen_width, screen_height;
