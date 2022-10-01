@@ -79,7 +79,7 @@ void GameExtrapolator::step(){
 void GameExtrapolator::clear_extrapolation(){
 	for(auto& history: histories){
 		for(int i = 0; i < extrapolated_size; i++){
-			history.pop_back();
+			if(history.back().alive) history.pop_back();
 		}
 	}
 	
