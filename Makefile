@@ -7,7 +7,7 @@ DBG_FLAGS = -g
 
 ifeq ($(SYS), Linux)
 	CMP_FLAGS = -I"/usr/include/SDL2" -I"enet\include" $(DBG_FLAGS)
-	LNK_FLAGS = -L"enet" -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lenet64
+	LNK_FLAGS = -L"enet" -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lenet
 	EXEC_EXT = 
 else
 ifeq ($(findstring MINGW32, $(SYS)), MINGW32)
