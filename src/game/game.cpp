@@ -31,6 +31,7 @@ Game::Game(
 	score_settings(score_settings),
 	round_num(-1),
 	tie_break_round(false),
+	game_over(false),
 	histories(teams.size(), vector<PlayerPosition>()),
 	states(teams.size(), PlayerState(0)),
 	pending_inputs(teams.size(), deque<int>()),

@@ -134,7 +134,6 @@ void GameClient::update(GameObserver& observer, istream& input){
 	auto states = read_vector<PlayerState>(input, [](istream& input){
 		return PlayerState::deserialize(input);
 	});
-	
 	observer.update(positions, states);
 }
 

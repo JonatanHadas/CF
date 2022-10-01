@@ -62,7 +62,7 @@ void GameServerObserver::update(const vector<PlayerPosition>& positions, const v
 	write_vector<PlayerState>(packet, states, [](ostream& output, const PlayerState& state){
 		state.serialize(output);
 	});
-	
+
 	send(packet.str());
 }
 
@@ -132,17 +132,17 @@ void GameServer::handle_disconnection(const NetEvent& event){
 	
 	for(auto player: peer_players[event.get_peer()]) player->set_active(false);
 	peer_players.erase(event.get_peer());
-	
+
 	on_disconnect(event);
 }
 
 void GameServer::handle_message(const NetEvent& event){
 	istringstream packet(event.get_packet());
-
+	
 	if(read_raw<MessageType>(packet) != MessageType::GAME) return;
 
 	auto index = read_raw<int>(packet);
-	
+
 	if(peer_players[event.get_peer()].size() <= index) return;
 	
 	switch(read_raw<PlayerInterfaceMessageType>(packet)){
@@ -169,6 +169,7 @@ void GameServer::set_active(PlayerInterface* player, istream& input){
 }
 
 void GameServer::serve(int interval){	
+	cout << this << " " << &game << endl;
 	while(true){
 		auto event = server.get_event(interval);
 		switch(event.get_type()){
@@ -189,5 +190,6 @@ void GameServer::serve(int interval){
 		
 		game.advance();
 		if(game.is_over()) return;
+		
 	}
 }
