@@ -4,6 +4,7 @@
 #include "game_observer.h"
 #include "game_view.h"
 #include "game_advancer.h"
+#include "game_event_listener_accumulator.h"
 
 #include "player_interface.h"
 
@@ -15,7 +16,7 @@
 
 using namespace std;
 
-class GameExtrapolator : public GameView, public GameObserver, public GameAdvancer {
+class GameExtrapolator : public GameView, public GameObserver, public GameAdvancer, public GameEventListenerAccumulator {
 	const BoardSize board;
 	const ScoreSettings score_settings;
 	
@@ -31,6 +32,8 @@ class GameExtrapolator : public GameView, public GameObserver, public GameAdvanc
 	vector<deque<int>> pending_inputs;
 	vector<bool> player_active;
 	bool history_exists;
+	
+	vector<bool> player_alive;
 
 	map<int, PowerUp> powerups;
 	set<unique_ptr<PowerUpEffect>> powerup_effects;

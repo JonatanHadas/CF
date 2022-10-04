@@ -31,6 +31,10 @@ GameAdvancer* LocalGame::get_advancer(){
 	return &game;
 }
 
+GameEventListenerAccumulator* LocalGame::get_accumulator(){
+	return &game;
+}
+
 
 LocalGameCreator::LocalGameCreator() :
 	manager(default_settings){

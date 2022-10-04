@@ -71,6 +71,10 @@ GameAdvancer* RemoteGame::get_advancer(){
 	return &advancer;
 }
 
+GameEventListenerAccumulator* RemoteGame::get_accumulator(){
+	return &game;
+}
+
 
 RemoteGameCreator::RemoteGameCreator(Client&& client) :
 	client(std::move(client)),

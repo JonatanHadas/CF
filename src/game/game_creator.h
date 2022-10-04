@@ -8,6 +8,7 @@
 #include "game_view.h"
 #include "player_interface.h"
 #include "game_advancer.h"
+#include "game_event_listener_accumulator.h"
 
 #include <vector>
 #include <memory>
@@ -19,6 +20,7 @@ public:
 	virtual GameView* get_view() = 0;
 	virtual const vector<PlayerInterface*>& get_interfaces() const = 0;
 	virtual GameAdvancer* get_advancer() = 0;
+	virtual GameEventListenerAccumulator* get_accumulator() = 0;
 };
 
 class GameCreator{

@@ -1,7 +1,5 @@
-#include "gui/game_gui.h"
 #include "gui/texts.h"
 #include "gui/images.h"
-#include "game/game.h"
 
 #include "gui/game_menu.h"
 

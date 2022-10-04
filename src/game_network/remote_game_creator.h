@@ -43,6 +43,7 @@ public:
 	GameView* get_view();
 	const vector<PlayerInterface*>& get_interfaces() const;
 	GameAdvancer* get_advancer();
+	GameEventListenerAccumulator* get_accumulator();
 };
 
 class RemoteGameCreator : public GameCreator {

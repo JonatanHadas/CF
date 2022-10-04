@@ -9,6 +9,7 @@
 #include "keyset.h"
 #include "../game/player_interface.h"
 #include "../game/game_advancer.h"
+#include "../game/game_event_listener_accumulator.h"
 
 #include <map>
 
@@ -29,6 +30,7 @@ public:
 	GameGui(
 		GameView* view,
 		GameAdvancer* advancer,
+		GameEventListenerAccumulator* accumulator,
 		const GameSettings& settings,
 		const map<PlayerInterface*, KeySet>& interfaces
 	);

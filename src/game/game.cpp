@@ -220,6 +220,10 @@ void Game::step(){
 				other_player == player
 			)) break;
 		}
+		
+		if(!histories[player].back().alive){
+			for(auto listener: get_listeners()) listener->kill_player(player);
+		}
 	}
 	
 	// Update scores
@@ -280,6 +284,7 @@ void Game::step(){
 				}
 				
 				for(auto observer: observers) observer->activate_powerup(it->first, *effect);
+				for(auto listener: get_listeners()) listener->activate_powerup(it->second);
 				powerup_effects.insert(move(effect));
 				
 				powerups.erase(it++);
@@ -312,6 +317,7 @@ void Game::step(){
 
 				powerups.insert({id, powerup});
 				for(auto observer: observers) observer->spawn_powerup(id, powerup);
+				for(auto listener: get_listeners()) listener->spawn_powerup(powerup);
 			}
 			
 			if((*it)->is_done()) spawners.erase(it++);

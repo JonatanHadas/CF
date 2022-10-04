@@ -33,6 +33,7 @@ GameExtrapolator::GameExtrapolator(
 	extrapolated_size(0),
 	extrapolation_limit(0),
 	history_exists(false),
+	player_alive(false, player_num),
 	pending_inputs(player_num, deque<int>()),
 	player_active(player_num, true)
 	{
@@ -197,7 +198,12 @@ void GameExtrapolator::update(const vector<PlayerPosition>& positions, const vec
 	clear_extrapolation();
 	
 	for(int i = 0; i < positions.size(); i++){
+		if(player_alive[i] && !positions[i].alive){
+			for(auto listener: get_listeners()) listener->kill_player(i);
+		}
+
 		histories[i].push_back(positions[i]);
+		player_alive[i] = positions[i].alive;
 	}
 	this->states = states;
 	history_exists = true;
@@ -213,9 +219,12 @@ void GameExtrapolator::update(const vector<PlayerPosition>& positions, const vec
 
 void GameExtrapolator::spawn_powerup(int id, const PowerUp& power_up){
 	powerups.insert({id, power_up});
+	
+	for(auto listener: get_listeners()) listener->spawn_powerup(power_up);
 }
 
 void GameExtrapolator::activate_powerup(int id, const PowerUpEffect& effect){
+	for(auto listener: get_listeners()) listener->activate_powerup(powerups.at(id));
 	powerups.erase(id);
 	
 	powerup_effects.insert(make_unique<PowerUpEffect>(effect));

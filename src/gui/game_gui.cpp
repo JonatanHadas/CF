@@ -5,6 +5,7 @@
 GameGui::GameGui(
 	GameView* view,
 	GameAdvancer* advancer,
+	GameEventListenerAccumulator* accumulator,
 	const GameSettings& settings,
 	const map<PlayerInterface*, KeySet>& interfaces
 ) :
