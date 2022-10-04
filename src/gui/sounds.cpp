@@ -5,7 +5,7 @@
 #include "SDL_mixer.h"
 #include <map>
 
-#define DIR "sounds/"
+#define DIR "/data/sounds/"
 #define WAV ".wav"
 
 

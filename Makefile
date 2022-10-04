@@ -71,7 +71,7 @@ HEADS_gui/sounds := gui/sounds
 HEADS_gui/keyset := gui/keyset utils/serialization utils/utils
 HEADS_gui/gui_utils := gui/gui_utils
 HEADS_gui/game_drawer := gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings $(GAME_INTERFACES) utils/geometry
-HEADS_gui/game_gui := gui/winner_display gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings game/game_event_listener_accumulator $(GAME_INTERFACES)
+HEADS_gui/game_gui := gui/winner_display gui/sounds gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings game/game_event_listener_accumulator $(GAME_INTERFACES)
 HEADS_gui/winner_display := gui/winner_display gui/gui gui/colors gui/texts game/game_view $(GAME_SETTINGS)
 
 # Network objects

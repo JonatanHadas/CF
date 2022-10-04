@@ -1,5 +1,24 @@
 #include "game_gui.h"
 
+#include "sounds.h"
+
+GameSoundManager::~GameSoundManager(){
+	silence();
+}
+
+void GameSoundManager::kill_player(int player){
+	
+}
+
+void GameSoundManager::spawn_powerup(const PowerUp& power_up){
+	
+}
+
+void GameSoundManager::activate_powerup(const PowerUp& power_up){
+	
+}
+
+
 #define START_DELAY 30
 
 GameGui::GameGui(
@@ -16,7 +35,15 @@ GameGui::GameGui(
 	drawer(view, settings),
 	view(view),
 	advancer(advancer),
-	interfaces(interfaces) {}
+	accumulator(accumulator),
+	interfaces(interfaces) {
+		
+	accumulator->add_listener(&sounds);
+}
+
+GameGui::~GameGui(){
+	accumulator->remove_listener(&sounds);
+}
 
 bool GameGui::step(){
 	if(!paused){
