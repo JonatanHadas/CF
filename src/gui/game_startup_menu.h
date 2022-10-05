@@ -78,13 +78,15 @@ public:
 class ConnectionState{
 	int text_x, text_y;
 	
+	int error_x, exiting_error_x, connecting_x;
+	
 	int counter;
 	
 	unique_ptr<Client> client;
 	
 	bool has_error;
 	unique_ptr<string> error;
-	unique_ptr<Msg> error_msg;
+	unique_ptr<Msg> error_msg, exiting_error;
 
 	unique_ptr<Msg> connecting_msg;
 public:

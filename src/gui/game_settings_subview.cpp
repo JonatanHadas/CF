@@ -7,6 +7,9 @@
 #include "../game/powerups.h"
 
 #include "../utils/utils.h"
+#include "gui_utils.h"
+
+#define OPTION_FOLLOW_SPEED 3
 
 WinCriterionMenu::WinCriterionMenu(
 	const SDL_Rect& rect, int x_margin,
@@ -19,6 +22,7 @@ WinCriterionMenu::WinCriterionMenu(
 			"Never",
 		}),
 		x_margin,
+		OPTION_FOLLOW_SPEED,
 		line_color, text_color, text_color,
 		FontType::NRM
 	),
@@ -747,7 +751,25 @@ PlayersView::PlayersView(
 	bool multi_peer
 ) : SubView(rect, false),
 	view(view), manipulator(manipulator),
-	multi_peer(multi_peer) {}
+	multi_peer(multi_peer) {
+
+	SDL_Rect button_rect;
+	button_rect.x = rect.w * TEAMS_BUTTON_MARGIN;
+	button_rect.w = rect.w - button_rect.x * 2;
+	button_rect.h = rect.h * TEAMS_BUTTON_H;
+	button_rect.y = -button_rect.h;
+
+	using_teams_button = make_unique<TeamsButton>(button_rect, view, manipulator);
+	view_manager.add_view(using_teams_button.get());
+	
+	button_rect.x = rect.w * TEAMS_BUTTON_MARGIN;
+	button_rect.w = rect.w - button_rect.x * 2;
+	button_rect.h = rect.h * TEAMS_BUTTON_H;
+	button_rect.y = rect.h;
+
+	add_team_button = make_unique<TeamAddButton>(button_rect, manipulator);
+	view_manager.add_view(add_team_button.get());
+}
 
 void PlayersView::sync_displays(){
 	SDL_Rect rect;
@@ -788,33 +810,9 @@ void PlayersView::sync_displays(){
 		teams.clear();
 	}
 	
-	if(view->am_i_host() && using_teams_button.get() == nullptr){		
-		rect.x = get_rect().w * TEAMS_BUTTON_MARGIN;
-		rect.w = get_rect().w - rect.x * 2;
-		rect.h = get_rect().h * TEAMS_BUTTON_H;
-		rect.y = -rect.h;
-
-		using_teams_button = make_unique<TeamsButton>(rect, view, manipulator);
-		view_manager.add_view(using_teams_button.get());
-	}
-	else if(!view->am_i_host() && using_teams_button.get() != nullptr){
-		view_manager.remove_view(using_teams_button.get());
-		using_teams_button = nullptr;
-	}
-
-	if(view->am_i_host() && view->get_settings().using_teams && add_team_button.get() == nullptr){		
-		rect.x = get_rect().w * TEAMS_BUTTON_MARGIN;
-		rect.w = get_rect().w - rect.x * 2;
-		rect.h = get_rect().h * TEAMS_BUTTON_H;
-		rect.y = get_rect().h;
-
-		add_team_button = make_unique<TeamAddButton>(rect, manipulator);
-		view_manager.add_view(add_team_button.get());
-	}
-	else if(!(view->am_i_host() && view->get_settings().using_teams) && add_team_button.get() != nullptr){
-		view_manager.remove_view(add_team_button.get());
-		add_team_button = nullptr;
-	}
+	using_teams_button->set_active(view->am_i_host());
+	
+	add_team_button->set_active(view->am_i_host() && view->get_settings().using_teams);
 }
 
 bool PlayersView::on_event(const SDL_Event& event){
@@ -825,7 +823,23 @@ bool PlayersView::on_event(const SDL_Event& event){
 void PlayersView::draw_content(SDL_Renderer* renderer){
 	sync_displays();
 	fill_back(renderer, bg_color);
-	
+
+	view_manager.draw(renderer);
+}
+
+void PlayersView::lose_focus(){
+	sync_displays();
+	view_manager.lose_focus();
+}
+
+#define PLAYER_FOLLOW_SPEED 5
+
+void PlayersView::step(){
+	sync_displays();
+
+	removed_players.clear();
+	removed_teams.clear();
+
 	vector<SubView*> views;
 	
 	if(view->get_settings().using_teams){
@@ -841,44 +855,49 @@ void PlayersView::draw_content(SDL_Renderer* renderer){
 				views.push_back(players[player].get());
 			}
 		}
-		
 	}
 	else{
 		for(auto& view: players) views.push_back(view.get());
 	}
 	
 	int y = get_rect().h * PLAYERS_SPACE;
+	
+	int using_teams_button_y = -using_teams_button->get_rect().h;
 
 	if(view->am_i_host()){
-		using_teams_button->move(using_teams_button->get_rect().x, y);
-		
+		using_teams_button_y = y;
 		y += get_rect().h * PLAYERS_SPACE + using_teams_button->get_rect().h;
 	}
+	
+	using_teams_button->move(using_teams_button->get_rect().x, follow(
+		using_teams_button->get_rect().y,
+		using_teams_button_y,
+		PLAYER_FOLLOW_SPEED
+	));
 
 	for(auto view: views){
-		view->move(0, y);
+		view->move(0, follow(
+			view->get_rect().y,
+			y,
+			PLAYER_FOLLOW_SPEED
+		));
+
 		y += view->get_rect().h;
 	}
+	
+	int add_team_button_y = get_rect().h;
 	
 	if(view->am_i_host() && view->get_settings().using_teams){
 		y += get_rect().h * PLAYERS_SPACE;
 		
-		add_team_button->move(add_team_button->get_rect().x, y);
+		add_team_button_y = y;
 	}
 
-	view_manager.draw(renderer);
-}
-
-void PlayersView::lose_focus(){
-	sync_displays();
-	view_manager.lose_focus();
-}
-
-void PlayersView::step(){
-	sync_displays();
-
-	removed_players.clear();
-	removed_teams.clear();
+	add_team_button->move(add_team_button->get_rect().x, follow(
+		add_team_button->get_rect().y,
+		add_team_button_y,
+		PLAYER_FOLLOW_SPEED
+	));
 
 	view_manager.step();
 }

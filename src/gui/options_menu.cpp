@@ -2,6 +2,8 @@
 
 #include "colors.h"
 
+#include "gui_utils.h"
+
 OptionButton::OptionButton(
 	const SDL_Rect& rect,
 	int option,
@@ -58,10 +60,12 @@ void OptionButton::on_pressed(){
 OptionsMenu::OptionsMenu(
 	const SDL_Rect& rect,
 	vector<string>&& texts,
+	double follow_speed,
 	const SDL_Color& pressed, const SDL_Color& released, const SDL_Color& inactive,
 	FontType font
 ) : SubView(rect, true),
 	texts(std::move(texts)),
+	follow_speed(follow_speed),
 	pressed(pressed), released(released), inactive(inactive),
 	font(font),
 	active(true) {}
@@ -87,6 +91,8 @@ void OptionsMenu::init(SDL_Renderer* renderer){
 		buttons.back()->set_active(active);
 		manager.add_view(buttons.back().get());
 	}
+	
+	rect = buttons[get_option()]->get_rect();
 }
 
 bool OptionsMenu::on_event(const SDL_Event& event){
@@ -98,7 +104,11 @@ void OptionsMenu::draw_content(SDL_Renderer* renderer){
 	
 	fill_back(renderer, clear_color);
 	
-	SDL_Rect rect = buttons[get_option()]->get_rect();
+	rect.x = follow(rect.x, buttons[get_option()]->get_rect().x, follow_speed);
+	rect.y = follow(rect.y, buttons[get_option()]->get_rect().y, follow_speed);
+	rect.w = follow(rect.w, buttons[get_option()]->get_rect().w, follow_speed);
+	rect.h = follow(rect.h, buttons[get_option()]->get_rect().h, follow_speed);
+	
 	SDL_SetRenderDrawColor(renderer, line_color.r, line_color.g, line_color.b, line_color.a);
 	SDL_RenderDrawRect(renderer, &rect);
 	
@@ -126,11 +136,13 @@ void OptionsMenu::set_active(bool is_active){
 VerticalOptionsMenu::VerticalOptionsMenu(
 	const SDL_Rect& rect,
 	vector<string>&& texts,
+	double follow_speed,
 	SDL_Color pressed, SDL_Color released, SDL_Color inactive,
 	FontType font
 ) : OptionsMenu(
 		{ .x = rect.x, .y = rect.y, .w = rect.w, .h = rect.h * (int)texts.size() },
 		std::move(texts),
+		follow_speed,
 		pressed, released, inactive,
 		font
 	),
@@ -155,11 +167,13 @@ vector<SDL_Rect> VerticalOptionsMenu::get_locations(const vector<Msg>& msgs){
 HorizontalOptionsMenu::HorizontalOptionsMenu(
 	const SDL_Rect& rect,
 	vector<string>&& texts, int x_margin,
+	double follow_speed,
 	SDL_Color pressed, SDL_Color released, SDL_Color inactive,
 	FontType font
 ) : OptionsMenu(
 		{ .x = rect.x, .y = rect.y, .w = rect.w, .h = rect.h },
 		std::move(texts),
+		follow_speed,
 		pressed, released, inactive,
 		font
 	),

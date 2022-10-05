@@ -32,4 +32,6 @@ void draw_circle(SDL_Renderer* renderer, int x, int y, double radius);
 
 unique_ptr<Texture> make_cross(SDL_Renderer* renderer, int size, double ratio);
 
+double follow(double current, double target, double speed);
+
 #endif

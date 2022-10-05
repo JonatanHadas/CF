@@ -44,6 +44,9 @@ public:
 class OptionsMenu : public SubView {
 	vector<string> texts;
 	
+	double follow_speed;
+	SDL_Rect rect;
+	
 	SDL_Color pressed, released, inactive;
 	FontType font;
 	
@@ -63,6 +66,7 @@ public:
 	OptionsMenu(
 		const SDL_Rect& rect,
 		vector<string>&& texts,
+		double follow_speed,
 		const SDL_Color& pressed, const SDL_Color& released, const SDL_Color& inactive,
 		FontType font
 	);
@@ -84,6 +88,7 @@ public:
 	VerticalOptionsMenu(
 		const SDL_Rect& rect,
 		vector<string>&& texts,
+		double follow_speed,
 		SDL_Color pressed, SDL_Color released, SDL_Color inactive,
 		FontType font
 	);
@@ -97,6 +102,7 @@ public:
 	HorizontalOptionsMenu(
 		const SDL_Rect& rect,
 		vector<string>&& texts, int x_margin,
+		double follow_speed,
 		SDL_Color pressed, SDL_Color released, SDL_Color inactive,
 		FontType font
 	);

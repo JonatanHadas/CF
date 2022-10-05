@@ -41,7 +41,9 @@ bool GameGui::step(){
 	}
 	
 	advancer->allow_step();
-	advancer->advance();	
+	advancer->advance();
+
+	drawer.step();
 	return false;
 }
 

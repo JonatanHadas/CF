@@ -2,6 +2,7 @@
 
 #include "colors.h"
 #include "../utils/utils.h"
+#include "gui_utils.h"
 
 #define REMOVE_CROSS_RATIO (1.0/3.0)
 
@@ -481,8 +482,6 @@ void PlayersSubView::lose_focus(){
 	view_manager.lose_focus();
 }
 
-#define FOLLOW(current, target, speed) (((current) + ((target) * ((speed) - 1)))/(speed))
-
 #define VIEW_FOLLOW_SPEED 5
 
 void PlayersSubView::step(){
@@ -498,12 +497,12 @@ void PlayersSubView::step(){
 		int x = views[i]->get_rect().x;
 		int y = views[i]->get_rect().y;
 		
-		views[i]->move(x, FOLLOW(y, target_y, VIEW_FOLLOW_SPEED));
+		views[i]->move(x, follow(y, target_y, VIEW_FOLLOW_SPEED));
 	}
 	
 	int x = add_button->get_rect().x;
 	int y = add_button->get_rect().y;
-	add_button->move(x, FOLLOW(y, target_y, VIEW_FOLLOW_SPEED));
+	add_button->move(x, follow(y, target_y, VIEW_FOLLOW_SPEED));
 }
 
 void PlayersSubView::attach_settings(GameSettingsView* view, GameSettingsManipulator* manipulator){

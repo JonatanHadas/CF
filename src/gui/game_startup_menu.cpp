@@ -141,6 +141,8 @@ void ReadyButton::on_pressed(){
 
 #define CONNECTION_TIMEOUT (3*SECOND_LENGTH)
 
+#define CONNECTION_FOLLOW_SPEED 3
+
 ConnectionState::ConnectionState(int text_x, int text_y) :
 	text_x(text_x), text_y(text_y),
 	has_error(false) {}
@@ -170,14 +172,23 @@ bool ConnectionState::is_connected(){
 }
 
 void ConnectionState::draw(SDL_Renderer* renderer){
-	if(connecting_msg.get() == nullptr) connecting_msg = make_unique<Msg>(
-		"Connecting...",
-		text_color,
-		FontType::NRM,
-		renderer
-	);
+	if(connecting_msg.get() == nullptr) {
+		connecting_msg = make_unique<Msg>(
+			"Connecting...",
+			text_color,
+			FontType::NRM,
+			renderer
+		);
+		
+		connecting_x = -connecting_msg->get_width();
+	}
 	
 	if(error.get() != nullptr){
+		if(error_msg.get() != nullptr){
+			exiting_error_x = error_x;
+			exiting_error = std::move(error_msg);
+		}
+		
 		error_msg = make_unique<Msg>(
 			error->c_str(),
 			SDL_Color({128, 0, 0, 255}),
@@ -185,13 +196,21 @@ void ConnectionState::draw(SDL_Renderer* renderer){
 			renderer
 		);
 		
+		error_x = -error_msg->get_width();
+		
 		error = nullptr;
 	}
 	
-	if(has_error){
-		error_msg->render_centered(text_x, text_y, Align::LEFT);
+	if(!has_error){
+		exiting_error_x = error_x;
+		exiting_error = std::move(error_msg);
+		
+		error_msg = nullptr;
 	}
-	if(is_active() && !is_connected()) connecting_msg->render_centered(text_x, text_y, Align::LEFT);
+	
+	if(error_msg.get() != nullptr) error_msg->render_centered(error_x, text_y, Align::LEFT);
+	if(exiting_error.get() != nullptr) exiting_error->render_centered(exiting_error_x, text_y, Align::LEFT);
+	if(connecting_msg.get() != nullptr) connecting_msg->render_centered(connecting_x, text_y, Align::LEFT);
 }
 
 void ConnectionState::step() {
@@ -211,6 +230,24 @@ void ConnectionState::step() {
 		set_error("Could not connect");
 		client = nullptr;
 	}
+	
+	if(exiting_error.get() != nullptr) exiting_error_x = follow(
+		exiting_error_x,
+		-exiting_error->get_width(),
+		CONNECTION_FOLLOW_SPEED
+	);
+	
+	if(error_msg.get() != nullptr) error_x = follow(
+		error_x,
+		has_error ? text_x : -error_msg->get_width(),
+		CONNECTION_FOLLOW_SPEED
+	);
+	
+	if(connecting_msg.get() != nullptr) connecting_x = follow(
+		connecting_x,
+		is_active() && !is_connected() ? text_x : -connecting_msg->get_width(),
+		CONNECTION_FOLLOW_SPEED
+	);
 }
 
 void ConnectionState::set_error(const string& message){
@@ -255,7 +292,7 @@ string HostTextBox::get_default_text(){
 #define HOST_H 0.2
 #define HOST_MARGIN 0.02
 
-#define ERROR_X 0.15
+#define ERROR_X 0.02
 #define ERROR_Y 0.65
 
 #define BUTTON_Y 0.4

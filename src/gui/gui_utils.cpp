@@ -88,3 +88,7 @@ unique_ptr<Texture> make_cross(SDL_Renderer* renderer, int size, double ratio){
 
 	return texture;
 }
+
+double follow(double current, double target, double speed){
+	return (current + target * (speed - 1)) / speed;
+}

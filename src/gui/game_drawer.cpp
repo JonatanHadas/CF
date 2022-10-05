@@ -300,16 +300,7 @@ void ScoreDrawer::draw(SDL_Renderer* renderer){
 		}
 	}
 
-	sort(order.begin(), order.end(), [&](int first, int second){
-		return scores[first] > scores[second];
-	});
-
 	int dy = h * SCORES_DY;
-	int y = h * SCORES_Y;
-	for(int i: order){
-		ys[i] = y;
-		y += dy * (1 + player_names[i].size());
-	}
 
 	for(int i = 0; i < scores.size(); i++){
 		int y = ys[i];
@@ -409,8 +400,19 @@ void ScoreDrawer::draw(SDL_Renderer* renderer){
 	}
 }
 
-void ScoreDrawer::step(){
+#define SCORE_FOLLOW_SPEED 3
 
+void ScoreDrawer::step(){
+	sort(order.begin(), order.end(), [&](int first, int second){
+		return scores[first] > scores[second];
+	});
+
+	int dy = h * SCORES_DY;
+	int y = h * SCORES_Y;
+	for(int i: order){
+		ys[i] = follow(ys[i], y, SCORE_FOLLOW_SPEED);
+		y += dy * (1 + player_names[i].size());
+	}
 }
 
 
