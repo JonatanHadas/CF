@@ -5,7 +5,9 @@
 
 bool load_sounds();
 
-enum Sound{
+enum class Sound{
+	SPAWN_POWERUP,
+	TAKE_POWERUP,
 };
 
 void play(Sound snd);

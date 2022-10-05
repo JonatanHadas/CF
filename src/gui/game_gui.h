@@ -17,6 +17,8 @@ using namespace std;
 
 class GameSoundManager : public GameEventListener {
 public:
+	GameSoundManager();
+
 	GameSoundManager(GameSoundManager&&) = delete;
 	GameSoundManager(const GameSoundManager&) = delete;
 

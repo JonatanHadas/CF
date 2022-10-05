@@ -2,20 +2,22 @@
 
 #include "sounds.h"
 
+GameSoundManager::GameSoundManager(){}
+
 GameSoundManager::~GameSoundManager(){
 	silence();
 }
 
 void GameSoundManager::kill_player(int player){
-	
+
 }
 
 void GameSoundManager::spawn_powerup(const PowerUp& power_up){
-	
+	play(Sound::SPAWN_POWERUP);
 }
 
 void GameSoundManager::activate_powerup(const PowerUp& power_up){
-	
+	play(Sound::TAKE_POWERUP);
 }
 
 

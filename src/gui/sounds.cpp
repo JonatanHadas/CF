@@ -5,7 +5,7 @@
 #include "SDL_mixer.h"
 #include <map>
 
-#define DIR "/data/sounds/"
+#define DIR "data/sounds/"
 #define WAV ".wav"
 
 
@@ -32,8 +32,9 @@ bool load_sound(Sound id, const char* path, double volume){
 bool load_sounds(){
 	atexit(free_sounds);
 	
-	//if(load_sound(Sound::, DIR "..." WAV, 1.0))
-	//	return true;
+	if(load_sound(Sound::SPAWN_POWERUP, DIR "spawn_powerup" WAV, 1.0))
+	if(load_sound(Sound::TAKE_POWERUP, DIR "take_powerup" WAV, 1.0))
+		return true;
 	return false;
 }
 
