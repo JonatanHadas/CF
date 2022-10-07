@@ -418,7 +418,7 @@ void ScoreDrawer::step(){
 }
 
 
-#define WINNER_MARGIN 0.07
+#define WINNER_MARGIN 0.2
 
 WinnerDrawer::WinnerDrawer(
 	GameView* view,
@@ -527,6 +527,7 @@ void WinnerDrawer::step(){
 
 #define WINNER_DRAWER_H 0.03
 
+#define BOARD_SCALE 
 
 GameDrawer::GameDrawer(GameView* view, const GameSettings& settings) :
 	view(view),
@@ -537,12 +538,7 @@ GameDrawer::GameDrawer(GameView* view, const GameSettings& settings) :
 
 void GameDrawer::init(SDL_Renderer* renderer){
 	if(!is_initialized){
-		int output_w, output_h;
-		SDL_GetRendererOutputSize(renderer, &output_w, &output_h);
-		int scaled_w = output_h * board.w / board.h * 2;
-		int scaled_h = output_w * board.h / board.w / 2;
-		screen_width = max(output_w, scaled_w);
-		screen_height = max(output_h, scaled_h);
+		SDL_GetRendererOutputSize(renderer, &screen_width, &screen_height);
 
 		SDL_RenderSetLogicalSize(renderer, screen_width, screen_height);
 
@@ -560,6 +556,14 @@ void GameDrawer::init(SDL_Renderer* renderer){
 			settings,
 			(screen_height - h)/2, h, screen_width/2
 		);
+		
+		double scale = min(screen_width * 0.00475, screen_height * 0.0075);
+		
+		board_rect.w = scale * board.w;
+		board_rect.h = scale * board.h;
+		
+		board_rect.x = (screen_width / 2 - board_rect.w) / 2;
+		board_rect.y = (screen_height - board_rect.h) / 2;
 	}
 }
 
@@ -572,24 +576,19 @@ void GameDrawer::draw(SDL_Renderer* renderer){
 	SDL_SetRenderDrawColor(renderer, 32, 32, 32, 0);
 	SDL_RenderClear(renderer);
 	
-	int x_margin = screen_width * X_MARGIN;
-	int y_margin = screen_height * Y_MARGIN;
-
 	board_drawer.draw(renderer);
 	score_drawer->draw(renderer);
 
-    SDL_Rect dst;
-    dst.x = x_margin - 1;
-    dst.y = y_margin - 1;
-    dst.w = screen_width/2 - 2*x_margin + 2;
-    dst.h = screen_height - 2*y_margin + 2;
+    SDL_Rect frame;
+    frame.x = board_rect.x - 1;
+    frame.y = board_rect.y - 1;
+    frame.w = board_rect.w + 2;
+    frame.h = board_rect.h + 2;
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &dst);
+    SDL_RenderFillRect(renderer, &frame);
 
-    dst.x += 1; dst.y += 1;
-    dst.w -= 2; dst.h -= 2;
-    SDL_RenderCopy(renderer, board_drawer.get_texture().get(), NULL, &dst);
+    SDL_RenderCopy(renderer, board_drawer.get_texture().get(), NULL, &board_rect);
 
 	winner_drawer->draw(renderer);
 }

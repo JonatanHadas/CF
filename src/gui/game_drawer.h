@@ -87,6 +87,7 @@ public:
 
 class GameDrawer{
 	GameView* view;
+	SDL_Rect board_rect;
 	const BoardSize board;
 	const GameSettings& settings;
 	
