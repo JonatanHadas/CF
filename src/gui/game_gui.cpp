@@ -9,7 +9,7 @@ GameSoundManager::~GameSoundManager(){
 }
 
 void GameSoundManager::kill_player(int player){
-
+	play(Sound::COLLISION);
 }
 
 void GameSoundManager::spawn_powerup(const PowerUp& power_up){

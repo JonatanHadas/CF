@@ -34,6 +34,7 @@ bool load_sounds(){
 	
 	if(load_sound(Sound::SPAWN_POWERUP, DIR "spawn_powerup" WAV, 1.0))
 	if(load_sound(Sound::TAKE_POWERUP, DIR "take_powerup" WAV, 1.0))
+	if(load_sound(Sound::COLLISION, DIR "collision" WAV, 1.0))
 		return true;
 	return false;
 }
