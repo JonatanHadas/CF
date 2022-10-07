@@ -173,7 +173,7 @@ bool Game::can_step(){
 	return true;
 }
 
-#define END_TIMER 120
+#define END_TIMER 300
 
 void Game::step(){
 	// Advance players
