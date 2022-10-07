@@ -7,6 +7,8 @@
 
 #include "colors.h"
 
+#include "sounds.h"
+
 #include <enet/enet.h>
 
 SimpleButton::SimpleButton(const SDL_Rect& rect, string text) : Button(rect, false), text(text) {}
@@ -373,12 +375,16 @@ void GameStartupMenu::step(){
 		countdown = -1;
 	}
 	else if(countdown == -1){
-		countdown = SECOND_LENGTH * COUNTDOWN_LENGTH - 1;
+		countdown = SECOND_LENGTH * COUNTDOWN_LENGTH;
 	}
 	else if(countdown > 0){
+		if(countdown % SECOND_LENGTH == 0){
+			play(Sound::DING_LOW);
+		}
 		countdown--;
 	}
 	else{
+		play(Sound::DING_HIGH);
 		game_creator->get_manipulator()->start_game();
 	}
 	

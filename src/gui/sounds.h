@@ -9,6 +9,8 @@ enum class Sound{
 	SPAWN_POWERUP,
 	TAKE_POWERUP,
 	COLLISION,
+	DING_LOW,
+	DING_HIGH,
 };
 
 void play(Sound snd);
