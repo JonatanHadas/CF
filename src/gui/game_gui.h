@@ -15,12 +15,32 @@
 
 using namespace std;
 
+class GameSoundManager : public GameEventListener {
+public:
+	GameSoundManager();
+
+	GameSoundManager(GameSoundManager&&) = delete;
+	GameSoundManager(const GameSoundManager&) = delete;
+
+	~GameSoundManager();
+	
+	GameSoundManager& operator=(GameSoundManager&&) = delete;
+	GameSoundManager& operator=(const GameSoundManager&) = delete;
+
+	void kill_player(int player);
+
+	void spawn_powerup(const PowerUp& power_up);
+	void activate_powerup(const PowerUp& power_up);
+};
+
 class GameGui : public Gui{
 	const GameSettings& settings;
 	GameDrawer drawer;
+	GameSoundManager sounds;
 	
 	GameView* view;
 	GameAdvancer* advancer;
+	GameEventListenerAccumulator* accumulator;
 	map<PlayerInterface*, KeySet> interfaces;
 	
 	bool paused;
@@ -34,6 +54,14 @@ public:
 		const GameSettings& settings,
 		const map<PlayerInterface*, KeySet>& interfaces
 	);
+	
+	GameGui(GameGui&&) = delete;
+	GameGui(const GameGui&) = delete;
+	
+	~GameGui();
+	
+	GameGui& operator=(GameGui&&) = delete;
+	GameGui& operator=(const GameGui&) = delete;
 	
 	bool step();
 	bool handle_event(const SDL_Event& event);

@@ -28,6 +28,7 @@ protected:
 	virtual void draw_back(SDL_Renderer* renderer, bool typing);
 	virtual void on_set(const string& text) = 0;
 	virtual string get_default_text() = 0;
+	virtual void on_active();
 public:
 	TextBox(
 		const SDL_Rect& rect, bool translucent,

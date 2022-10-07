@@ -1,5 +1,6 @@
 #include "gui/texts.h"
 #include "gui/images.h"
+#include "gui/sounds.h"
 
 #include "gui/game_menu.h"
 
@@ -8,6 +9,7 @@
 #include <time.h>
 #include "SDL_ttf.h"
 #include "SDL_image.h"
+#include "SDL_mixer.h"
 
 using namespace std;
 
@@ -50,9 +52,20 @@ int main(int argc, char** argv){
 		cerr << "Error initializing SDL_ttf:" << endl << TTF_GetError() << endl;
 	}
 	atexit(TTF_Quit);
+	
+	if(Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, CHANNELS, 2048 ) < 0){
+		cerr << "Error initializing SDL_mixer:" << endl << Mix_GetError() << endl;
+	}
+	atexit(Mix_Quit);
+
 
 	if(!load_fonts()){
 		cerr << "Error while loading fonts" << endl << SDL_GetError() << TTF_GetError() << endl;
+		return 1;
+	}
+	
+	if(!load_sounds()){
+		cerr << "Error while loading sounds" << endl << Mix_GetError() << endl;
 		return 1;
 	}
 

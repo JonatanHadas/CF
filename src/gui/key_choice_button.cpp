@@ -178,9 +178,12 @@ void KeyChoiceButton::draw_content(SDL_Renderer* renderer) {
 	if(msg.get() != nullptr) msg->render_centered(x, y, Align::CENTER);
 }
 
+void KeyChoiceButton::on_active() {}
+
 bool KeyChoiceButton::on_event(const SDL_Event& event){
 	switch(event.type){
 	case SDL_MOUSEBUTTONDOWN:
+		if(!active) on_active();
 		active = true;
 		return true;
 	case SDL_KEYDOWN:

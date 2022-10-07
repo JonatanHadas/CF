@@ -7,6 +7,8 @@
 
 #include "colors.h"
 
+#include "sounds.h"
+
 #include <enet/enet.h>
 
 SimpleButton::SimpleButton(const SDL_Rect& rect, string text) : Button(rect, false), text(text) {}
@@ -41,6 +43,7 @@ LocalGameButton::LocalGameButton(const SDL_Rect& rect, GameStartupMenu& menu) :
 	SimpleButton(rect, "Play"), menu(menu) {}
 
 void LocalGameButton::on_pressed(){
+	play(Sound::CLICK);
 	menu.set_creator(make_shared<LocalGameCreator>());
 }
 
@@ -48,6 +51,7 @@ LeaveGameButton::LeaveGameButton(const SDL_Rect& rect, GameStartupMenu& menu) :
 	SimpleButton(rect, "Leave"), menu(menu) {}
 
 void LeaveGameButton::on_pressed(){
+	play(Sound::CLICK);
 	menu.set_creator(nullptr);
 }
 
@@ -129,6 +133,7 @@ void ReadyButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void ReadyButton::on_pressed(){
+	play(Sound::CLICK);
 	if(view->am_i_host()){
 		if(view->get_settings().teams.size() == view->get_ready().size()) manipulator->start_countdown();
 	}
@@ -278,8 +283,13 @@ void HostTextBox::draw_back(SDL_Renderer* renderer, bool typing){
 }
 
 void HostTextBox::on_set(const string& text){
+	play(Sound::CLICK);
 	connection.connect(text);
 	set_active(false);
+}
+
+void HostTextBox::on_active(){
+	play(Sound::CLICK);
 }
 
 string HostTextBox::get_default_text(){
@@ -410,12 +420,16 @@ void GameStartupMenu::step(){
 		countdown = -1;
 	}
 	else if(countdown == -1){
-		countdown = SECOND_LENGTH * COUNTDOWN_LENGTH - 1;
+		countdown = SECOND_LENGTH * COUNTDOWN_LENGTH;
 	}
 	else if(countdown > 0){
+		if(countdown % SECOND_LENGTH == 0){
+			play(Sound::DING_LOW);
+		}
 		countdown--;
 	}
 	else{
+		play(Sound::DING_HIGH);
 		game_creator->get_manipulator()->start_game();
 	}
 	

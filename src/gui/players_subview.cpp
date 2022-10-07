@@ -1,6 +1,7 @@
 #include "players_subview.h"
 
 #include "colors.h"
+#include "sounds.h"
 #include "../utils/utils.h"
 #include "gui_utils.h"
 
@@ -39,6 +40,7 @@ void PlayerRemoveButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void PlayerRemoveButton::on_pressed(){
+	play(Sound::CLICK);
 	view.remove();
 }
 
@@ -56,7 +58,12 @@ void PlayerNameBox::draw_back(SDL_Renderer* renderer, bool typing){
 }
 
 void PlayerNameBox::on_set(const string& text){
+	play(Sound::CLICK);
 	view.set_name(text);
+}
+
+void PlayerNameBox::on_active(){
+	play(Sound::CLICK);
 }
 
 string PlayerNameBox::get_default_text(){
@@ -81,10 +88,15 @@ PlayerKeyButton::PlayerKeyButton(
 	view(view) {}
 
 bool PlayerKeyButton::on_set(SDL_Scancode key){
+	play(Sound::CLICK);
 	KeySet keys = view.get_keys();
 	key_choice(keys) = key;
 	view.set_keys(keys);
 	return true;
+}
+
+void PlayerKeyButton::on_active(){
+	play(Sound::CLICK);
 }
 
 void PlayerKeyButton::draw_back(SDL_Renderer* renderer, bool active){
@@ -116,6 +128,7 @@ void PlayerColorButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void PlayerColorButton::on_pressed(){
+	play(Sound::CLICK);
 	view.set_color_menu_open(true);
 }
 
@@ -154,6 +167,7 @@ void ColorButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void ColorButton::on_pressed(){
+	play(Sound::CLICK);
 	view.set_color(color);
 }
 
@@ -399,6 +413,7 @@ void PlayerAddButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void PlayerAddButton::on_pressed(){
+	play(Sound::CLICK);
 	owner.add_player();
 }
 

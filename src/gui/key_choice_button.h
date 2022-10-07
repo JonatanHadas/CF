@@ -18,6 +18,7 @@ class KeyChoiceButton : public SubView {
 	bool updated;
 protected:
 	virtual bool on_set(SDL_Scancode key) = 0;
+	virtual void on_active();
 
 	virtual void draw_back(SDL_Renderer* renderer, bool active) = 0;
 	

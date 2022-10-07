@@ -2,6 +2,7 @@
 
 #include "colors.h"
 #include "images.h"
+#include "sounds.h"
 
 #include "powerup_images.h"
 #include "../game/powerups.h"
@@ -29,6 +30,7 @@ WinCriterionMenu::WinCriterionMenu(
 	view(view), manipulator(manipulator) {}
 
 void WinCriterionMenu::on_set(int option){
+	play(Sound::CLICK);
 	manipulator->set_win_criterion((WinCriterion)option);
 }
 
@@ -53,6 +55,7 @@ WinAmountButton::WinAmountButton(
 	view(view), manipulator(manipulator) {}
 
 void WinAmountButton::on_set(int num){
+	play(Sound::CLICK);
 	manipulator->set_win_amount(num);
 }
 
@@ -74,6 +77,7 @@ TieBreakButton::TieBreakButton(
 	view(view), manipulator(manipulator) {}
 
 void TieBreakButton::on_set(int num){
+	play(Sound::CLICK);
 	manipulator->set_tie_break(num);
 }
 
@@ -147,6 +151,7 @@ void PowerUpButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void PowerUpButton::on_pressed(){
+	play(Sound::CLICK);
 	manipulator->set_allowed_powerup(descriptor, !view->get_settings().allowed_powerups.count(descriptor));
 }
 
@@ -366,6 +371,7 @@ void TeamChangeButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void TeamChangeButton::on_pressed(){
+	play(Sound::CLICK);
 	view.set_team(view.get_team() + (direction ? -1 : 1));
 }
 
@@ -529,7 +535,12 @@ void TeamNameBox::draw_back(SDL_Renderer* renderer, bool typing){
 }
 
 void TeamNameBox::on_set(const string& text){
+	play(Sound::CLICK);
 	view.set_name(text);
+}
+
+void TeamNameBox::on_active(){
+	play(Sound::CLICK);
 }
 
 string TeamNameBox::get_default_text(){
@@ -570,6 +581,7 @@ void TeamRemoveButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void TeamRemoveButton::on_pressed(){
+	play(Sound::CLICK);
 	view.remove();
 }
 
@@ -699,6 +711,7 @@ void TeamsButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void TeamsButton::on_pressed(){
+	play(Sound::CLICK);
 	manipulator->set_teams(!view->get_settings().using_teams);
 }
 
@@ -734,6 +747,7 @@ void TeamAddButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void TeamAddButton::on_pressed(){
+	play(Sound::CLICK);
 	manipulator->add_team();
 }
 
@@ -971,6 +985,10 @@ vector<TabView::ViewDescriptor> GameSettingsMenu::init_subviews(const SDL_Rect& 
 			.name = "Settings",
 		},
 	});
+}
+
+void GameSettingsMenu::on_changed(){
+	play(Sound::CLICK);
 }
 
 void GameSettingsMenu::draw_button_back(SDL_Renderer* renderer, const SubView& view, TabView::State state){

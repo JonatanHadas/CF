@@ -99,6 +99,7 @@ protected:
 
 	virtual vector<ViewDescriptor> init_subviews(const SDL_Rect& rect) = 0;
 	virtual void draw_button_back(SDL_Renderer* renderer, const SubView& view, TabView::State state) = 0;
+	virtual void on_changed();
 	
 	bool on_event(const SDL_Event& event);
 	void draw_content(SDL_Renderer* renderer);	

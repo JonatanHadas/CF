@@ -185,6 +185,7 @@ protected:
 	void draw_back(SDL_Renderer* renderer, bool typing);
 	void on_set(const string& text);
 	string get_default_text();
+	void on_active();
 public:
 	TeamNameBox(
 		const SDL_Rect& rect, int margin,
@@ -355,6 +356,8 @@ class GameSettingsMenu : public TabView {
 protected:
 	vector<TabView::ViewDescriptor> init_subviews(const SDL_Rect& rect);
 	void draw_button_back(SDL_Renderer* renderer, const SubView& view, TabView::State state);
+	
+	void on_changed();
 
 public:
 	GameSettingsMenu(
