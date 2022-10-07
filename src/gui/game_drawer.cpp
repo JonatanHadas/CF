@@ -31,7 +31,9 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 
 #define CIRCLE_RAD 50
 
-#define RING_RATIO 2.0
+#define CURVE_WIDTH_RATIO 1.1
+
+#define RING_RATIO (2.0 * CURVE_WIDTH_RATIO)
 #define RING_WIDTH 0.4
 #define RING_INTERVAL 0.8
 #define RING_PART 0.01
@@ -102,8 +104,8 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 			for(int j = 1; j < player_history.size(); j++){
 				if(player_history[j].hovering) continue;
 
-				double width = get_player_size(player_history[j].size);
-				double prev_width = min(width, get_player_size(player_history[j].size));
+				double width = get_player_size(player_history[j].size) * CURVE_WIDTH_RATIO;
+				double prev_width = min(width, get_player_size(player_history[j].size) * CURVE_WIDTH_RATIO);
 
 				double prev_x = player_history[j-1].x;
 				if(player_history[j].warping_x) prev_x -= board.w * player_history[j].warp_x;
@@ -157,7 +159,7 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 
 			SDL_RenderGeometry(renderer, NULL, vertices.data(), vertices.size(), indices.data(), indices.size());
 
-			double width = get_player_size(player_history.back().size);
+			double width = get_player_size(player_history.back().size) * CURVE_WIDTH_RATIO;
 			dst.w = dst.h = DRAW_SCALE * width;
 			dst.x = DRAW_SCALE * player_history.back().x - dst.w / 2.0;
 			dst.y = DRAW_SCALE * player_history.back().y - dst.h / 2.0;
