@@ -126,7 +126,7 @@ class PlayerSubView : public SubView {
 	
 	unique_ptr<PlayerColorButton> color_button;
 	unique_ptr<ColorMenu> color_menu;
-	bool showing_color, showing_color_menu;
+	bool showing_color_menu;
 	
 	SubViewManager view_manager;
 protected:

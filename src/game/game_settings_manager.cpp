@@ -303,6 +303,8 @@ void GameSettingsManager::set_player_name(int player, string name){
 }
 
 void GameSettingsManager::set_player_color(int player, int color){
+	if(count(settings.colors, color)) return;
+
 	settings.colors[player] = color;
 	
 	do_with_observers([&](GameSettingsObserver& observer){

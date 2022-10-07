@@ -208,10 +208,8 @@ void ColorMenu::lose_focus(){
 }
 
 void ColorMenu::step(){	
-	if(view.get_settings().is_attached()){
-		for(int i = 0; i < buttons.size(); i++){
-			buttons[i]->set_active(count(view.get_settings().get_settings().colors, i)==0);
-		}
+	for(int i = 0; i < buttons.size(); i++){
+		buttons[i]->set_active(view.get_settings().get_colors().count(i) == 0);
 	}
 
 	manager.step();
@@ -236,7 +234,6 @@ PlayerSubView::PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& setti
 	keys_id(key_manager.get_new()),
 	key_manager(key_manager),
 	showing_color_menu(false),
-	showing_color(false),
 	settings(settings) {
 		
 	SDL_Rect button_rect;
@@ -271,7 +268,8 @@ PlayerSubView::PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& setti
 	button_rect.w = button_rect.h = rect.h * PLAYER_COLOR_HEIGHT;
 	
 	color_button = make_unique<PlayerColorButton>(button_rect, *this);
-	
+	view_manager.add_view(color_button.get());	
+
 	button_rect.x += button_rect.w;
 	color_menu = make_unique<ColorMenu>(button_rect, COLOR_MENU_W, *this);
 }
@@ -317,13 +315,7 @@ void PlayerSubView::lose_focus(){
 	set_color_menu_open(false);
 }
 
-void PlayerSubView::step(){
-	if(settings.is_attached() && !showing_color) view_manager.add_view(color_button.get());
-	if(!settings.is_attached() && showing_color) view_manager.remove_view(color_button.get());
-	showing_color = settings.is_attached();
-	
-	if(!showing_color) set_color_menu_open(false);
-	
+void PlayerSubView::step(){	
 	view_manager.step();
 }
 
@@ -370,8 +362,6 @@ const PlayerSettings& PlayerSubView::get_settings() const {
 }
 
 void PlayerSubView::set_color_menu_open(bool open){
-	open = open && settings.is_attached();
-	
 	if(open && !showing_color_menu) view_manager.add_view(color_menu.get());
 	if(!open && showing_color_menu) view_manager.remove_view(color_menu.get());
 	

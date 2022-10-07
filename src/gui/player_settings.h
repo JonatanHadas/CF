@@ -14,6 +14,7 @@ class PlayerSettings{
 	GameSettingsManipulator* manipulator;
 	
 	map<int, string> names;
+	map<int, int> colors;
 	map<int, int> player_ids;
 	vector<int> index_ids;
 	
@@ -33,6 +34,8 @@ public:
 	void set_player_color(int id, int color);
 	
 	const GameSettings& get_settings() const;
+	
+	set<int> get_colors() const;
 	
 	bool is_attached() const;
 	void attach(GameSettingsView* view, GameSettingsManipulator* manipulator);
