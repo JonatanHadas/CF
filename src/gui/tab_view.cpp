@@ -138,7 +138,11 @@ void TabView::set_current(int tab){
 	
 	current = tab;
 	menu->set_tab(tab);
+	
+	on_changed();
 }
+
+void TabView::on_changed() {}
 
 bool TabView::on_event(const SDL_Event& event){
 	init();

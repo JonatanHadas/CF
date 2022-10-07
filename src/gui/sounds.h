@@ -11,6 +11,7 @@ enum class Sound{
 	COLLISION,
 	DING_LOW,
 	DING_HIGH,
+	CLICK,
 };
 
 void play(Sound snd);

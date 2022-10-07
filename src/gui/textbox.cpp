@@ -17,6 +17,7 @@ bool TextBox::on_event(const SDL_Event& event){
 	switch(event.type){
 	case SDL_MOUSEBUTTONDOWN:
 		if(!typing){
+			on_active();
 			typing=true;
 			SDL_StartTextInput();
 			return true;
@@ -79,6 +80,8 @@ void TextBox::draw_content(SDL_Renderer* renderer){
 	int y = get_rect().h / 2;
 	msg->render_centered(margin, y, Align::LEFT);
 }
+
+void TextBox::on_active() {}
 
 void TextBox::draw_back(SDL_Renderer* renderer, bool typing){}
 

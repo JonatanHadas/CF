@@ -45,6 +45,7 @@ protected:
 	void draw_back(SDL_Renderer* renderer, bool typing);
 	void on_set(const string& text);
 	string get_default_text();
+	void on_active();
 public:
 	PlayerNameBox(const SDL_Rect& rect, int margin, PlayerSubView& view);
 };
@@ -55,6 +56,7 @@ class PlayerKeyButton : public KeyChoiceButton {
 	PlayerSubView& view;
 protected:	
 	bool on_set(SDL_Scancode key);
+	void on_active();
 
 	void draw_back(SDL_Renderer* renderer, bool active);
 public:

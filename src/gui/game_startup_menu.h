@@ -110,6 +110,7 @@ protected:
 	void draw_back(SDL_Renderer* renderer, bool typing);
 	void on_set(const string& text);
 	string get_default_text();
+	void on_active();
 public:
 	HostTextBox(const SDL_Rect& rect, int margin, ConnectionState& connection);
 };
