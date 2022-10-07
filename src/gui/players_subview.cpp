@@ -222,7 +222,8 @@ void ColorMenu::step(){
 #define PLAYER_NAME_HEIGHT 0.2
 
 #define PLAYER_KEY_HEIGHT 0.3
-#define PLAYER_KEY_Y 0.55
+#define PLAYER_KEY_Y 0.65
+#define PLAYER_KEY_LABEL_Y 0.5
 
 #define PLAYER_COLOR_HEIGHT 0.2
 #define PLAYER_COLOR_X 0.3
@@ -290,6 +291,20 @@ bool PlayerSubView::on_event(const SDL_Event& event){
 void PlayerSubView::draw_content(SDL_Renderer* renderer){
 	fill_back(renderer, bg_color);
 	draw_frame(renderer, line_color);
+	
+	if(keys_label.get() == nullptr) keys_label = make_unique<Msg>(
+		"Keys:",
+		text_color,
+		FontType::NRM,
+		renderer
+	);
+	
+	int keys_label_x = (left_key->get_rect().x + right_key->get_rect().x + right_key->get_rect().w) / 2;
+	keys_label->render_centered(
+		keys_label_x,
+		get_rect().h * PLAYER_KEY_LABEL_Y,
+		Align::CENTER
+	);
 	
 	name_box->set_text(settings.get_player_name(id));
 

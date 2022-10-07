@@ -121,6 +121,7 @@ class PlayerSubView : public SubView {
 	unique_ptr<PlayerRemoveButton> remove_button;
 	unique_ptr<PlayerNameBox> name_box;
 	
+	unique_ptr<Msg> keys_label;
 	unique_ptr<PlayerKeyButton> left_key, right_key;
 	
 	unique_ptr<PlayerColorButton> color_button;
