@@ -40,7 +40,7 @@ void SimpleButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 LocalGameButton::LocalGameButton(const SDL_Rect& rect, GameStartupMenu& menu) :
-	SimpleButton(rect, "Play"), menu(menu) {}
+	SimpleButton(rect, "Create Game"), menu(menu) {}
 
 void LocalGameButton::on_pressed(){
 	play(Sound::CLICK);
@@ -69,14 +69,14 @@ void ReadyButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
 	draw_frame(renderer, line_color);
 	
 	if(ready.get() == nullptr) ready = make_unique<Msg>(
-		"Ready",
+		"I'm Ready",
 		text_color,
 		FontType::NRM,
 		renderer
 	);
 
 	if(not_ready.get() == nullptr) not_ready = make_unique<Msg>(
-		"Not Ready",
+		"I'm Not Ready",
 		text_color,
 		FontType::NRM,
 		renderer
@@ -307,10 +307,10 @@ string HostTextBox::get_default_text(){
 
 #define BUTTON_Y 0.4
 #define BUTTON_H 0.5
-#define BUTTON_W 0.1
+#define BUTTON_W 0.12
 
-#define LOCAL_BUTTON_X 0.88
-#define LEAVE_BUTTON_X 0.88
+#define LOCAL_BUTTON_X 0.86
+#define LEAVE_BUTTON_X 0.86
 #define READY_BUTTON_X 0.02
 
 GameStartupMenu::GameStartupMenu(const SDL_Rect& rect) : SubView(rect, false),

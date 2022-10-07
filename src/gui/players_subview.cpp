@@ -67,7 +67,7 @@ void PlayerNameBox::on_active(){
 }
 
 string PlayerNameBox::get_default_text(){
-	return "player";
+	return "player name";
 }
 
 SDL_Scancode choose_key_const(const KeySet& keyset, function<SDL_Scancode&(KeySet&)> key_choice){
