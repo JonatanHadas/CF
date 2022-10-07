@@ -227,7 +227,7 @@ void ColorMenu::step(){
 #define PLAYER_COLOR_HEIGHT 0.2
 #define PLAYER_COLOR_X 0.3
 #define PLAYER_COLOR_Y 0.4
-#define COLOR_MENU_W 3
+#define COLOR_MENU_W 7
 
 PlayerSubView::PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& settings, KeySetManager& key_manager) :
 	SubView(rect, false),
