@@ -176,6 +176,7 @@ void ObservedSettingsView::start_countdown(){
 }
 
 void ObservedSettingsView::start_game() {
+	counting_down = false;
 	for(auto observer: get_observers()) observer->start_game();
 }
 

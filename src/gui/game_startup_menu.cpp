@@ -420,7 +420,7 @@ void GameStartupMenu::step(){
 		countdown = -1;
 	}
 	else if(countdown == -1){
-		countdown = SECOND_LENGTH * COUNTDOWN_LENGTH;
+		countdown = SECOND_LENGTH * COUNTDOWN_LENGTH - 1;
 	}
 	else if(countdown > 0){
 		if(countdown % SECOND_LENGTH == 0){

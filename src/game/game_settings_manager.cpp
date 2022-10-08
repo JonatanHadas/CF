@@ -124,7 +124,10 @@ void GameSettingsManager::Peer::set_tie_break(int threshold){
 
 void GameSettingsManager::Peer::set_ready(bool is_ready){
 	ready = is_ready;
-	if(!ready) manager.counting_down = false;
+	if(!ready) {
+		for(auto& peer: manager.peers) peer->starting = false;
+		manager.counting_down = false;
+	}
 	
 	for(auto player: players){
 		manager.set_player_ready(player, is_ready);
@@ -400,6 +403,7 @@ void GameSettingsManager::reset_all_ready(){
 	
 	for(auto& peer: peers){
 		peer->ready = false;
+		peer->starting = false;
 	}
 	
 	do_with_observers([&](GameSettingsObserver& observer){
