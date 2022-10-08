@@ -1,6 +1,7 @@
 #include "game_drawer.h"
 
 #include "colors.h"
+#include "player_texture.h"
 #include "texts.h"
 #include "images.h"
 
@@ -45,6 +46,10 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		CIRCLE_RAD * 2, CIRCLE_RAD * 2
 	);
+	Texture textured_circle(renderer,
+		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		CIRCLE_RAD * 2, CIRCLE_RAD * 2
+	);
 
 	circle_texture.do_with_texture(renderer, [&](){
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
@@ -54,8 +59,68 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 		draw_circle(renderer, CIRCLE_RAD, CIRCLE_RAD, CIRCLE_RAD);
 	});
 	SDL_SetTextureBlendMode(circle_texture.get(), SDL_BLENDMODE_BLEND);
+	SDL_SetTextureBlendMode(textured_circle.get(), SDL_BLENDMODE_BLEND);
 
 	SDL_Rect dst;
+	
+	auto texture_circle = [&](const PlayerTexture& player_texture, int counter){
+		textured_circle.do_with_texture(renderer, [&](){
+			SDL_RenderCopy(renderer, circle_texture.get(), NULL, NULL);
+			
+			if(player_texture.get_texture() != NULL){
+				SDL_Vertex vertices[4] = {
+					{
+						.position = {
+							.x = 0.0f,
+							.y = 0.0f,
+						},
+						.color = player_texture.get_color(),
+						.tex_coord = {
+							.x = 1.0f * counter / player_texture.get_length(),
+							.y = 1.0f,
+						},
+					},
+					{
+						.position = {
+							.x = 0.0f,
+							.y = CIRCLE_RAD * 2.0f,
+						},
+						.color = player_texture.get_color(),
+						.tex_coord = {
+							.x = 1.0f * counter / player_texture.get_length(),
+							.y = 0.0f,
+						},
+					},
+					{
+						.position = {
+							.x = CIRCLE_RAD * 2.0f,
+							.y = 0.0f,
+						},
+						.color = player_texture.get_color(),
+						.tex_coord = {
+							.x = 1.0f * (counter + 1) / player_texture.get_length(),
+							.y = 1.0f,
+						},
+					},
+					{
+						.position = {
+							.x = CIRCLE_RAD * 2.0f,
+							.y = CIRCLE_RAD * 2.0f,
+						},
+						.color = player_texture.get_color(),
+						.tex_coord = {
+							.x = 1.0f * (counter + 1) / player_texture.get_length(),
+							.y = 0.0f,
+						},
+					},
+				};
+				
+				int indices[6] = {0, 1, 2, 1, 2, 3};
+				
+				SDL_RenderGeometry(renderer, player_texture.get_texture(), vertices, 4, indices, 6);
+			}
+		});
+	};
 
 	texture->do_with_texture(renderer, [&](){
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -77,31 +142,28 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 			SDL_RenderCopy(renderer, get_img(powerup_images[entry.second.desc.type]), NULL, &dst);			
 		}
 
+		SDL_SetTextureBlendMode(circle_texture.get(), SDL_BLENDMODE_NONE);
+		SDL_SetTextureColorMod(circle_texture.get(), 255, 255, 255);
+
 		for(int i = 0; i < view->get_histories().size(); i++){
 			auto player_history = view->get_histories()[i];
+			const auto& player_state = view->get_states()[i];
+			const auto& player_texture = player_textures[settings.colors[i]];
 			
 			if(player_history.empty()) continue;
 
-			SDL_SetRenderDrawColor(renderer, 
-				player_colors[settings.colors[i]].r,
-				player_colors[settings.colors[i]].g,
-				player_colors[settings.colors[i]].b,
-				player_colors[settings.colors[i]].a
-			);
-
-			SDL_SetTextureColorMod(circle_texture.get(), 
-				player_colors[settings.colors[i]].r,
-				player_colors[settings.colors[i]].g,
-				player_colors[settings.colors[i]].b
-			);
-
+			
+			SDL_SetTextureBlendMode(player_texture.get_texture(), SDL_BLENDMODE_MOD);
+			
 			vector<SDL_Vertex> vertices;
 			vector<int> indices;
 			SDL_Vertex vertex = {
-				.color = player_colors[settings.colors[i]]
+				.color = player_texture.get_color(),
 			};
 
 			for(int j = 1; j < player_history.size(); j++){
+				int counter = (j + player_state.counter - player_history.size()) % player_texture.get_length();
+				
 				if(player_history[j].hovering) continue;
 
 				double width = get_player_size(player_history[j].size) * CURVE_WIDTH_RATIO;
@@ -114,13 +176,17 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 
 				double prev_direction = player_history[j - 1].direction;
 				if(player_history[j].corner) {
+					double direction = (prev_direction + player_history[j].direction) / 2;
+					
 					prev_direction = player_history[j].direction;
+					
+					texture_circle(player_texture, counter);
 
 					// Draw circle
 					dst.w = dst.h = DRAW_SCALE * prev_width;
 					dst.x = DRAW_SCALE * prev_x - dst.w / 2.0;
 					dst.y = DRAW_SCALE * prev_y - dst.h / 2.0;
-					SDL_RenderCopy(renderer, circle_texture.get(), NULL, &dst);
+					SDL_RenderCopyEx(renderer, textured_circle.get(), NULL, &dst, RAD2DEG(prev_direction), NULL, SDL_FLIP_NONE);
 				}
 
 				for(int warp_x = min(player_history[j].warp_x, 0); warp_x <= max(player_history[j].warp_x, 0); warp_x += 1){
@@ -130,20 +196,36 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 							.x = (float)(DRAW_SCALE * (prev_x - sin(prev_direction)*(width/2) + warp_x * board.w)),
 							.y = (float)(DRAW_SCALE * (prev_y + cos(prev_direction)*(width/2) + warp_y * board.h)),
 						};
+						vertex.tex_coord = {
+							.x = 1.0f * counter / player_texture.get_length(),
+							.y = 0.0f,
+						};
 						vertices.push_back(vertex);
 						vertex.position = {
 							.x = (float)(DRAW_SCALE * (prev_x + sin(prev_direction)*(width/2) + warp_x * board.w)),
 							.y = (float)(DRAW_SCALE * (prev_y - cos(prev_direction)*(width/2) + warp_y * board.h)),
+						};
+						vertex.tex_coord = {
+							.x = 1.0f * counter / player_texture.get_length(),
+							.y = 1.0f,
 						};
 						vertices.push_back(vertex);
 						vertex.position = {
 							.x = (float)(DRAW_SCALE * (player_history[j].x - sin(player_history[j].direction)*(width/2) + warp_x * board.w)),
 							.y = (float)(DRAW_SCALE * (player_history[j].y + cos(player_history[j].direction)*(width/2) + warp_y * board.h)),
 						};
+						vertex.tex_coord = {
+							.x = 1.0f * (counter + 1) / player_texture.get_length(),
+							.y = 0.0f,
+						};
 						vertices.push_back(vertex);
 						vertex.position = {
 							.x = (float)(DRAW_SCALE * (player_history[j].x + sin(player_history[j].direction)*(width/2) + warp_x * board.w)),
 							.y = (float)(DRAW_SCALE * (player_history[j].y - cos(player_history[j].direction)*(width/2) + warp_y * board.h)),
+						};
+						vertex.tex_coord = {
+							.x = 1.0f * (counter + 1) / player_texture.get_length(),
+							.y = 1.0f,
 						};
 						vertices.push_back(vertex);
 
@@ -157,13 +239,18 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 				}
 			}
 
-			SDL_RenderGeometry(renderer, NULL, vertices.data(), vertices.size(), indices.data(), indices.size());
+			SDL_SetTextureBlendMode(player_texture.get_texture(), SDL_BLENDMODE_BLEND);
+			SDL_RenderGeometry(renderer, player_texture.get_texture(), vertices.data(), vertices.size(), indices.data(), indices.size());
+
+			SDL_SetTextureBlendMode(player_texture.get_texture(), SDL_BLENDMODE_MOD);
+			texture_circle(player_texture, (player_state.counter + 1) % player_texture.get_length());
 
 			double width = get_player_size(player_history.back().size) * CURVE_WIDTH_RATIO;
 			dst.w = dst.h = DRAW_SCALE * width;
 			dst.x = DRAW_SCALE * player_history.back().x - dst.w / 2.0;
 			dst.y = DRAW_SCALE * player_history.back().y - dst.h / 2.0;
-			SDL_RenderCopy(renderer, circle_texture.get(), NULL, &dst);
+			
+			SDL_RenderCopyEx(renderer, textured_circle.get(), NULL, &dst, RAD2DEG(player_history.back().direction), NULL, SDL_FLIP_NONE);
 		}
 
 		vector<SDL_Vertex> vertices;
@@ -248,22 +335,28 @@ void ScoreDrawer::init(SDL_Renderer* renderer){
 		player_names = vector<vector<Msg>>(settings.team_names.size());
 
 		for(int i = 0; i < settings.teams.size(); i++){
+			const auto& player_texture = player_textures[settings.colors[i]];
+			
 			player_names[settings.teams[i]].push_back(Msg(
 				(settings.names[i].size() ? settings.names[i] : get_default_name("player", i)).c_str(),
-				player_colors[settings.colors[i]],
+				player_texture.get_color(),
 				FontType::NRM,
-				renderer
+				renderer,
+				player_texture.get_texture()
 			));
 		}
 	}
 	else{
 		player_names = vector<vector<Msg>>(settings.teams.size());
 		for(int i = 0; i < settings.teams.size(); i++){
+			const auto& player_texture = player_textures[settings.colors[i]];
+
 			names.push_back(Msg(
 				(settings.names[i].size() ? settings.names[i] : get_default_name("player", i)).c_str(),
-				player_colors[settings.colors[i]],
+				player_texture.get_color(),
 				FontType::NRM,
-				renderer
+				renderer,
+				player_texture.get_texture()
 			));
 		}
 	}
@@ -286,9 +379,10 @@ void ScoreDrawer::draw(SDL_Renderer* renderer){
 		if(scores.size() <= i || view->get_scores()[i] != scores[i]){
 			Msg msg(
 				to_string(view->get_scores()[i]).c_str(),
-				settings.using_teams ? text_color : player_colors[settings.colors[i]],
+				settings.using_teams ? text_color : player_textures[settings.colors[i]].get_color(),
 				FontType::NRM,
-				renderer
+				renderer,
+				settings.using_teams ? NULL :  player_textures[settings.colors[i]].get_texture()
 			);
 
 			if(scores.size() <= i){
@@ -468,11 +562,14 @@ void WinnerDrawer::draw_msg(SDL_Renderer* renderer){
 	auto names = get_names();
 	string text = "";
 	SDL_Color color = text_color;
+	SDL_Texture* text_texture = NULL;
 	if(winners.size() == 1){
 		text = settings.using_teams ? "Team " : "";
 		text += names[0];
 		if(!settings.using_teams){
-			color = player_colors[settings.colors[winners[0]]];
+			const auto& player_texture = player_textures[settings.colors[winners[0]]];
+			color = player_texture.get_color();
+			text_texture = player_texture.get_texture();
 		}
 		
 		text += " wins this round";
@@ -493,7 +590,8 @@ void WinnerDrawer::draw_msg(SDL_Renderer* renderer){
 		text.c_str(),
 		color,
 		FontType::NRM,
-		renderer
+		renderer,
+		text_texture
 	);
 	
 	texture->do_with_texture(renderer, [&](){

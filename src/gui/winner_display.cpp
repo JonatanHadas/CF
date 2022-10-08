@@ -1,6 +1,7 @@
 #include "winner_display.h"
 
 #include "colors.h"
+#include "player_texture.h"
 
 #include <algorithm>
 
@@ -54,11 +55,14 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 		player_names = vector<vector<Msg>>(settings.team_names.size());
 
 		for(int player = 0; player < settings.teams.size(); player++){
+			const auto& player_texture = player_textures[settings.colors[player]];
+			
 			player_names[order[settings.teams[player]]].push_back(Msg(
 				(settings.names[player].size() ? settings.names[player] : default_name("player", player)).c_str(),
-				player_colors[settings.colors[player]],
+				player_texture.get_color(),
 				FontType::MID,
-				renderer
+				renderer,
+				player_texture.get_texture()
 			));
 		}
 	}
@@ -67,29 +71,36 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 		for(auto player: order){
 			name_texts.push_back(settings.names[player].size() ? settings.names[player] : default_name("player", player));
 			
+			const auto& player_texture = player_textures[settings.colors[player]];
+			
 			names.push_back(Msg(
 				name_texts.back().c_str(),
-				player_colors[settings.colors[player]],
+				player_texture.get_color(),
 				FontType::MID,
-				renderer
+				renderer,
+				player_texture.get_texture()
 			));
 			
 			score_texts.push_back(Msg(
 				to_string(scores[player]).c_str(),
-				player_colors[settings.colors[player]],
+				player_texture.get_color(),
 				FontType::MID,
-				renderer
+				renderer,
+				player_texture.get_texture()
 			));
 		}
 	}
 	
 	string text = "";
 	SDL_Color color = text_color;
+	SDL_Texture* text_texture = NULL;
 	if(winner_amount == 1){
 		text = settings.using_teams ? "Team " : "";
 		text += name_texts[0];
 		if(!settings.using_teams){
-			color = player_colors[settings.colors[order[0]]];
+			const auto& player_texture = player_textures[settings.colors[order[0]]];
+			color = player_texture.get_color();
+			text_texture = player_texture.get_texture();
 		}
 	}
 	else{
@@ -107,7 +118,8 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 		text.c_str(),
 		color,
 		FontType::BIG,
-		renderer
+		renderer,
+		text_texture
 	);
 }
 

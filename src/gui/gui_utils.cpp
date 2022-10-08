@@ -28,6 +28,13 @@ SDL_Texture* Texture::get(){
 	return texture;
 }
 
+SDL_Texture* Texture::move_out(){
+	SDL_Texture* result = texture;
+	texture = NULL;
+	
+	return result;
+}
+
 void Texture::do_with_texture(SDL_Renderer* renderer, function<void()> todo){
 	SDL_Texture* old_target = SDL_GetRenderTarget(renderer);
 	SDL_SetRenderTarget(renderer, texture);

@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define RAD2ANG(x) (x * 180 / M_PI)
+#define RAD2DEG(x) (x * 180 / M_PI)
 
 double distance(double x1, double y1, double x2, double y2);
 

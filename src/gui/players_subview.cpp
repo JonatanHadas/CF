@@ -1,6 +1,7 @@
 #include "players_subview.h"
 
 #include "colors.h"
+#include "player_texture.h"
 #include "sounds.h"
 #include "../utils/utils.h"
 #include "gui_utils.h"
@@ -110,7 +111,26 @@ PlayerColorButton::PlayerColorButton(const SDL_Rect& rect, PlayerSubView& view) 
 
 void PlayerColorButton::draw_back(SDL_Renderer* renderer){
 	int color = view.get_color();
-	fill_back(renderer, color == -1 ? clear_color : player_colors[color]);
+	if(color == -1) fill_back(renderer, clear_color);
+	else{
+		const auto& player_texture = player_textures[color];
+		if(NULL == player_texture.get_texture()) fill_back(renderer, player_texture.get_color());
+		else{
+			SDL_Color old_color_mod;
+			SDL_GetTextureColorMod(player_texture.get_texture(), &old_color_mod.r, &old_color_mod.g, &old_color_mod.b);
+			SDL_GetTextureAlphaMod(player_texture.get_texture(), &old_color_mod.a);
+			
+			SDL_SetTextureColorMod(player_texture.get_texture(), player_texture.get_color().r, player_texture.get_color().g, player_texture.get_color().b);
+			SDL_SetTextureAlphaMod(player_texture.get_texture(), player_texture.get_color().a);
+			
+			SDL_SetTextureBlendMode(player_texture.get_texture(), SDL_BLENDMODE_NONE);
+			SDL_RenderCopy(renderer, player_texture.get_texture(), NULL, NULL);
+
+			SDL_SetTextureColorMod(player_texture.get_texture(), old_color_mod.r, old_color_mod.g, old_color_mod.b);
+			SDL_SetTextureAlphaMod(player_texture.get_texture(), old_color_mod.a);
+		}
+	}
+	
 }
 
 void PlayerColorButton::draw_pressed(SDL_Renderer* renderer){
@@ -147,7 +167,22 @@ void ColorButton::init(SDL_Renderer* renderer){
 }
 
 void ColorButton::draw_back(SDL_Renderer* renderer){
-	fill_back(renderer, player_colors[color]);
+	const auto& player_texture = player_textures[color];
+	if(NULL == player_texture.get_texture()) fill_back(renderer, player_texture.get_color());
+	else{
+		SDL_Color old_color_mod;
+		SDL_GetTextureColorMod(player_texture.get_texture(), &old_color_mod.r, &old_color_mod.g, &old_color_mod.b);
+		SDL_GetTextureAlphaMod(player_texture.get_texture(), &old_color_mod.a);
+		
+		SDL_SetTextureColorMod(player_texture.get_texture(), player_texture.get_color().r, player_texture.get_color().g, player_texture.get_color().b);
+		SDL_SetTextureAlphaMod(player_texture.get_texture(), player_texture.get_color().a);
+		
+		SDL_SetTextureBlendMode(player_texture.get_texture(), SDL_BLENDMODE_NONE);
+		SDL_RenderCopy(renderer, player_texture.get_texture(), NULL, NULL);
+
+		SDL_SetTextureColorMod(player_texture.get_texture(), old_color_mod.r, old_color_mod.g, old_color_mod.b);
+		SDL_SetTextureAlphaMod(player_texture.get_texture(), old_color_mod.a);
+	}
 }
 
 void ColorButton::draw_pressed(SDL_Renderer* renderer){
@@ -176,13 +211,13 @@ ColorMenu::ColorMenu(const SDL_Rect& first_rect, int width, PlayerSubView& view)
 		.x = first_rect.x,
 		.y = first_rect.y,
 		.w = first_rect.w * width,
-		.h = first_rect.h * (((int)player_colors.size() + width - 1)/width)
+		.h = first_rect.h * (((int)player_textures.size() + width - 1)/width)
 	}, true),
 	view(view) {
 		
 	SDL_Rect button_rect = first_rect;
 	
-	for(int i = 0; i < player_colors.size(); i++){
+	for(int i = 0; i < player_textures.size(); i++){
 		button_rect.x = (i % width) * first_rect.w;
 		button_rect.y = (i / width) * first_rect.h;
 		buttons.push_back(make_unique<ColorButton>(button_rect, i, view));
@@ -219,14 +254,14 @@ void ColorMenu::step(){
 #define PLAYER_NAME_WIDTH 0.85
 #define PLAYER_NAME_HEIGHT 0.2
 
-#define PLAYER_KEY_HEIGHT 0.3
+#define PLAYER_KEY_HEIGHT 0.2
 #define PLAYER_KEY_Y 0.65
 #define PLAYER_KEY_LABEL_Y 0.5
 
-#define PLAYER_COLOR_HEIGHT 0.2
+#define PLAYER_COLOR_HEIGHT 0.17
 #define PLAYER_COLOR_X 0.3
 #define PLAYER_COLOR_Y 0.4
-#define COLOR_MENU_W 7
+#define COLOR_MENU_W 5
 
 PlayerSubView::PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& settings, KeySetManager& key_manager) :
 	SubView(rect, false),
@@ -253,7 +288,7 @@ PlayerSubView::PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& setti
 	
 	button_rect.x = rect.w * PLAYER_VIEW_MARGIN_RATIO;
 	button_rect.y = rect.h * PLAYER_KEY_Y;
-	button_rect.w = button_rect.h = rect.h * PLAYER_NAME_HEIGHT;
+	button_rect.w = button_rect.h = rect.h * PLAYER_KEY_HEIGHT;
 	
 	left_key = make_unique<PlayerKeyButton>(button_rect, *this, [](KeySet& keys) -> SDL_Scancode& { return keys.left; });
 	view_manager.add_view(left_key.get());

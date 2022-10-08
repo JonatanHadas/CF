@@ -33,7 +33,7 @@ Game::Game(
 	tie_break_round(false),
 	game_over(false),
 	histories(teams.size(), vector<PlayerPosition>()),
-	states(teams.size(), PlayerState(0)),
+	states(teams.size(), PlayerState(0, 0)),
 	pending_inputs(teams.size(), deque<int>()),
 	player_active(teams.size(), true),
 	cheese_makers(teams.size(), CheeseMaker()),

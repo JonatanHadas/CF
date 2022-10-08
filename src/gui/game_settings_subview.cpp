@@ -1,6 +1,7 @@
 #include "game_settings_subview.h"
 
 #include "colors.h"
+#include "player_texture.h"
 #include "images.h"
 #include "sounds.h"
 
@@ -435,11 +436,14 @@ void PlayerView::draw_content(SDL_Renderer* renderer){
 		
 		char name_buffer[50];
 		snprintf(name_buffer, 50, "player-%d", player);
+		
+		const auto& player_texture = player_textures[color];
 
 		name_label = make_unique<Msg>(
 			name.size() ? name.c_str() : name_buffer,
-			player_colors[color], FontType::NRM,
-			renderer
+			player_texture.get_color(), FontType::NRM,
+			renderer,
+			player_texture.get_texture()
 		);
 	}
 	

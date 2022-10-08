@@ -16,8 +16,11 @@ class Msg{
 	SDL_Texture* img;
 	SDL_Renderer* rend;
 	int w,h;
+	
+	void destroy();
 public:
 	Msg(const char* text, SDL_Color color, FontType type, SDL_Renderer* renderer);
+	Msg(const char* text, SDL_Color color, FontType type, SDL_Renderer* renderer, SDL_Texture* texture);
 	
 	Msg(const Msg&) = delete;
 	Msg(Msg&& msg);

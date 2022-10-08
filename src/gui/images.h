@@ -18,8 +18,14 @@ enum class Img{
 	WARP,
 };
 
+enum class TextureId{
+	RAINBOW,
+};
+
 bool load_images(SDL_Renderer* rend);
 
 SDL_Texture* get_img(Img i);
+
+SDL_Texture* get_texture_by_id(TextureId i);
 
 #endif

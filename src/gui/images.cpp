@@ -8,18 +8,27 @@ using namespace std;
 
 #define DIR "data/images/"
 #define POWERUPS "powerups/"
+#define TEXTURES "textures/"
 #define PNG ".png"
 
-std::map<Img, SDL_Texture*> textures;
+std::map<Img, SDL_Texture*> images;
+std::map<TextureId, SDL_Texture*> textures;
 
-void free_images(){
-	for(auto entry: textures){
+template<typename ID>
+void free_textures(map<ID, SDL_Texture*>& storage){
+	for(auto entry: storage){
 		SDL_DestroyTexture(entry.second);
 	}
-	textures.clear();
+	storage.clear();
 }
 
-bool load_texture(SDL_Renderer* renderer, const char* name, Img id){
+void free_images(){
+	free_textures(images);
+	free_textures(textures);
+}
+
+template<typename ID>
+bool load_texture(SDL_Renderer* renderer, const char* name, ID id, map<ID, SDL_Texture*>& storage){
 	SDL_Surface* surface = IMG_Load(name);
 	
 	if(surface == NULL) return false;
@@ -28,8 +37,16 @@ bool load_texture(SDL_Renderer* renderer, const char* name, Img id){
 	SDL_FreeSurface(surface);
 	
 	if(texture == NULL) return false;
-	textures.insert({id, texture});
+	storage.insert({id, texture});
 	return true;
+}
+
+bool load_texture(SDL_Renderer* renderer, const char* name, Img id){
+	return load_texture(renderer, name, id, images);
+}
+
+bool load_texture(SDL_Renderer* renderer, const char* name, TextureId id){
+	return load_texture(renderer, name, id, textures);
 }
 
 bool load_images(SDL_Renderer* renderer){
@@ -47,10 +64,15 @@ bool load_images(SDL_Renderer* renderer){
 	if(load_texture(renderer, DIR POWERUPS "narrow_turn" PNG, Img::NARROW_TURN))
 	if(load_texture(renderer, DIR POWERUPS "wide_turn" PNG, Img::WIDE_TURN))
 	if(load_texture(renderer, DIR POWERUPS "warp" PNG, Img::WARP))
+	if(load_texture(renderer, DIR TEXTURES "rainbow" PNG, TextureId::RAINBOW))
 		return true;
 	return false;
 }
 
 SDL_Texture* get_img(Img i){
+	return images[i];
+}
+
+SDL_Texture* get_texture_by_id(TextureId i){
 	return textures[i];
 }

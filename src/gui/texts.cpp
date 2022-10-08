@@ -2,6 +2,8 @@
 
 #include "SDL_ttf.h"
 
+#include "gui_utils.h"
+
 #include <vector>
 
 #define FONT_NUM 4
@@ -56,6 +58,32 @@ Msg::Msg(const char* text, SDL_Color color, FontType t, SDL_Renderer* renderer) 
 		else{ w = surf->w; h = surf->h;}
 		SDL_SetTextureAlphaMod(img, color.a);
 		SDL_FreeSurface(surf);
+	}
+}
+
+Msg::Msg(const char* text, SDL_Color color, FontType type, SDL_Renderer* renderer, SDL_Texture* texture) :
+	Msg(text, color, type, renderer) {
+	
+	if(img != NULL && texture != NULL){
+		Texture textured(renderer,
+			SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+			w, h
+		);
+		
+		SDL_BlendMode mode;
+		SDL_GetTextureBlendMode(img, &mode);
+		SDL_SetTextureBlendMode(textured.get(), mode);
+		SDL_SetTextureBlendMode(img, SDL_BLENDMODE_NONE);
+		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_MOD);
+		
+		textured.do_with_texture(renderer, [&](){
+			SDL_RenderCopy(renderer, img, NULL, NULL);
+			
+			SDL_RenderCopy(renderer, texture, NULL, NULL);
+		});
+		
+		SDL_DestroyTexture(img);
+		img = textured.move_out();
 	}
 }
 

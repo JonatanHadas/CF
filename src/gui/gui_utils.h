@@ -24,6 +24,7 @@ public:
 	~Texture();
 	
 	SDL_Texture* get();
+	SDL_Texture* move_out();
 	
 	void do_with_texture(SDL_Renderer* renderer, function<void()> todo);
 };

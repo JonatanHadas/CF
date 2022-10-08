@@ -7,8 +7,6 @@
 
 using namespace std;
 
-extern vector<SDL_Color> player_colors;
-
 extern vector<SDL_Color> powerup_colors;
 
 extern vector<SDL_Color> powerup_ring_colors;

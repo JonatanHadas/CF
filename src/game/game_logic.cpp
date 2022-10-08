@@ -76,6 +76,8 @@ PlayerPosition advance_player(
 	PlayerState& state, int turn_state,
 	const set<unique_ptr<PowerUpEffect>>& effects
 ){
+	state.counter++;
+	
 	int real_turn_state = turn_state;
 	if(count_powerups(player, PowerUpType::INVERT, effects) % 2) real_turn_state = -turn_state;
 
