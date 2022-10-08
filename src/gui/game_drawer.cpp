@@ -594,14 +594,14 @@ void ScoreDrawer::step(){
 }
 
 
-#define WINNER_MARGIN 0.2
+#define WINNER_MARGIN 0.02
 
 WinnerDrawer::WinnerDrawer(
 	GameView* view,
 	const GameSettings& settings,
-	int y, int h, int w
+	int y, int h, int w, int x
 ) : view(view), settings(settings),
-	y(y), h(h), w(w) {}
+	y(y), h(h), w(w), x(x + WINNER_MARGIN * w) {}
 
 void WinnerDrawer::init(SDL_Renderer* renderer){
 	if(texture.get() == nullptr){
@@ -680,7 +680,7 @@ void WinnerDrawer::draw_msg(SDL_Renderer* renderer){
 		SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, 128);
 		SDL_RenderClear(renderer);
 		
-		msg->render_centered(w * WINNER_MARGIN, h / 2, Align::LEFT);
+		msg->render_centered(x , h / 2, Align::LEFT);
 	});
 }
 
@@ -730,13 +730,6 @@ void GameDrawer::init(SDL_Renderer* renderer){
 			screen_width / 2, screen_width / 2, screen_height
 		);
 		
-		int h = screen_height * WINNER_DRAWER_H;
-		winner_drawer = make_unique<WinnerDrawer>(
-			view,
-			settings,
-			(screen_height - h)/2, h, screen_width/2
-		);
-		
 		double scale = min(screen_width * 0.00475, screen_height * 0.0075);
 		
 		board_rect.w = scale * board.w;
@@ -744,6 +737,14 @@ void GameDrawer::init(SDL_Renderer* renderer){
 		
 		board_rect.x = (screen_width / 2 - board_rect.w) / 2;
 		board_rect.y = (screen_height - board_rect.h) / 2;
+
+		int h = screen_height * WINNER_DRAWER_H;
+		winner_drawer = make_unique<WinnerDrawer>(
+			view,
+			settings,
+			(screen_height - h)/2, h, screen_width/2, board_rect.x - 1
+		);
+		
 	}
 }
 

@@ -70,7 +70,7 @@ class WinnerDrawer{
 	unique_ptr<Msg> msg;
 	unique_ptr<Texture> texture;
 	
-	int y, h, w;
+	int y, h, w, x;
 	
 	vector<string> get_names();
 	
@@ -80,7 +80,7 @@ public:
 	WinnerDrawer(
 		GameView* view,
 		const GameSettings& settings,
-		int y, int h, int w
+		int y, int h, int w, int x
 	);
 
 	void draw(SDL_Renderer* renderer);
