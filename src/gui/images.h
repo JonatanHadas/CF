@@ -16,6 +16,7 @@ enum class Img{
 	NARROW_TURN,
 	WIDE_TURN,
 	WARP,
+	ARROWS,
 };
 
 enum class TextureId{

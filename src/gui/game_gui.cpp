@@ -28,17 +28,19 @@ GameGui::GameGui(
 	GameAdvancer* advancer,
 	GameEventListenerAccumulator* accumulator,
 	const GameSettings& settings,
-	const map<PlayerInterface*, KeySet>& interfaces
+	const map<int, PlayerInterface*>& interfaces,
+	const map<int, KeySet>& keysets
 ) :
 	settings(settings),
 	last_round(-1),
 	starting_timer(0),
 	paused(false),
-	drawer(view, settings),
+	drawer(view, settings, this->keysets),
 	view(view),
 	advancer(advancer),
 	accumulator(accumulator),
-	interfaces(interfaces) {
+	interfaces(interfaces),
+	keysets(keysets) {
 		
 	accumulator->add_listener(&sounds);
 }
@@ -59,12 +61,13 @@ bool GameGui::step(){
 		if(starting_timer) starting_timer--;
 		else{
 			auto keyboard_state = SDL_GetKeyboardState(NULL);
-			for(auto interface: interfaces){
+			for(auto entry: interfaces){
 				int turn_state = 0;
-				if(keyboard_state[interface.second.left]) turn_state -= 1;
-				if(keyboard_state[interface.second.right]) turn_state += 1;
+				const auto& keyset = keysets[entry.first];
+				if(keyboard_state[keyset.left]) turn_state -= 1;
+				if(keyboard_state[keyset.right]) turn_state += 1;
 				
-				interface.first->step(view->get_round(), turn_state);
+				entry.second->step(view->get_round(), turn_state);
 			}
 		}
 	}
@@ -82,9 +85,6 @@ bool GameGui::handle_event(const SDL_Event& event){
 		switch(event.key.keysym.scancode){
 		case SDL_SCANCODE_ESCAPE:
 			return true;
-		case SDL_SCANCODE_RETURN:
-			paused = !paused;
-			break;
 		}
 		break;
 	}
@@ -92,7 +92,7 @@ bool GameGui::handle_event(const SDL_Event& event){
 }
 
 void GameGui::draw(SDL_Renderer* renderer){
-	drawer.draw(renderer);
+	drawer.draw(renderer, paused || starting_timer);
 }
 
 unique_ptr<WinnerDisplay> GameGui::get_score_display(){

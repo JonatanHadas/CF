@@ -13,10 +13,11 @@
 
 #include <algorithm>
 
-BoardDrawer::BoardDrawer(GameView* view, const GameSettings& settings) :
+BoardDrawer::BoardDrawer(GameView* view, const GameSettings& settings, const map<int, KeySet>& keysets) :
 	board(view->get_board_size()),
 	view(view),
 	settings(settings),
+	keysets(keysets),
 	texture(nullptr) {}
 
 #define DRAW_SCALE 8.0
@@ -32,6 +33,14 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 
 #define CIRCLE_RAD 50
 
+#define ARROW_SIZE (DRAW_SCALE * 12.)
+#define ARROW_CENTER_X (ARROW_SIZE * -0.1);
+
+#define ARROW_CANVAS_SIZE 256
+#define ARROW_TEXT_Y 80
+#define ARROW_TEXT_X 8
+
+
 #define CURVE_WIDTH_RATIO 1.1
 
 #define RING_RATIO (2.0 * CURVE_WIDTH_RATIO)
@@ -39,7 +48,7 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 #define RING_INTERVAL 0.8
 #define RING_PART 0.01
 
-void BoardDrawer::draw(SDL_Renderer* renderer){
+void BoardDrawer::draw(SDL_Renderer* renderer, bool paused){
 	init(renderer);
 
 	Texture circle_texture(renderer,
@@ -49,6 +58,15 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 	Texture textured_circle(renderer,
 		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		CIRCLE_RAD * 2, CIRCLE_RAD * 2
+	);
+	
+	Texture textured_arrows(renderer,
+		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		ARROW_CANVAS_SIZE, ARROW_CANVAS_SIZE
+	);
+	Texture arrows(renderer,
+		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		ARROW_CANVAS_SIZE, ARROW_CANVAS_SIZE
 	);
 
 	circle_texture.do_with_texture(renderer, [&](){
@@ -61,10 +79,22 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 	SDL_SetTextureBlendMode(circle_texture.get(), SDL_BLENDMODE_BLEND);
 	SDL_SetTextureBlendMode(textured_circle.get(), SDL_BLENDMODE_BLEND);
 
+	SDL_SetTextureBlendMode(textured_arrows.get(), SDL_BLENDMODE_BLEND);
+	SDL_SetTextureBlendMode(arrows.get(), SDL_BLENDMODE_NONE);
+	SDL_SetTextureBlendMode(get_img(Img::ARROWS), SDL_BLENDMODE_NONE);
+
 	SDL_Rect dst;
 	
 	auto texture_circle = [&](const PlayerTexture& player_texture, int counter){
 		textured_circle.do_with_texture(renderer, [&](){
+			if(player_texture.get_texture() == NULL) SDL_SetTextureColorMod(
+				circle_texture.get(),
+				player_texture.get_color().r,
+				player_texture.get_color().g,
+				player_texture.get_color().b
+			);
+			else SDL_SetTextureColorMod(circle_texture.get(), 255, 255, 255);
+
 			SDL_RenderCopy(renderer, circle_texture.get(), NULL, NULL);
 			
 			if(player_texture.get_texture() != NULL){
@@ -244,6 +274,58 @@ void BoardDrawer::draw(SDL_Renderer* renderer){
 
 			SDL_SetTextureBlendMode(player_texture.get_texture(), SDL_BLENDMODE_MOD);
 			texture_circle(player_texture, (player_state.counter + 1) % player_texture.get_length());
+			
+			if(paused && keysets.count(i)){
+				arrows.do_with_texture(renderer, [&](){
+					SDL_RenderCopy(renderer, get_img(Img::ARROWS), NULL, NULL);
+					
+					Msg(
+						SDL_GetScancodeName(keysets.at(i).left),
+						{255, 255, 255, 255},
+						FontType::MID,
+						renderer
+					).render_centered(
+						ARROW_TEXT_X,
+						ARROW_TEXT_Y,
+						Align::LEFT
+					);
+
+					Msg(
+						SDL_GetScancodeName(keysets.at(i).right),
+						{255, 255, 255, 255},
+						FontType::MID,
+						renderer
+					).render_centered(
+						ARROW_CANVAS_SIZE - ARROW_TEXT_X,
+						ARROW_TEXT_Y,
+						Align::RIGHT
+					);
+				});
+				
+				textured_arrows.do_with_texture(renderer, [&](){
+					SDL_RenderCopyEx(renderer, arrows.get(), NULL, NULL, 90, NULL, SDL_FLIP_NONE);
+					
+					if(player_texture.get_texture() != NULL){
+						SDL_RenderCopy(renderer, player_texture.get_texture(), NULL, NULL);
+					}
+				});
+				
+				SDL_SetTextureColorMod(textured_arrows.get(),
+					player_texture.get_color().r,
+					player_texture.get_color().g,
+					player_texture.get_color().b
+				);
+				
+				dst.w = dst.h = ARROW_SIZE;
+				dst.y = DRAW_SCALE * player_history.back().y - dst.h / 2;
+				dst.x = DRAW_SCALE * player_history.back().x - ARROW_CENTER_X;
+				
+				SDL_Point center;
+				center.x = ARROW_CENTER_X;
+				center.y = dst.h / 2;
+				
+				SDL_RenderCopyEx(renderer, textured_arrows.get(), NULL, &dst, RAD2DEG(player_history.back().direction), &center, SDL_FLIP_NONE);
+			}
 
 			double width = get_player_size(player_history.back().size) * CURVE_WIDTH_RATIO;
 			dst.w = dst.h = DRAW_SCALE * width;
@@ -627,11 +709,11 @@ void WinnerDrawer::step(){
 
 #define BOARD_SCALE 
 
-GameDrawer::GameDrawer(GameView* view, const GameSettings& settings) :
+GameDrawer::GameDrawer(GameView* view, const GameSettings& settings, const map<int, KeySet>& keysets) :
 	view(view),
 	settings(settings),
 	board(view->get_board_size()),
-	board_drawer(view, settings),
+	board_drawer(view, settings, keysets),
 	is_initialized(false) {}
 
 void GameDrawer::init(SDL_Renderer* renderer){
@@ -668,13 +750,13 @@ void GameDrawer::init(SDL_Renderer* renderer){
 #define X_MARGIN 0.025
 #define Y_MARGIN 0.05
 
-void GameDrawer::draw(SDL_Renderer* renderer){
+void GameDrawer::draw(SDL_Renderer* renderer, bool paused){
 	init(renderer);
 
 	SDL_SetRenderDrawColor(renderer, 32, 32, 32, 0);
 	SDL_RenderClear(renderer);
 	
-	board_drawer.draw(renderer);
+	board_drawer.draw(renderer, paused);
 	score_drawer->draw(renderer);
 
     SDL_Rect frame;

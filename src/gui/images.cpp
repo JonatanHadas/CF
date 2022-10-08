@@ -64,6 +64,7 @@ bool load_images(SDL_Renderer* renderer){
 	if(load_texture(renderer, DIR POWERUPS "narrow_turn" PNG, Img::NARROW_TURN))
 	if(load_texture(renderer, DIR POWERUPS "wide_turn" PNG, Img::WIDE_TURN))
 	if(load_texture(renderer, DIR POWERUPS "warp" PNG, Img::WARP))
+	if(load_texture(renderer, DIR "arrows" PNG, Img::ARROWS))
 	if(load_texture(renderer, DIR TEXTURES "rainbow" PNG, TextureId::RAINBOW))
 		return true;
 	return false;

@@ -63,10 +63,14 @@ void GameMenu::sync_display(){
 	}
 	
 	if(game.get() != nullptr && game_gui.get() == nullptr){
-		map<PlayerInterface*, KeySet> keys_map;
+		map<int, KeySet> keys_map;
+		map<int, PlayerInterface*> interfaces_map;
+		
 		vector<KeySet> keys = players->get_keys();
 		for(int i = 0; i < keys.size(); i++){
-			keys_map[game->get_interfaces()[i]] = keys[i];
+			auto player = game_creator->get_view()->get_my_players()[i];
+			keys_map[player] = keys[i];
+			interfaces_map[player] = game->get_interfaces()[i];
 		}
 
 		game_gui = make_unique<GameGui>(
@@ -74,6 +78,7 @@ void GameMenu::sync_display(){
 			game->get_advancer(),
 			game->get_accumulator(),
 			game_creator->get_view()->get_settings(),
+			interfaces_map,
 			keys_map
 		);
 	}

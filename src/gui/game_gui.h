@@ -41,7 +41,8 @@ class GameGui : public Gui{
 	GameView* view;
 	GameAdvancer* advancer;
 	GameEventListenerAccumulator* accumulator;
-	map<PlayerInterface*, KeySet> interfaces;
+	map<int, PlayerInterface*> interfaces;
+	map<int, KeySet> keysets;
 	
 	bool paused;
 	int last_round;
@@ -52,7 +53,8 @@ public:
 		GameAdvancer* advancer,
 		GameEventListenerAccumulator* accumulator,
 		const GameSettings& settings,
-		const map<PlayerInterface*, KeySet>& interfaces
+		const map<int, PlayerInterface*>& interfaces,
+		const map<int, KeySet>& keysets
 	);
 	
 	GameGui(GameGui&&) = delete;

@@ -2,6 +2,7 @@
 #define _GAME_DRAWER
 
 #include "gui_utils.h"
+#include "keyset.h"
 #include "../game/game_view.h"
 #include "../game/game_settings.h"
 
@@ -14,6 +15,7 @@ using namespace std;
 
 class BoardDrawer{
 	GameView* view;
+	const map<int, KeySet>& keysets;
 	const GameSettings& settings;
 	const BoardSize board;
 	
@@ -21,9 +23,9 @@ class BoardDrawer{
 
 	void init(SDL_Renderer* renderer);
 public:
-	BoardDrawer(GameView* view, const GameSettings& settings);
+	BoardDrawer(GameView* view, const GameSettings& settings, const map<int, KeySet>& keysets);
 	
-	void draw(SDL_Renderer* renderer);
+	void draw(SDL_Renderer* renderer, bool paused);
 	
 	Texture& get_texture() const;
 };
@@ -100,9 +102,9 @@ class GameDrawer{
 	
 	void init(SDL_Renderer* renderer);
 public:
-	GameDrawer(GameView* view, const GameSettings& settings);
+	GameDrawer(GameView* view, const GameSettings& settings, const map<int, KeySet>& keysets);
 	
-	void draw(SDL_Renderer* renderer);
+	void draw(SDL_Renderer* renderer, bool paused);
 	void step();
 };
 
