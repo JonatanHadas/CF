@@ -195,7 +195,7 @@ bool check_end_condition(const ScoreSettings& settings, const vector<int>& score
 	case WinCriterion::BY_SCORE:
 		return settings.amount <= *max_element(scores.begin(), scores.end());
 	case WinCriterion::BY_ROUND:
-		return round > settings.amount;
+		return round >= settings.amount;
 	default:
 		return false;
 	}

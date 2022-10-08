@@ -377,7 +377,7 @@ void ScoreDrawer::draw(SDL_Renderer* renderer){
 				if(amount != view->get_round() || threshold.get() == nullptr){
 					amount = view->get_round();
 					char text[50];
-					snprintf(text, 50, "%d/%d", view->get_round(), settings.scores.amount);
+					snprintf(text, 50, "%d/%d", view->get_round() + 1, settings.scores.amount);
 					threshold = make_unique<Msg>(
 						text,
 						text_color,
