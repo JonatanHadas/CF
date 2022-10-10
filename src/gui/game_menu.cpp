@@ -1,15 +1,64 @@
 #include "game_menu.h"
 
+#include "images.h"
+#include "colors.h"
+
+MusicButton::MusicButton(const SDL_Rect& rect) :
+	Button(rect, true), music_on(true) {}
+
+void MusicButton::draw(SDL_Renderer* renderer, const SDL_Color color){
+	fill_back(renderer, clear_color);
+	
+	auto image = get_img(music_on ? Img::UNMUTED : Img::MUTED);
+	
+	SDL_SetTextureBlendMode(image, SDL_BLENDMODE_BLEND);
+	SDL_SetTextureColorMod(image, color.r, color.g, color.b);
+	SDL_SetTextureAlphaMod(image, color.a);
+	
+	SDL_RenderCopy(renderer, image, NULL, NULL);
+}
+
+void MusicButton::draw_inactive(SDL_Renderer* renderer){
+	draw(renderer, text_color);
+}
+
+void MusicButton::draw_pressed(SDL_Renderer* renderer){
+	draw(renderer, active_color);
+}
+
+void MusicButton::draw_released(SDL_Renderer* renderer){
+	draw(renderer, text_color);
+}
+
+void MusicButton::on_pressed(){
+	music_on = !music_on;
+}
+
+bool MusicButton::is_music_on() const{
+	return music_on;
+}
+
 #define PLAYERS_WIDTH_RATIO 0.25
 #define CONNECTION_HEIGHT_RATIO 0.2
+#define MUSIC_H 0.05
+#define MUSIC_MARGIN 0.02
+
 
 GameMenu::GameMenu(int w, int h, KeySetManager& key_manager) : settings_menu(nullptr), w(w), h(h){
 	SDL_Rect rect;
+	int margin = h * MUSIC_MARGIN;
+	rect.w = rect.h = MUSIC_H * h;
+	rect.x = w - (rect.w + margin);
+	rect.y = h - (rect.h + margin);
+	
+	music = make_unique<MusicButton>(rect);
+	view_manager.add_view(music.get());
+	
+	rect.h = h - (rect.h + 2 * margin);
+	rect.y = 0;
 	rect.w = w * PLAYERS_WIDTH_RATIO;
 	rect.x = w - rect.w;
-	rect.h = h;
-	rect.y = 0;
-	
+
 	settings_rect.x = 0;
 	settings_rect.y = h * CONNECTION_HEIGHT_RATIO;
 	settings_rect.w = w - rect.w;
@@ -79,7 +128,8 @@ void GameMenu::sync_display(){
 			game->get_accumulator(),
 			game_creator->get_view()->get_settings(),
 			interfaces_map,
-			keys_map
+			keys_map,
+			music->is_music_on()
 		);
 	}
 }

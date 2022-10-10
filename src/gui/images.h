@@ -17,6 +17,8 @@ enum class Img{
 	WIDE_TURN,
 	WARP,
 	ARROWS,
+	MUTED,
+	UNMUTED,
 };
 
 enum class TextureId{

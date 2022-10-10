@@ -63,7 +63,7 @@ HEADS_gui/player_settings := gui/player_settings $(GAME_SETTINGS_INTERFACES)
 HEADS_gui/players_subview := gui/gui_utils game/powerups gui/player_settings gui/players_subview gui/subview_manager gui/button gui/subview gui/colors gui/texts gui/images gui/player_texture gui/sounds gui/textbox gui/key_choice_button gui/keyset $(GAME_SETTINGS_INTERFACES)
 HEADS_gui/game_settings_subview := gui/gui_utils game/game_settings_observer_accumulator utils/utils gui/powerup_images gui/images gui/number_button gui/options_menu gui/game_settings_subview gui/tab_view gui/subview gui/subview_manager gui/button gui/texts gui/colors gui/images gui/player_texture gui/sounds $(GAME_SETTINGS_INTERFACES)
 HEADS_gui/game_startup_menu := gui/gui_utils gui/texts gui/colors gui/sounds game/local_game_creator game/game_event_listener_accumulator gui/game_startup_menu gui/subview_manager gui/subview gui/button gui/textbox gui/texts game/game_creator game/game_settings_observer_accumulator game/game game/game_logic game/collision_grid game/powerups game/cheese_maker utils/geometry network/client network/network game_network/protocol game_network/remote_game_creator game/game_extrapolator game/composite_player_interface game_network/game_client game_network/game_settings_client game/observed_settings_view $(GAME_SETTINGS_INTERFACES) $(GAME_INTERFACES)
-HEADS_gui/game_menu := gui/winner_display game/game_event_listener_accumulator gui/game_gui gui/game_drawer gui/game_startup_menu game/game_creator game/game_settings_observer_accumulator gui/number_button gui/options_menu gui/player_settings gui/game_settings_subview gui/tab_view gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/textbox gui/key_choice_button gui/keyset network/client network/network $(GAME_SETTINGS_INTERFACES) $(GAME_INTERFACES)
+HEADS_gui/game_menu := gui/winner_display game/game_event_listener_accumulator gui/game_gui gui/game_drawer gui/game_startup_menu game/game_creator game/game_settings_observer_accumulator gui/number_button gui/options_menu gui/player_settings gui/game_settings_subview gui/tab_view gui/game_menu gui/players_subview gui/subview_manager gui/button gui/subview gui/textbox gui/key_choice_button gui/keyset network/client network/network gui/sounds gui/images gui/colors $(GAME_SETTINGS_INTERFACES) $(GAME_INTERFACES)
 HEADS_gui/player_texture := gui/player_texture gui/images
 HEADS_gui/colors := gui/colors
 HEADS_gui/texts := gui/texts
@@ -72,7 +72,7 @@ HEADS_gui/sounds := gui/sounds
 HEADS_gui/keyset := gui/keyset utils/serialization utils/utils
 HEADS_gui/gui_utils := gui/gui_utils
 HEADS_gui/game_drawer := gui/game_drawer gui/keyset gui/images gui/player_texture gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings $(GAME_INTERFACES) utils/geometry
-HEADS_gui/game_gui := gui/winner_display gui/sounds gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings game/game_event_listener_accumulator $(GAME_INTERFACES)
+HEADS_gui/game_gui := gui/winner_display gui/subview_manager gui/subview gui/button gui/sounds gui/gui gui/game_gui gui/game_drawer gui/images gui/texts gui/gui_utils gui/colors gui/keyset game/game_logic game/game_settings game/game_event_listener_accumulator $(GAME_INTERFACES)
 HEADS_gui/winner_display := gui/winner_display gui/gui gui/colors gui/player_texture gui/sounds gui/images gui/texts game/game_view $(GAME_SETTINGS)
 
 # Network objects

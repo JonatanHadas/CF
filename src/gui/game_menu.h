@@ -7,10 +7,27 @@
 #include "players_subview.h"
 #include "game_settings_subview.h"
 #include "game_startup_menu.h"
+#include "button.h"
 
 #include "game_gui.h"
 
 #include "../game/game_settings_manager.h"
+
+class MusicButton : public Button {
+	bool music_on;
+
+	void draw(SDL_Renderer* renderer, const SDL_Color color);
+protected:
+	void draw_inactive(SDL_Renderer* renderer);
+	void draw_pressed(SDL_Renderer* renderer);
+	void draw_released(SDL_Renderer* renderer);
+	
+	void on_pressed();
+public:
+	MusicButton(const SDL_Rect& rect);
+	
+	bool is_music_on() const;
+};
 
 class GameMenu : public Gui, public GameSettingsObserver{
 	int w, h;
@@ -21,6 +38,7 @@ class GameMenu : public Gui, public GameSettingsObserver{
 	unique_ptr<PlayersSubView> players;
 	unique_ptr<GameSettingsMenu> settings_menu;
 	unique_ptr<GameStartupMenu> startup;
+	unique_ptr<MusicButton> music;
 	
 	shared_ptr<GameCreator> game_creator;
 	unique_ptr<CreatedGame> game;

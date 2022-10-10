@@ -11,7 +11,13 @@
 #include "../game/game_advancer.h"
 #include "../game/game_event_listener_accumulator.h"
 
+#include "button.h"
+#include "subview_manager.h"
+
+#include "sounds.h"
+
 #include <map>
+#include <memory>
 
 using namespace std;
 
@@ -33,10 +39,28 @@ public:
 	void activate_powerup(const PowerUp& power_up);
 };
 
+class GameMusicButton : public Button {
+	Music music;
+	void draw(SDL_Renderer* renderer, const SDL_Color color);
+protected:
+	void draw_inactive(SDL_Renderer* renderer);
+	void draw_pressed(SDL_Renderer* renderer);
+	void draw_released(SDL_Renderer* renderer);
+	
+	void on_pressed();
+public:
+	GameMusicButton(const SDL_Rect& rect, bool music_on);
+	
+	bool is_music_on();
+};
+
 class GameGui : public Gui{
 	const GameSettings& settings;
 	GameDrawer drawer;
 	GameSoundManager sounds;
+	
+	unique_ptr<GameMusicButton> music_button;
+	SubViewManager view_manager;
 	
 	GameView* view;
 	GameAdvancer* advancer;
@@ -47,6 +71,8 @@ class GameGui : public Gui{
 	bool paused;
 	int last_round;
 	int starting_timer;
+	
+	bool music_on;
 public:
 	GameGui(
 		GameView* view,
@@ -54,7 +80,8 @@ public:
 		GameEventListenerAccumulator* accumulator,
 		const GameSettings& settings,
 		const map<int, PlayerInterface*>& interfaces,
-		const map<int, KeySet>& keysets
+		const map<int, KeySet>& keysets,
+		bool music_on
 	);
 	
 	GameGui(GameGui&&) = delete;
