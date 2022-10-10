@@ -21,6 +21,8 @@ enum class Img{
 
 enum class TextureId{
 	RAINBOW,
+	RED_STRIPES,
+	TRAFFIC_LIGHT,
 };
 
 bool load_images(SDL_Renderer* rend);

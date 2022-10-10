@@ -38,12 +38,14 @@ vector<PlayerTexture> player_textures({
 	PlayerTexture({255, 64, 255, 255}),  // Magenta
 	PlayerTexture({255, 160, 64, 255}),  // Orange
 	PlayerTexture({160, 64, 255, 255}),  // Purple
-	PlayerTexture({64, 160, 64, 255}),  // Dark Green
-	PlayerTexture({64, 64, 160, 255}),  // Dark Blue
-	PlayerTexture({160, 64, 64, 255}),  // Dark Red
+	PlayerTexture({0, 160, 0, 255}),  // Dark Green
+	PlayerTexture({0, 0, 160, 255}),  // Dark Blue
+	PlayerTexture({160, 0, 0, 255}),  // Dark Red
 	PlayerTexture({255, 255, 255, 255}),  // White
 	PlayerTexture({160, 160, 160, 255}),  // Gray
 	PlayerTexture({255, 160, 160, 255}),  // Pink
 	PlayerTexture({136, 112, 64, 255}),  // Brown
 	PlayerTexture(TextureId::RAINBOW, 90),
+	PlayerTexture(TextureId::RED_STRIPES, 1, true),
+	PlayerTexture(TextureId::TRAFFIC_LIGHT, 45),
 });

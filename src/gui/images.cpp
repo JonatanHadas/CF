@@ -66,6 +66,8 @@ bool load_images(SDL_Renderer* renderer){
 	if(load_texture(renderer, DIR POWERUPS "warp" PNG, Img::WARP))
 	if(load_texture(renderer, DIR "arrows" PNG, Img::ARROWS))
 	if(load_texture(renderer, DIR TEXTURES "rainbow" PNG, TextureId::RAINBOW))
+	if(load_texture(renderer, DIR TEXTURES "red_stripes" PNG, TextureId::RED_STRIPES))
+	if(load_texture(renderer, DIR TEXTURES "traffic_light" PNG, TextureId::TRAFFIC_LIGHT))
 		return true;
 	return false;
 }
