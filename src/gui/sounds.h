@@ -12,6 +12,7 @@ enum class Sound{
 	DING_LOW,
 	DING_HIGH,
 	CLICK,
+	GAME_END,
 };
 
 void play(Sound snd);

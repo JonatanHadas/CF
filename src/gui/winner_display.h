@@ -17,6 +17,7 @@ class WinnerDisplay : public Gui {
 	const vector<int> scores;
 	
 	int timer;
+	bool start;
 	
 	int screen_width, screen_height;
 

@@ -3,6 +3,8 @@
 #include "colors.h"
 #include "player_texture.h"
 
+#include "sounds.h"
+
 #include <algorithm>
 
 #define MIN_TIME 60
@@ -10,6 +12,7 @@
 WinnerDisplay::WinnerDisplay(const GameSettings& settings, GameView* view) :
 	settings(settings),
 	scores(view->get_scores()),
+	start(true),
 	timer(MIN_TIME) {}
 	
 string default_name(const char* type, int index){
@@ -124,6 +127,10 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 }
 
 bool WinnerDisplay::step(){
+	if(start){
+		play(Sound::GAME_END);
+		start = false;
+	}
 	if(timer) timer--;
 	return false;
 }
