@@ -48,7 +48,7 @@ public:
 	LeaveGameButton(const SDL_Rect& rect, GameStartupMenu& menu);	
 };
 
-#define COUNTDOWN_LENGTH 4
+#define COUNTDOWN_LENGTH 3
 
 class ReadyButton : public Button {
 	unique_ptr<Msg> ready, not_ready, start, waiting;

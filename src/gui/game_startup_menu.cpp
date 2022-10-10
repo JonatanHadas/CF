@@ -96,16 +96,9 @@ void ReadyButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
 		renderer
 	);
 	
-	if(countdown[0].get() == nullptr) countdown[0] = make_unique<Msg>(
-		"Go!",
-		text_color,
-		FontType::NRM,
-		renderer
-	);
-	
-	for(int i = 1; i < COUNTDOWN_LENGTH; i++){
+	for(int i = 0; i < COUNTDOWN_LENGTH; i++){
 		if(countdown[i].get() == nullptr) countdown[i] = make_unique<Msg>(
-			to_string(i).c_str(),
+			to_string(i + 1).c_str(),
 			text_color,
 			FontType::NRM,
 			renderer
@@ -420,6 +413,7 @@ void GameStartupMenu::step(){
 		countdown = -1;
 	}
 	else if(countdown == -1){
+		play(Sound::DING_LOW);
 		countdown = SECOND_LENGTH * COUNTDOWN_LENGTH - 1;
 	}
 	else if(countdown > 0){
