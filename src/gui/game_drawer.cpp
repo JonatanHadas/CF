@@ -48,6 +48,8 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 #define RING_INTERVAL 0.8
 #define RING_PART 0.01
 
+#define CIRCLE_PARTS 100
+
 void BoardDrawer::draw(SDL_Renderer* renderer, bool paused){
 	init(renderer);
 
@@ -148,6 +150,75 @@ void BoardDrawer::draw(SDL_Renderer* renderer, bool paused){
 				int indices[6] = {0, 1, 2, 1, 2, 3};
 				
 				SDL_RenderGeometry(renderer, player_texture.get_texture(), vertices, 4, indices, 6);
+			}
+		});
+	};
+	
+	auto circular_texture = [&](const PlayerTexture& player_texture){
+		textured_circle.do_with_texture(renderer, [&](){
+			if(player_texture.get_texture() == NULL) SDL_SetTextureColorMod(
+				circle_texture.get(),
+				player_texture.get_color().r,
+				player_texture.get_color().g,
+				player_texture.get_color().b
+			);
+			else SDL_SetTextureColorMod(circle_texture.get(), 255, 255, 255);
+
+			SDL_RenderCopy(renderer, circle_texture.get(), NULL, NULL);
+			
+			if(player_texture.get_texture() != NULL){
+				vector<SDL_Vertex> vertices;
+				vector<int> indices;
+
+				vertices.push_back({
+					.position = {
+						.x = 2.01f * CIRCLE_RAD,
+						.y = 1.0f * CIRCLE_RAD,
+					},
+					.color = player_texture.get_color(),
+					.tex_coord = {
+						.x = 0.0f,
+						.y = 0.0f,
+					},
+				});
+
+				for(int i = 1; i <= CIRCLE_PARTS; i++){
+					double angle = M_PI * 2 * i / CIRCLE_PARTS;
+					
+					indices.push_back(vertices.size() + 1);
+					indices.push_back(vertices.size());
+					indices.push_back(vertices.size() - 1);
+					vertices.push_back({
+						.position = {
+							.x = 1.0f * CIRCLE_RAD,
+							.y = 1.0f * CIRCLE_RAD,
+						},
+						.color = player_texture.get_color(),
+						.tex_coord = {
+							.x = 1.0f * (i - 0.5f) / CIRCLE_PARTS,
+							.y = 1.0f,
+						},
+					});
+					vertices.push_back({
+						.position = {
+							.x = (float)(1.0 + 1.01 * cos(angle)) * CIRCLE_RAD,
+							.y = (float)(1.0 + 1.01 * sin(angle)) * CIRCLE_RAD,
+						},
+						.color = player_texture.get_color(),
+						.tex_coord = {
+							.x = 1.0f * i / CIRCLE_PARTS,
+							.y = 0.0f,
+						},
+					});
+				}
+				
+				if(!player_texture.is_lateral()){
+					for(auto& vertex: vertices){
+						swap(vertex.tex_coord.x, vertex.tex_coord.y);
+					}
+				}
+				
+				SDL_RenderGeometry(renderer, player_texture.get_texture(), vertices.data(), vertices.size(), indices.data(), indices.size());
 			}
 		});
 	};
@@ -273,7 +344,7 @@ void BoardDrawer::draw(SDL_Renderer* renderer, bool paused){
 			SDL_RenderGeometry(renderer, player_texture.get_texture(), vertices.data(), vertices.size(), indices.data(), indices.size());
 
 			SDL_SetTextureBlendMode(player_texture.get_texture(), SDL_BLENDMODE_MOD);
-			texture_circle(player_texture, (player_state.counter + 1) % player_texture.get_length());
+			circular_texture(player_texture);
 			
 			if(paused && keysets.count(i)){
 				arrows.do_with_texture(renderer, [&](){
@@ -332,7 +403,7 @@ void BoardDrawer::draw(SDL_Renderer* renderer, bool paused){
 			dst.x = DRAW_SCALE * player_history.back().x - dst.w / 2.0;
 			dst.y = DRAW_SCALE * player_history.back().y - dst.h / 2.0;
 			
-			SDL_RenderCopyEx(renderer, textured_circle.get(), NULL, &dst, RAD2DEG(player_history.back().direction), NULL, SDL_FLIP_NONE);
+			SDL_RenderCopy(renderer, textured_circle.get(), NULL, &dst);
 		}
 
 		vector<SDL_Vertex> vertices;

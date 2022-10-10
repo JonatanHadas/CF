@@ -3,13 +3,15 @@
 PlayerTexture::PlayerTexture(const SDL_Color& color) :
 	color(color),
 	using_texture(false),
-	length(1) {}
+	length(1),
+	lateral(false) {}
 
-PlayerTexture::PlayerTexture(TextureId image, int length) :
+PlayerTexture::PlayerTexture(TextureId image, int length, bool lateral) :
 	color({255, 255, 255, 255}),
 	using_texture(true),
 	image(image),
-	length(length) {}
+	length(length),
+	lateral(lateral) {}
 
 const SDL_Color& PlayerTexture::get_color() const {
 	return color;
@@ -21,6 +23,10 @@ SDL_Texture* PlayerTexture::get_texture() const {
 
 int PlayerTexture::get_length() const {
 	return length;
+}
+
+bool PlayerTexture::is_lateral() const {
+	return lateral;
 }
 
 vector<PlayerTexture> player_textures({
