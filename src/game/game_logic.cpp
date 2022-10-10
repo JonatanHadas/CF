@@ -165,7 +165,7 @@ PlayerPosition advance_player(
 }
 
 
-#define WIDTH (1.2/1.1)
+#define WIDTH 1.0
 #define WIDTH_MULTIPLIER 2.0
 
 double get_player_size(int size){

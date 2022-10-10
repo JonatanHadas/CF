@@ -41,7 +41,7 @@ void BoardDrawer::init(SDL_Renderer* renderer){
 #define ARROW_TEXT_X 8
 
 
-#define CURVE_WIDTH_RATIO 1.1
+#define CURVE_WIDTH_RATIO 1.2
 
 #define RING_RATIO (2.0 * CURVE_WIDTH_RATIO)
 #define RING_WIDTH 0.4
