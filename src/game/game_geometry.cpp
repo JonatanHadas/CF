@@ -210,7 +210,7 @@ bool check_border_collision(  // Return whether further checking is possible.
 	bool at_begining = false;
 	
 	if(leaving_box(
-		radius, radius, board.w - radius, board.h-radius,
+		radius, radius, board.w - (2 * radius), board.h - (2 * radius),
 		last_position.x, last_position.y,
 		position.x, position.y,
 		position.x, position.y,
