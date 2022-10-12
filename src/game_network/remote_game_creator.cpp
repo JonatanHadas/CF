@@ -34,7 +34,7 @@ RemoteGame::RemoteGame(
 	game(
 		get_board_size(settings.get_settings().teams.size()),
 		settings.get_settings().scores,
-		settings.get_settings().teams.size(), settings.get_settings().get_team_num()
+		settings.get_settings().teams, settings.get_settings().get_team_num()
 	),
 	client(
 		client, game,

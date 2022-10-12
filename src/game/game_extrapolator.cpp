@@ -19,26 +19,27 @@ void GameExtrapolator::ExtrapolatorPlayerInterface::set_active(bool active){
 GameExtrapolator::GameExtrapolator(
 	const BoardSize& board,
 	const ScoreSettings& score_settings,
-	int player_num, int team_num
+	const vector<int>& teams, int team_num
 ) : 
 	board(board),
 	score_settings(score_settings),
+	teams(teams),
 	round_num(-1),
 	round_timer(-1),
 	scores(team_num, 0),
 	game_over(false), tie_break_round(false), round_over(false),
-	states(player_num, PlayerState(0, 0)),
-	extrapolated_states(player_num, PlayerState(0, 0)),
-	histories(player_num, vector<PlayerPosition>()),
+	states(teams.size(), PlayerState(0, 0)),
+	extrapolated_states(teams.size(), PlayerState(0, 0)),
+	histories(teams.size(), vector<PlayerPosition>()),
 	extrapolated_size(0),
 	extrapolation_limit(0),
 	history_exists(false),
-	player_alive(false, player_num),
-	pending_inputs(player_num, deque<int>()),
-	player_active(player_num, true)
+	player_alive(false, teams.size()),
+	pending_inputs(teams.size(), deque<int>()),
+	player_active(teams.size(), true)
 	{
 
-	for(int i = 0; i < player_num; i++) interfaces.push_back(ExtrapolatorPlayerInterface(*this, i));
+	for(int i = 0; i < teams.size(); i++) interfaces.push_back(ExtrapolatorPlayerInterface(*this, i));
 }	
 
 bool GameExtrapolator::can_step(){
@@ -65,6 +66,7 @@ void GameExtrapolator::step(){
 		
 		histories[player].push_back(advance_player(
 			player, board, round_timer + extrapolated_size,
+			teams,
 			histories[player].back(),
 			states[player], turn_state,
 			extrapolated_powerup_effects
@@ -232,7 +234,7 @@ void GameExtrapolator::activate_powerup(int id, const PowerUpEffect& effect){
 	
 	switch(effect.desc.type){
 	case PowerUpType::ERASER:
-		apply_to_players(effect.desc.affects, effect.player, states.size(), [&](int player){
+		apply_to_players(effect.desc.affects, effect.player, teams, [&](int player){
 			histories[player].clear();
 		});
 		history_exists = false;

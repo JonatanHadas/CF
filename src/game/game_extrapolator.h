@@ -19,6 +19,7 @@ using namespace std;
 class GameExtrapolator : public GameView, public GameObserver, public GameAdvancer, public GameEventListenerAccumulator {
 	const BoardSize board;
 	const ScoreSettings score_settings;
+	const vector<int> teams;
 	
 	int round_num;
 	vector<int> scores;
@@ -67,7 +68,7 @@ public:
 	GameExtrapolator(
 		const BoardSize& board,
 		const ScoreSettings& score_settings,
-		int player_num, int team_num
+		const vector<int>& teams, int team_num
 	);
 
 	PlayerInterface& get_player_interface(int player);

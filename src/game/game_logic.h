@@ -12,20 +12,21 @@ using namespace std;
 
 #define POWERUP_RADIUS 3.5
 
-void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int player, function<void(const PowerUpEffect&)> todo);
+void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int player, const vector<int> teams, function<void(const PowerUpEffect&)> todo);
 
-void apply_to_players(PowerUpAffects affects, int player, int player_num, function<void(int)> todo);
+void apply_to_players(PowerUpAffects affects, int player, const vector<int> teams, function<void(int)> todo);
 
-int count_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
+int count_powerups(int player, const vector<int> teams, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
 
-int count_self_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
+int count_self_powerups(int player, const vector<int> teams, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
 
-int count_others_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
+int count_others_powerups(int player, const vector<int> teams, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects);
 
 double apply_multiplier(double start, double multiplier, int amount);
 
 PlayerPosition advance_player(
 	int player, const BoardSize& board, int starting_timer,
+	const vector<int> teams,
 	const PlayerPosition& position,
 	PlayerState& state, int turn_state,
 	const set<unique_ptr<PowerUpEffect>>& effects

@@ -414,7 +414,7 @@ void BoardDrawer::draw(SDL_Renderer* renderer, bool paused){
 			if(!view->get_histories()[player].back().alive) continue;
 			double radius = RING_RATIO * get_player_size(view->get_histories()[player].back().size);
 			double x = view->get_histories()[player].back().x, y = view->get_histories()[player].back().y;
-			applying_to_player(view->get_powerup_effects(), player, [&](const PowerUpEffect& effect){
+			applying_to_player(view->get_powerup_effects(), player, settings.teams, [&](const PowerUpEffect& effect){
 				double angle = M_PI * 2 * effect.timer / powerup_times[effect.desc];
 				int parts = angle / RING_PART;
 				vertex.color = powerup_ring_colors[(int)effect.desc.affects];

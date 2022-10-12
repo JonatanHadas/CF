@@ -6,47 +6,56 @@
 #include <math.h>
 
 
-void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int player, function<void(const PowerUpEffect&)> todo){
+void applying_to_player(const set<unique_ptr<PowerUpEffect>>& effects, int player, const vector<int> teams, function<void(const PowerUpEffect&)> todo){
 	for(const unique_ptr<PowerUpEffect>& effect: effects){
-		if(
-			effect->desc.affects == PowerUpAffects::ALL ||
-			(effect->desc.affects == PowerUpAffects::OTHERS ^ effect->player == player)
-		){
+		bool applying;
+		switch(effect->desc.affects){
+		case PowerUpAffects::ALL:
+			applying = true;
+			break;
+		case PowerUpAffects::YOU:
+			applying = (effect->player == player);
+			break;
+		case PowerUpAffects::OTHERS:
+			applying = (teams[effect->player] != teams[player]);
+			break;
+		}
+		if(applying){
 			todo(*effect);
 		}
 	}
 }
 
-void apply_to_players(PowerUpAffects affects, int player, int player_num, function<void(int)> todo){
+void apply_to_players(PowerUpAffects affects, int player, const vector<int> teams, function<void(int)> todo){
 	if(affects == PowerUpAffects::YOU) todo(player);
 	else{
-		for(int i = 0; i < player_num; i++){
-			if(affects == PowerUpAffects::ALL || i != player) todo(i);
+		for(int i = 0; i < teams.size(); i++){
+			if(affects == PowerUpAffects::ALL || teams[i] != teams[player]) todo(i);
 		}
 	}
 }
 
-int count_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
+int count_powerups(int player, const vector<int> teams, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
 	int count = 0;
-	applying_to_player(effects, player, [type, &count](const PowerUpEffect& effect) {
+	applying_to_player(effects, player, teams, [type, &count](const PowerUpEffect& effect) {
 		if(effect.desc.type == type) count++;
 	});
 	
 	return count;
 }
 
-int count_self_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
+int count_self_powerups(int player, const vector<int> teams, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
 	int count = 0;
-	applying_to_player(effects, player, [type, &count](const PowerUpEffect& effect) {
+	applying_to_player(effects, player, teams, [type, &count](const PowerUpEffect& effect) {
 		if(effect.desc.type == type && effect.desc.affects == PowerUpAffects::YOU) count++;
 	});
 	
 	return count;
 }
 
-int count_others_powerups(int player, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
+int count_others_powerups(int player, const vector<int> teams, PowerUpType type, const set<unique_ptr<PowerUpEffect>>& effects) {
 	int count = 0;
-	applying_to_player(effects, player, [type, &count](const PowerUpEffect& effect) {
+	applying_to_player(effects, player, teams, [type, &count](const PowerUpEffect& effect) {
 		if(effect.desc.type == type && effect.desc.affects == PowerUpAffects::OTHERS) count++;
 	});
 	
@@ -72,6 +81,7 @@ double apply_multiplier(double start, double multiplier, int amount){
 
 PlayerPosition advance_player(
 	int player, const BoardSize& board, int starting_timer,
+	const vector<int> teams,
 	const PlayerPosition& position,
 	PlayerState& state, int turn_state,
 	const set<unique_ptr<PowerUpEffect>>& effects
@@ -79,25 +89,25 @@ PlayerPosition advance_player(
 	state.counter++;
 	
 	int real_turn_state = turn_state;
-	if(count_powerups(player, PowerUpType::INVERT, effects) % 2) real_turn_state = -turn_state;
+	if(count_powerups(player, teams, PowerUpType::INVERT, effects) % 2) real_turn_state = -turn_state;
 
 	double turn = 0;
 	bool corner = false;
 	double direction = position.direction;
-	if(count_powerups(player, PowerUpType::RIGHT_TURN, effects)){
+	if(count_powerups(player, teams, PowerUpType::RIGHT_TURN, effects)){
 		if(turn_state && !state.turn_state){
 			direction += M_PI_2 * real_turn_state;
 			corner = true;
 		}
 	}
 	else{
-		int narrow_turns = count_powerups(player, PowerUpType::NARROW_TURN, effects);
-		int wide_turns = count_powerups(player, PowerUpType::WIDE_TURN, effects);
+		int narrow_turns = count_powerups(player, teams, PowerUpType::NARROW_TURN, effects);
+		int wide_turns = count_powerups(player, teams, PowerUpType::WIDE_TURN, effects);
 						
-		int speed_turn_size = count_self_powerups(player, PowerUpType::SPEED_UP, effects) - 
-							  count_others_powerups(player, PowerUpType::SLOW_DOWN, effects);
+		int speed_turn_size = count_self_powerups(player, teams, PowerUpType::SPEED_UP, effects) - 
+							  count_others_powerups(player, teams, PowerUpType::SLOW_DOWN, effects);
 							 
-		int other_speed_turn_size = count_others_powerups(player, PowerUpType::SPEED_UP, effects);
+		int other_speed_turn_size = count_others_powerups(player, teams, PowerUpType::SPEED_UP, effects);
 						
 		turn = real_turn_state * apply_multiplier(TURN, SPEED_MULTIPLIER, speed_turn_size)
 							   * apply_multiplier(1, SPEED_TURN_MULTIPLIER, other_speed_turn_size)
@@ -112,12 +122,12 @@ PlayerPosition advance_player(
 	
 	state.turn_state = turn_state;
 	
-	int speed_size = count_powerups(player, PowerUpType::SPEED_UP, effects) - 
-					 count_powerups(player, PowerUpType::SLOW_DOWN, effects);
+	int speed_size = count_powerups(player, teams, PowerUpType::SPEED_UP, effects) - 
+					 count_powerups(player, teams, PowerUpType::SLOW_DOWN, effects);
 	double speed = apply_multiplier(SPEED, SPEED_MULTIPLIER, speed_size);
 	
-	int size = count_powerups(player, PowerUpType::THICKEN, effects) -
-			   count_powerups(player, PowerUpType::NARROW, effects);
+	int size = count_powerups(player, teams, PowerUpType::THICKEN, effects) -
+			   count_powerups(player, teams, PowerUpType::NARROW, effects);
 	double radius = get_player_size(size) / 2;
 			   
 	double x = position.x + (speed * cos(direction));
@@ -127,7 +137,7 @@ PlayerPosition advance_player(
 	
 	int warp_x = 0, warp_y = 0;
 	bool warping_x = false, warping_y = false;
-	if(count_powerups(player, PowerUpType::WARP_AROUND, effects)){
+	if(count_powerups(player, teams, PowerUpType::WARP_AROUND, effects)){
 		if(x < radius){
 			warp_x = 1;
 		}
@@ -159,7 +169,7 @@ PlayerPosition advance_player(
 		warp_x, warp_y,
 		warping_x, warping_y,
 		corner,
-		count_powerups(player, PowerUpType::HOVER, effects) || (starting_timer < STARTING_HOVER),
+		count_powerups(player, teams, PowerUpType::HOVER, effects) || (starting_timer < STARTING_HOVER),
 		position.alive
 	);
 }

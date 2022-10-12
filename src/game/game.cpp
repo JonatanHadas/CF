@@ -188,6 +188,7 @@ void Game::step(){
 		
 		histories[player].push_back(advance_player(
 			player, board, starting_timer,
+			teams,
 			histories[player].back(),
 			states[player], turn_state,
 			powerup_effects
@@ -202,7 +203,7 @@ void Game::step(){
 		if(!histories[player].back().alive) continue;  // Do not check the dead.
 		if(histories[player].back().hovering) continue;  // Cannot collide wile hovering.		
 		
-		if(count_powerups(player, PowerUpType::WARP_AROUND, powerup_effects) == 0){
+		if(count_powerups(player, teams, PowerUpType::WARP_AROUND, powerup_effects) == 0){
 			if(check_border_collision(
 				board,
 				histories[player][histories[player].size()-2],
@@ -274,7 +275,7 @@ void Game::step(){
 				
 				switch(it->second.desc.type){
 					case PowerUpType::ERASER:
-						apply_to_players(it->second.desc.affects, player, teams.size(), [&](int player){
+						apply_to_players(it->second.desc.affects, player, teams, [&](int player){
 							erased.insert(player);
 						});
 						break;
