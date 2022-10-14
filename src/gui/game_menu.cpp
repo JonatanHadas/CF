@@ -141,6 +141,7 @@ bool GameMenu::step(){
 
 		if(game_gui->step()){
 			winner_display = game_gui->get_score_display();
+			game_gui = nullptr;
 			game = nullptr;
 		}
 		
@@ -167,6 +168,7 @@ bool GameMenu::handle_event(const SDL_Event& event){
 	if(game_gui.get() != nullptr){		
 		if(game.get() == nullptr) return exit_key;
 		else if(exit_key){
+			game_gui = nullptr;
 			game = nullptr;
 			startup->set_creator(nullptr);
 			return false;
@@ -174,6 +176,7 @@ bool GameMenu::handle_event(const SDL_Event& event){
 
 		if(game_gui->handle_event(event)){
 			winner_display = game_gui->get_score_display();
+			game_gui = nullptr;
 			game = nullptr;
 		}
 		return false;
@@ -192,14 +195,8 @@ void GameMenu::draw(SDL_Renderer* renderer){
 	sync_display();
 	
 	if(game_gui.get() != nullptr){
-		if(game.get() == nullptr){
-			SDL_RenderSetLogicalSize(renderer, w, h);
-			game_gui = nullptr;
-		}
-		else{			
-			game_gui->draw(renderer);
-			return;
-		}
+		game_gui->draw(renderer);
+		return;
 	}
 	if(winner_display.get() != nullptr){
 		winner_display->draw(renderer);
