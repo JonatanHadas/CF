@@ -55,7 +55,7 @@ public:
 };
 
 class GameGui : public Gui{
-	const GameSettings& settings;
+	const GameSettings settings;
 	GameDrawer drawer;
 	GameSoundManager sounds;
 	

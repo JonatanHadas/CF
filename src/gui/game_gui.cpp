@@ -79,7 +79,7 @@ GameGui::GameGui(
 	last_round(-1),
 	starting_timer(0),
 	paused(false),
-	drawer(view, settings, this->keysets),
+	drawer(view, this->settings, this->keysets),
 	view(view),
 	advancer(advancer),
 	accumulator(accumulator),
