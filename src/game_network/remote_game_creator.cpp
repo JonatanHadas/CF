@@ -44,8 +44,14 @@ RemoteGame::RemoteGame(
 		}
 	),
 	advancer(this->client, game, game) {
+		
+	for(int player = 0; player < settings.get_settings().teams.size(); player++){
+		if(!count(settings.get_my_players(), player)){
+			game.get_player_interface(player).set_active(false);
+		}
+	}
 
-	for(int i = 0; i < this->client.get_players().size(); i++){
+	for(int i = 0; i < this->client.get_players().size(); i++){		
 		interfaces.push_back(CompositePlayerInterface({
 			this->client.get_players()[i],
 			&game.get_player_interface(settings.get_my_players()[i])
