@@ -34,7 +34,7 @@ GameExtrapolator::GameExtrapolator(
 	extrapolated_size(0),
 	extrapolation_limit(0),
 	history_exists(false),
-	player_alive(false, teams.size()),
+	player_alive(teams.size(), false),
 	pending_inputs(teams.size(), deque<int>()),
 	player_active(teams.size(), true)
 	{
