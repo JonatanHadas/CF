@@ -591,7 +591,7 @@ void ScoreDrawer::draw(SDL_Renderer* renderer){
 	}
 
 	if(settings.scores.criterion != WinCriterion::NEVER){
-		int max_score, second_score;
+		int max_score = 0, second_score = -settings.scores.tie_break_threshold;
 		for(auto score: scores){
 			if(score > max_score){
 				second_score = max_score;
