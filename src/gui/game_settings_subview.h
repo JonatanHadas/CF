@@ -147,6 +147,8 @@ class ReadyButton : public Button {
 	
 	unique_ptr<Msg> ready, not_ready;
 	
+	function<bool()> allow_ready;
+	
 	bool is_ready() const;
 	
 	void draw(SDL_Renderer* renderer, bool pressed);
@@ -160,6 +162,7 @@ public:
 	ReadyButton(
 		const SDL_Rect& rect,
 		PlayerView& player,
+		function<bool()> allow_ready,
 		GameSettingsView* view,
 		GameSettingsManipulator* manipulator
 	);
@@ -186,6 +189,8 @@ class PlayerView : public SubView {
 	
 	SubViewManager view_manager;
 	
+	function<bool()> allow_ready;
+	
 	void sync_display();
 protected:
 	void draw_content(SDL_Renderer* renderer);
@@ -195,6 +200,7 @@ public:
 		const SDL_Rect& rect,
 		int player,
 		GameSettingsView* view, GameSettingsManipulator* manipulator,
+		function<bool()> allow_ready,
 		bool multi_peer
 	);
 	
@@ -334,6 +340,8 @@ class PlayersView : public SubView, public GameSettingsObserver {
 	
 	TextCompleter& name_completer;
 	
+	function<bool()> allow_ready;
+	
 	void sync_displays();
 protected:
 	bool on_event(const SDL_Event& event);
@@ -343,6 +351,7 @@ public:
 		const SDL_Rect& rect,
 		GameSettingsView* view, GameSettingsManipulator* manipulator,
 		TextCompleter& name_completer,
+		function<bool()> allow_ready,
 		bool multi_peer
 	);
 
@@ -391,6 +400,8 @@ class GameSettingsMenu : public TabView {
 	unique_ptr<PlayersView> players;	
 	
 	TextCompleter& name_completer;
+	
+	function<bool()> allow_ready;
 protected:
 	vector<TabView::ViewDescriptor> init_subviews(const SDL_Rect& rect);
 	void draw_button_back(SDL_Renderer* renderer, const SubView& view, TabView::State state);
@@ -401,6 +412,7 @@ public:
 	GameSettingsMenu(
 		const SDL_Rect& rect,
 		GameSettingsView* view, GameSettingsManipulator* manipulator, GameSettingsObserverAccumulator* accumulator,
+		function<bool()> allow_ready,
 		TextCompleter& name_completer,
 		bool multi_peer
 	);

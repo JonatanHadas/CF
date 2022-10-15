@@ -48,6 +48,8 @@ class GameMenu : public Gui, public GameSettingsObserver{
 	
 	TextCompleter& name_completer;
 	
+	function<bool()> allow_ready;
+	
 	void sync_display();
 public:
 	GameMenu(

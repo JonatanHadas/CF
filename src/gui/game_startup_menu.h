@@ -55,6 +55,7 @@ class StartButton : public Button {
 	unique_ptr<Msg> countdown[COUNTDOWN_LENGTH];
 	
 	function<int()> get_countdown;
+	function<bool()> allow_ready;
 	
 	GameSettingsView* view;
 	GameSettingsManipulator* manipulator;
@@ -71,6 +72,7 @@ public:
 		const SDL_Rect& rect,
 		GameSettingsView* view,
 		GameSettingsManipulator* manipulator,
+		function<bool()> allow_ready,
 		function<int()> get_countdown
 	);
 };
@@ -133,6 +135,7 @@ class GameStartupMenu : public SubView {
 	shared_ptr<GameCreator> game_creator;
 	
 	int countdown;
+	function<bool()> allow_ready;
 	
 	SubViewManager view_manager;
 	
@@ -141,7 +144,7 @@ protected:
 	void draw_content(SDL_Renderer* renderer);
 	bool on_event(const SDL_Event& event);
 public:
-	GameStartupMenu(const SDL_Rect& rect, TextCompleter& host_completer);
+	GameStartupMenu(const SDL_Rect& rect, function<bool()> allow_ready, TextCompleter& host_completer);
 	
 	shared_ptr<GameCreator> get_creator();
 	void set_creator(shared_ptr<GameCreator> creator);

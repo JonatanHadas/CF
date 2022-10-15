@@ -379,9 +379,10 @@ void TeamChangeButton::on_pressed(){
 ReadyButton::ReadyButton(
 	const SDL_Rect& rect,
 	PlayerView& player,
+	function<bool()> allow_ready,
 	GameSettingsView* view,
 	GameSettingsManipulator* manipulator
-) : Button(rect, true), player(player), view(view), manipulator(manipulator) {}
+) : Button(rect, true), player(player), view(view), manipulator(manipulator), allow_ready(allow_ready) {}
 
 bool ReadyButton::is_ready() const {
 	return view->get_ready().count(player.get_player());
@@ -421,7 +422,7 @@ void ReadyButton::draw_inactive(SDL_Renderer* renderer){
 }
 
 void ReadyButton::on_pressed(){
-	manipulator->set_ready(!view->am_i_ready());
+	if(allow_ready()) manipulator->set_ready(!view->am_i_ready());
 }
 
 int ReadyButton::get_width() const {
@@ -446,11 +447,13 @@ PlayerView::PlayerView(
 	const SDL_Rect& rect,
 	int player,
 	GameSettingsView* view, GameSettingsManipulator* manipulator,
+	function<bool()> allow_ready,
 	bool multi_peer
 ) : SubView(rect, true),
 	player(player),
 	view(view), manipulator(manipulator),
 	using_ready_button(false),
+	allow_ready(allow_ready),
 	multi_peer(multi_peer) {
 		
 	SDL_Rect button_rect;
@@ -472,7 +475,7 @@ PlayerView::PlayerView(
 	button_rect.x = (rect.w * PLAYER_STATUS_X) - button_rect.w;
 	ready_button = make_unique<ReadyButton>(
 		button_rect,
-		*this,
+		*this, allow_ready,
 		view,
 		manipulator
 	);
@@ -501,7 +504,8 @@ void PlayerView::sync_display(){
 		using_ready_button = true;
 	}
 	
-	ready_button->set_active(mine && using_ready_button);
+	if(view->am_i_ready() && !allow_ready()) manipulator->set_ready(false);
+	ready_button->set_active(mine && using_ready_button && allow_ready());
 }
 
 void PlayerView::draw_content(SDL_Renderer* renderer){
@@ -844,10 +848,12 @@ PlayersView::PlayersView(
 	const SDL_Rect& rect,
 	GameSettingsView* view, GameSettingsManipulator* manipulator,
 	TextCompleter& name_completer,
+	function<bool()> allow_ready,
 	bool multi_peer
 ) : SubView(rect, false),
 	view(view), manipulator(manipulator),
 	name_completer(name_completer),
+	allow_ready(allow_ready),
 	multi_peer(multi_peer) {
 
 	SDL_Rect button_rect;
@@ -883,6 +889,7 @@ void PlayersView::sync_displays(){
 			rect,
 			players.size(),
 			view, manipulator,
+			allow_ready,
 			multi_peer
 		));
 		view_manager.add_view(players.back().get());
@@ -1041,9 +1048,10 @@ void PlayersView::start_game() {}
 GameSettingsMenu::GameSettingsMenu(
 	const SDL_Rect& rect,
 	GameSettingsView* view, GameSettingsManipulator* manipulator, GameSettingsObserverAccumulator* accumulator,
+	function<bool()> allow_ready,
 	TextCompleter& name_completer,
 	bool multi_peer
-) : view(view), manipulator(manipulator), accumulator(accumulator), name_completer(name_completer), multi_peer(multi_peer),
+) : allow_ready(allow_ready), view(view), manipulator(manipulator), accumulator(accumulator), name_completer(name_completer), multi_peer(multi_peer),
 	TabView(
 		rect, rect.h * MENU_H, false,
 		FontType::NRM, ::text_color, 20
@@ -1057,7 +1065,7 @@ GameSettingsMenu::~GameSettingsMenu(){
 
 vector<TabView::ViewDescriptor> GameSettingsMenu::init_subviews(const SDL_Rect& rect){
 	settings = make_unique<GameSettingsSubView>(rect, view, manipulator);
-	players = make_unique<PlayersView>(rect, view, manipulator, name_completer, multi_peer);
+	players = make_unique<PlayersView>(rect, view, manipulator, name_completer, allow_ready, multi_peer);
 	accumulator->add_observer(players.get());
 
 	return vector<TabView::ViewDescriptor>({

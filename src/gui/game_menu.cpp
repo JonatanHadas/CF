@@ -48,7 +48,15 @@ GameMenu::GameMenu(
 	int w, int h,
 	TextCompleter& host_completer, TextCompleter& name_completer,
 	KeySetManager& key_manager
-) : settings_menu(nullptr), w(w), h(h), name_completer(name_completer){
+) : settings_menu(nullptr), w(w), h(h),
+	allow_ready([&](){  // Allow ready
+		for(auto keyset: players->get_keys()){
+			if(keyset.right == 0 || keyset.left == 0) return false;
+		}
+		return true;
+	}),
+	name_completer(name_completer) {
+
 	SDL_Rect rect;
 	int margin = h * MUSIC_MARGIN;
 	rect.w = rect.h = MUSIC_H * h;
@@ -74,7 +82,7 @@ GameMenu::GameMenu(
 	rect.y = rect.x = 0;
 	rect.w = settings_rect.w;
 	rect.h = settings_rect.y;
-	startup = make_unique<GameStartupMenu>(rect, host_completer);
+	startup = make_unique<GameStartupMenu>(rect, allow_ready, host_completer);
 	view_manager.add_view(startup.get());
 }
 
@@ -111,6 +119,7 @@ void GameMenu::sync_display(){
 			settings_menu = make_unique<GameSettingsMenu>(
 				settings_rect,
 				game_creator->get_view(), game_creator->get_manipulator(), game_creator->get_accumulator(),
+				allow_ready,
 				name_completer,
 				game_creator->is_multi_peer()
 			);

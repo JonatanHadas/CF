@@ -59,9 +59,11 @@ StartButton::StartButton(
 	const SDL_Rect& rect,
 	GameSettingsView* view,
 	GameSettingsManipulator* manipulator,
+	function<bool()> allow_ready,
 	function<int()> get_countdown
 ) : Button(rect, false),
 	view(view), manipulator(manipulator),
+	allow_ready(allow_ready),
 	get_countdown(get_countdown) {}
 
 void StartButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
@@ -93,7 +95,7 @@ void StartButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
 	
 	Msg* msg;
 	if(view->is_counting_down()) msg = countdown[get_countdown()].get();
-	else if(view->am_i_host()) msg = (view->get_settings().teams.size() == view->get_ready().size() ? start : waiting).get();
+	else if(view->am_i_host() && allow_ready()) msg = (view->get_settings().teams.size() == view->get_ready().size() ? start : waiting).get();
 	else msg = waiting.get();
 	
 	msg->render_centered(get_rect().w / 2, get_rect().h / 2, Align::CENTER);
@@ -296,8 +298,8 @@ string HostTextBox::get_default_text(){
 #define LEAVE_BUTTON_X 0.86
 #define READY_BUTTON_X 0.02
 
-GameStartupMenu::GameStartupMenu(const SDL_Rect& rect, TextCompleter& host_completer) : SubView(rect, false),
-	connection(rect.w * ERROR_X, rect.h * ERROR_Y) {
+GameStartupMenu::GameStartupMenu(const SDL_Rect& rect, function<bool()> allow_ready, TextCompleter& host_completer) : SubView(rect, false),
+	connection(rect.w * ERROR_X, rect.h * ERROR_Y), allow_ready(allow_ready) {
 	SDL_Rect button_rect;
 	button_rect.w = rect.w * BUTTON_W;
 	button_rect.h = rect.h * BUTTON_H;
@@ -355,6 +357,7 @@ void GameStartupMenu::sync_display(){
 			rect,
 			game_creator->get_view(),
 			game_creator->get_manipulator(),
+			allow_ready,
 			[&](){ return countdown / SECOND_LENGTH; }
 		);
 		view_manager.add_view(start.get());
@@ -364,6 +367,7 @@ void GameStartupMenu::sync_display(){
 	}
 	
 	if(start.get() != nullptr) start->set_active(
+		allow_ready() &&
 		game_creator->get_view()->am_i_host() &&
 		game_creator->get_view()->get_settings().teams.size() == game_creator->get_view()->get_ready().size()
 	);
