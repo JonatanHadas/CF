@@ -47,7 +47,11 @@ protected:
 	string get_default_text();
 	void on_active();
 public:
-	PlayerNameBox(const SDL_Rect& rect, int margin, PlayerSubView& view);
+	PlayerNameBox(
+		const SDL_Rect& rect, int margin,
+		TextCompleter& completer,
+		PlayerSubView& view
+	);
 };
 
 class PlayerKeyButton : public KeyChoiceButton {
@@ -133,7 +137,12 @@ protected:
 	bool on_event(const SDL_Event& event);
 	void draw_content(SDL_Renderer* renderer);
 public:
-	PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& settings, KeySetManager& key_manager);
+	PlayerSubView(
+		const SDL_Rect& rect,
+		int id, PlayerSettings& settings,
+		TextCompleter& name_completer,
+		KeySetManager& key_manager
+	);
 	
 	PlayerSubView(PlayerSubView&&) = delete;
 	PlayerSubView(const PlayerSubView&) = delete;
@@ -188,13 +197,15 @@ class PlayersSubView : public SubView {
 	KeySetManager& key_manager;
 	
 	PlayerSettings settings;
+	
+	TextCompleter& name_completer;
 protected:
 	bool on_event(const SDL_Event& event);
 	void draw_content(SDL_Renderer* renderer);
 	
 	void reorganize_views();
 public:
-	PlayersSubView(const SDL_Rect& rect, KeySetManager& key_manager);
+	PlayersSubView(const SDL_Rect& rect, TextCompleter& name_completer, KeySetManager& key_manager);
 	
 	~PlayersSubView();
 	

@@ -114,7 +114,11 @@ protected:
 	string get_default_text();
 	void on_active();
 public:
-	HostTextBox(const SDL_Rect& rect, int margin, ConnectionState& connection);
+	HostTextBox(
+		const SDL_Rect& rect, int margin,
+		TextCompleter& completer,
+		ConnectionState& connection
+	);
 };
 
 class GameStartupMenu : public SubView {
@@ -137,7 +141,7 @@ protected:
 	void draw_content(SDL_Renderer* renderer);
 	bool on_event(const SDL_Event& event);
 public:
-	GameStartupMenu(const SDL_Rect& rect);
+	GameStartupMenu(const SDL_Rect& rect, TextCompleter& host_completer);
 	
 	shared_ptr<GameCreator> get_creator();
 	void set_creator(shared_ptr<GameCreator> creator);

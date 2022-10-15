@@ -244,12 +244,16 @@ unique_ptr<Client>&& ConnectionState::get_client(){
 	return std::move(client);
 }
 
-HostTextBox::HostTextBox(const SDL_Rect& rect, int margin, ConnectionState& connection) :
-	TextBox(
+HostTextBox::HostTextBox(
+	const SDL_Rect& rect, int margin,
+	TextCompleter& completer,
+	ConnectionState& connection
+) : TextBox(
 		rect, false,
 		FontType::NRM,
 		margin,
-		text_color, {72, 72, 72, 32}
+		text_color, text_completion_color,
+		completer
 	),
 	connection(connection) {}
 
@@ -289,7 +293,7 @@ string HostTextBox::get_default_text(){
 #define LEAVE_BUTTON_X 0.86
 #define READY_BUTTON_X 0.02
 
-GameStartupMenu::GameStartupMenu(const SDL_Rect& rect) : SubView(rect, false),
+GameStartupMenu::GameStartupMenu(const SDL_Rect& rect, TextCompleter& host_completer) : SubView(rect, false),
 	connection(rect.w * ERROR_X, rect.h * ERROR_Y) {
 	SDL_Rect button_rect;
 	button_rect.w = rect.w * BUTTON_W;
@@ -307,7 +311,11 @@ GameStartupMenu::GameStartupMenu(const SDL_Rect& rect) : SubView(rect, false),
 	button_rect.y = rect.h * HOST_Y;
 	button_rect.w = rect.w * HOST_W;
 	button_rect.h = rect.h * HOST_H;
-	host_box = make_unique<HostTextBox>(button_rect, rect.w * HOST_MARGIN, connection);
+	host_box = make_unique<HostTextBox>(
+		button_rect, rect.w * HOST_MARGIN,
+		host_completer,
+		connection
+		);
 	view_manager.add_view(host_box.get());
 }
 

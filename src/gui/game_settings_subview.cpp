@@ -598,12 +598,14 @@ void PlayerView::set_team(int team){
 
 TeamNameBox::TeamNameBox(
 	const SDL_Rect& rect, int margin,
+	TextCompleter& completer,
 	TeamSeparator& view
 ) : TextBox(
 		rect, true,
 		FontType::NRM,
 		margin,
-		text_color, {72, 72, 72, 32}
+		text_color, {96, 96, 96, 160},
+		completer
 	),
 	view(view) {}
 
@@ -668,7 +670,8 @@ void TeamRemoveButton::on_pressed(){
 TeamSeparator::TeamSeparator(
 	const SDL_Rect& rect,
 	int team,
-	GameSettingsView* view, GameSettingsManipulator* manipulator
+	GameSettingsView* view, GameSettingsManipulator* manipulator,
+	TextCompleter& name_completer
 ) : SubView(rect, true),
 	team(team),
 	view(view), manipulator(manipulator) {
@@ -678,7 +681,7 @@ TeamSeparator::TeamSeparator(
 	view_rect.h = rect.h;
 	view_rect.w = rect.w * (TEAM_REMOVE_BUTTON_X - LINE_MARGIN) - rect.h / 2;
 	
-	name = make_unique<TeamNameBox>(view_rect, rect.w * TEAM_NAME_X, *this);
+	name = make_unique<TeamNameBox>(view_rect, rect.w * TEAM_NAME_X, name_completer, *this);
 	view_manager.add_view(name.get());
 }
 
@@ -839,9 +842,11 @@ void TeamAddButton::on_pressed(){
 PlayersView::PlayersView(
 	const SDL_Rect& rect,
 	GameSettingsView* view, GameSettingsManipulator* manipulator,
+	TextCompleter& name_completer,
 	bool multi_peer
 ) : SubView(rect, false),
 	view(view), manipulator(manipulator),
+	name_completer(name_completer),
 	multi_peer(multi_peer) {
 
 	SDL_Rect button_rect;
@@ -891,7 +896,8 @@ void PlayersView::sync_displays(){
 			teams.push_back(make_unique<TeamSeparator>(
 				rect,
 				teams.size(),
-				view, manipulator
+				view, manipulator,
+				name_completer
 			));
 			view_manager.add_view(teams.back().get());
 		}
@@ -1034,8 +1040,9 @@ void PlayersView::start_game() {}
 GameSettingsMenu::GameSettingsMenu(
 	const SDL_Rect& rect,
 	GameSettingsView* view, GameSettingsManipulator* manipulator, GameSettingsObserverAccumulator* accumulator,
+	TextCompleter& name_completer,
 	bool multi_peer
-) : view(view), manipulator(manipulator), accumulator(accumulator), multi_peer(multi_peer),
+) : view(view), manipulator(manipulator), accumulator(accumulator), name_completer(name_completer), multi_peer(multi_peer),
 	TabView(
 		rect, rect.h * MENU_H, false,
 		FontType::NRM, ::text_color, 20
@@ -1049,7 +1056,7 @@ GameSettingsMenu::~GameSettingsMenu(){
 
 vector<TabView::ViewDescriptor> GameSettingsMenu::init_subviews(const SDL_Rect& rect){
 	settings = make_unique<GameSettingsSubView>(rect, view, manipulator);
-	players = make_unique<PlayersView>(rect, view, manipulator, multi_peer);
+	players = make_unique<PlayersView>(rect, view, manipulator, name_completer, multi_peer);
 	accumulator->add_observer(players.get());
 
 	return vector<TabView::ViewDescriptor>({

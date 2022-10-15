@@ -45,11 +45,16 @@ void PlayerRemoveButton::on_pressed(){
 	view.remove();
 }
 
-PlayerNameBox::PlayerNameBox(const SDL_Rect& rect, int margin, PlayerSubView& view) : TextBox(
+PlayerNameBox::PlayerNameBox(
+	const SDL_Rect& rect, int margin,
+	TextCompleter& completer,
+	PlayerSubView& view
+) : TextBox(
 	rect, false,
 	FontType::NRM,
 	margin,
-	text_color, {72, 72, 72, 32}
+	text_color, text_completion_color,
+	completer
 	),
 	view(view) {}
 
@@ -263,7 +268,12 @@ void ColorMenu::step(){
 #define PLAYER_COLOR_Y 0.4
 #define COLOR_MENU_W 6
 
-PlayerSubView::PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& settings, KeySetManager& key_manager) :
+PlayerSubView::PlayerSubView(
+	const SDL_Rect& rect,
+	int id, PlayerSettings& settings,
+	TextCompleter& name_completer,
+	KeySetManager& key_manager
+) :
 	SubView(rect, false),
 	id(id),
 	keys_id(key_manager.get_new()),
@@ -283,7 +293,11 @@ PlayerSubView::PlayerSubView(const SDL_Rect& rect, int id, PlayerSettings& setti
 	button_rect.w = rect.w * PLAYER_NAME_WIDTH;
 	button_rect.h = rect.h * PLAYER_NAME_HEIGHT;
 	
-	name_box = make_unique<PlayerNameBox>(button_rect, button_rect.x, *this);
+	name_box = make_unique<PlayerNameBox>(
+		button_rect, button_rect.x,
+		name_completer,
+		*this
+	);
 	view_manager.add_view(name_box.get());
 	
 	button_rect.x = rect.w * PLAYER_VIEW_MARGIN_RATIO;
@@ -460,8 +474,9 @@ void PlayerAddButton::on_pressed(){
 #define MARGIN 0.05
 #define BUTTON_HEIGHT 0.2
 
-PlayersSubView::PlayersSubView(const SDL_Rect& rect, KeySetManager& key_manager) :
+PlayersSubView::PlayersSubView(const SDL_Rect& rect, TextCompleter& name_completer, KeySetManager& key_manager) :
 	SubView(rect, false),
+	name_completer(name_completer),
 	key_manager(key_manager){
 	SDL_Rect button_rect;
 	button_rect.y = button_rect.x = rect.w * MARGIN;
@@ -514,7 +529,12 @@ void PlayersSubView::reorganize_views(){
 
 	for(int i = 0; i < ids.size(); i++, rect.y += dy){
 		if(views[i].get() == nullptr){
-			views[i] = make_unique<PlayerSubView>(rect, ids[i], settings, key_manager);
+			views[i] = make_unique<PlayerSubView>(
+				rect,
+				ids[i], settings,
+				name_completer,
+				key_manager
+			);
 			view_manager.add_view(views[i].get());
 		}
 	}

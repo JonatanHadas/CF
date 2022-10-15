@@ -99,11 +99,19 @@ int main(int argc, char** argv){
 
 	KeySetManager key_manager("game_data/keys");
 	
+	TextCompleter host_completer("game_data/hosts");
+	TextCompleter name_completer("game_data/names");
+	
 	int screen_w, screen_h;
 	SDL_GetRendererOutputSize(renderer, &screen_w, &screen_h);
 	SDL_RenderSetLogicalSize(renderer, screen_w, screen_h);
 
-	GameMenu gui(screen_w, screen_h, key_manager);
+	GameMenu gui(
+		screen_w, screen_h,
+		host_completer,
+		name_completer,
+		key_manager
+	);
 	
 	mainloop(gui, renderer);
 	

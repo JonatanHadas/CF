@@ -4,6 +4,8 @@
 #include "texts.h"
 #include "subview.h"
 
+#include "../utils/text_completer.h"
+
 #include <string>
 #include <memory>
 
@@ -12,15 +14,29 @@ using namespace std;
 class TextBox : public SubView {
 	string text;
 	string last_text;
-	unique_ptr<Msg> msg;
+	unique_ptr<Msg> msg, completion_msg;
 	
 	FontType font;
 	SDL_Color color;
 	SDL_Color back_color;
 	
+	TextCompleter* completer;
+	vector<string> suggestions;
+	int current_suggestion;
+	
 	int margin;
 	
 	bool updated, typing, active;
+
+	TextBox(
+		const SDL_Rect& rect, bool translucent,
+		FontType font,
+		int margin,
+		const SDL_Color& color, const SDL_Color& back_color,
+		TextCompleter* completer
+	);
+
+	void set();
 protected:
 	bool on_event(const SDL_Event& event);
 	void draw_content(SDL_Renderer* renderer);
@@ -35,6 +51,13 @@ public:
 		FontType font,
 		int margin,
 		const SDL_Color& color, const SDL_Color& back_color
+	);
+	TextBox(
+		const SDL_Rect& rect, bool translucent,
+		FontType font,
+		int margin,
+		const SDL_Color& color, const SDL_Color& back_color,
+		TextCompleter& completer
 	);
 
 	void step();

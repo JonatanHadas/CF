@@ -220,6 +220,7 @@ protected:
 public:
 	TeamNameBox(
 		const SDL_Rect& rect, int margin,
+		TextCompleter& completer,
 		TeamSeparator& view
 	);
 };
@@ -259,7 +260,8 @@ public:
 	TeamSeparator(
 		const SDL_Rect& rect,
 		int team,
-		GameSettingsView* view, GameSettingsManipulator* manipulator
+		GameSettingsView* view, GameSettingsManipulator* manipulator,
+		TextCompleter& name_completer
 	);
 	
 	void lose_focus();
@@ -330,6 +332,8 @@ class PlayersView : public SubView, public GameSettingsObserver {
 	
 	SubViewManager view_manager;
 	
+	TextCompleter& name_completer;
+	
 	void sync_displays();
 protected:
 	bool on_event(const SDL_Event& event);
@@ -338,6 +342,7 @@ public:
 	PlayersView(
 		const SDL_Rect& rect,
 		GameSettingsView* view, GameSettingsManipulator* manipulator,
+		TextCompleter& name_completer,
 		bool multi_peer
 	);
 
@@ -384,6 +389,8 @@ class GameSettingsMenu : public TabView {
 
 	unique_ptr<GameSettingsSubView> settings;
 	unique_ptr<PlayersView> players;	
+	
+	TextCompleter& name_completer;
 protected:
 	vector<TabView::ViewDescriptor> init_subviews(const SDL_Rect& rect);
 	void draw_button_back(SDL_Renderer* renderer, const SubView& view, TabView::State state);
@@ -394,6 +401,7 @@ public:
 	GameSettingsMenu(
 		const SDL_Rect& rect,
 		GameSettingsView* view, GameSettingsManipulator* manipulator, GameSettingsObserverAccumulator* accumulator,
+		TextCompleter& name_completer,
 		bool multi_peer
 	);
 	

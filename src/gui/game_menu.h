@@ -46,9 +46,14 @@ class GameMenu : public Gui, public GameSettingsObserver{
 	unique_ptr<GameGui> game_gui;
 	unique_ptr<WinnerDisplay> winner_display;
 	
+	TextCompleter& name_completer;
+	
 	void sync_display();
 public:
-	GameMenu(int w, int h, KeySetManager& key_manager);
+	GameMenu(
+		int w, int h,
+		TextCompleter& host_completer, TextCompleter& name_completer,
+		KeySetManager& key_manager);
 	~GameMenu();
 
 	bool step();
