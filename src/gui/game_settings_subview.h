@@ -137,6 +137,36 @@ public:
 	);
 };
 
+class ReadyButton : public Button {
+	GameSettingsView* view;
+	GameSettingsManipulator* manipulator;
+	
+	PlayerView& player;
+	
+	bool pressed;
+	
+	unique_ptr<Msg> ready, not_ready;
+	
+	bool is_ready() const;
+	
+	void draw(SDL_Renderer* renderer, bool pressed);
+protected:
+	void draw_pressed(SDL_Renderer* renderer);
+	void draw_released(SDL_Renderer* renderer);
+	void draw_inactive(SDL_Renderer* renderer);
+	
+	void on_pressed();
+public:
+	ReadyButton(
+		const SDL_Rect& rect,
+		PlayerView& player,
+		GameSettingsView* view,
+		GameSettingsManipulator* manipulator
+	);
+	
+	int get_width() const;
+};
+
 class PlayerView : public SubView {
 	GameSettingsView* view;
 	GameSettingsManipulator* manipulator;
@@ -149,7 +179,8 @@ class PlayerView : public SubView {
 	unique_ptr<Msg> name_label;
 
 	unique_ptr<Msg> host_label;
-	unique_ptr<Msg> ready_label;
+	unique_ptr<ReadyButton> ready_button;
+	bool using_ready_button;
 	
 	unique_ptr<TeamChangeButton> inc, dec;
 	

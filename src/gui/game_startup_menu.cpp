@@ -55,7 +55,7 @@ void LeaveGameButton::on_pressed(){
 	menu.set_creator(nullptr);
 }
 
-ReadyButton::ReadyButton(
+StartButton::StartButton(
 	const SDL_Rect& rect,
 	GameSettingsView* view,
 	GameSettingsManipulator* manipulator,
@@ -64,23 +64,9 @@ ReadyButton::ReadyButton(
 	view(view), manipulator(manipulator),
 	get_countdown(get_countdown) {}
 
-void ReadyButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
+void StartButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
 	fill_back(renderer, color);
 	draw_frame(renderer, line_color);
-	
-	if(ready.get() == nullptr) ready = make_unique<Msg>(
-		"I'm Ready",
-		text_color,
-		FontType::NRM,
-		renderer
-	);
-
-	if(not_ready.get() == nullptr) not_ready = make_unique<Msg>(
-		"I'm Not Ready",
-		text_color,
-		FontType::NRM,
-		renderer
-	);
 
 	if(start.get() == nullptr) start = make_unique<Msg>(
 		"Start",
@@ -108,30 +94,27 @@ void ReadyButton::draw_button(SDL_Renderer* renderer, const SDL_Color& color){
 	Msg* msg;
 	if(view->is_counting_down()) msg = countdown[get_countdown()].get();
 	else if(view->am_i_host()) msg = (view->get_settings().teams.size() == view->get_ready().size() ? start : waiting).get();
-	else msg = (view->am_i_ready() ? ready : not_ready).get();
+	else msg = waiting.get();
 	
 	msg->render_centered(get_rect().w / 2, get_rect().h / 2, Align::CENTER);
 }
 
-void ReadyButton::draw_pressed(SDL_Renderer* renderer){
+void StartButton::draw_pressed(SDL_Renderer* renderer){
 	draw_button(renderer, active_color);
 }
 
-void ReadyButton::draw_released(SDL_Renderer* renderer){
+void StartButton::draw_released(SDL_Renderer* renderer){
 	draw_button(renderer, bg_color);
 }
 
-void ReadyButton::draw_inactive(SDL_Renderer* renderer){
+void StartButton::draw_inactive(SDL_Renderer* renderer){
 	draw_button(renderer, bg_color);
 }
 
-void ReadyButton::on_pressed(){
+void StartButton::on_pressed(){
 	play(Sound::CLICK);
 	if(view->am_i_host()){
 		if(view->get_settings().teams.size() == view->get_ready().size()) manipulator->start_countdown();
-	}
-	else{
-		manipulator->set_ready(!view->am_i_ready());
 	}
 }
 
@@ -342,35 +325,35 @@ void GameStartupMenu::sync_display(){
 	host_box->set_active(game_creator.get() == nullptr && !connection.is_active());
 	
 	if(game_creator.get() == nullptr){
-		if(ready.get() != nullptr){
-			view_manager.remove_view(ready.get());
-			ready = nullptr;
+		if(start.get() != nullptr){
+			view_manager.remove_view(start.get());
+			start = nullptr;
 			
 			view_manager.remove_view(leave_game.get());
 			view_manager.add_view(local_game.get());
 		}
 	}
-	else if(ready.get() == nullptr){
+	else if(start.get() == nullptr){
 		SDL_Rect rect;
 		rect.w = get_rect().w * BUTTON_W;
 		rect.h = get_rect().h * BUTTON_H;
 		rect.x = get_rect().w * READY_BUTTON_X;
 		rect.y = get_rect().h * BUTTON_Y;
 		
-		ready = make_unique<ReadyButton>(
+		start = make_unique<StartButton>(
 			rect,
 			game_creator->get_view(),
 			game_creator->get_manipulator(),
 			[&](){ return countdown / SECOND_LENGTH; }
 		);
-		view_manager.add_view(ready.get());
+		view_manager.add_view(start.get());
 		
 		view_manager.add_view(leave_game.get());
 		view_manager.remove_view(local_game.get());	
 	}
 	
-	if(ready.get() != nullptr) ready->set_active(
-		!game_creator->get_view()->am_i_host() ||
+	if(start.get() != nullptr) start->set_active(
+		game_creator->get_view()->am_i_host() &&
 		game_creator->get_view()->get_settings().teams.size() == game_creator->get_view()->get_ready().size()
 	);
 }

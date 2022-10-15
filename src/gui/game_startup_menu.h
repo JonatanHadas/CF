@@ -50,8 +50,8 @@ public:
 
 #define COUNTDOWN_LENGTH 3
 
-class ReadyButton : public Button {
-	unique_ptr<Msg> ready, not_ready, start, waiting;
+class StartButton : public Button {
+	unique_ptr<Msg> start, waiting;
 	unique_ptr<Msg> countdown[COUNTDOWN_LENGTH];
 	
 	function<int()> get_countdown;
@@ -67,7 +67,7 @@ protected:
 
 	void on_pressed();
 public:
-	ReadyButton(
+	StartButton(
 		const SDL_Rect& rect,
 		GameSettingsView* view,
 		GameSettingsManipulator* manipulator,
@@ -124,7 +124,7 @@ class GameStartupMenu : public SubView {
 	ConnectionState connection;
 	
 	unique_ptr<LeaveGameButton> leave_game;
-	unique_ptr<ReadyButton> ready;
+	unique_ptr<StartButton> start;
 	
 	shared_ptr<GameCreator> game_creator;
 	

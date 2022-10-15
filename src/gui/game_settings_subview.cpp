@@ -376,11 +376,66 @@ void TeamChangeButton::on_pressed(){
 	view.set_team(view.get_team() + (direction ? -1 : 1));
 }
 
+ReadyButton::ReadyButton(
+	const SDL_Rect& rect,
+	PlayerView& player,
+	GameSettingsView* view,
+	GameSettingsManipulator* manipulator
+) : Button(rect, true), player(player), view(view), manipulator(manipulator) {}
+
+bool ReadyButton::is_ready() const {
+	return view->get_ready().count(player.get_player());
+}
+
+void ReadyButton::draw(SDL_Renderer* renderer, bool is_pressed){
+	if(ready.get() == nullptr || pressed != is_pressed) ready = make_unique<Msg>(
+		"Ready",
+		is_pressed ? active_color : text_color,
+		FontType::NRM,
+		renderer
+	);
+
+	if(not_ready.get() == nullptr || pressed != is_pressed) not_ready = make_unique<Msg>(
+		"Not Ready",
+		is_pressed ? active_color : text_color,
+		FontType::NRM,
+		renderer
+	);
+	
+	pressed = is_pressed;
+	
+	fill_back(renderer, clear_color);
+	(is_ready() ? ready : not_ready)->render_centered(get_rect().w, get_rect().h / 2, Align::RIGHT);
+}
+
+void ReadyButton::draw_pressed(SDL_Renderer* renderer){
+	draw(renderer, true);
+}
+
+void ReadyButton::draw_released(SDL_Renderer* renderer){
+	draw(renderer, false);
+}
+
+void ReadyButton::draw_inactive(SDL_Renderer* renderer){
+	draw(renderer, false);
+}
+
+void ReadyButton::on_pressed(){
+	manipulator->set_ready(!view->am_i_ready());
+}
+
+int ReadyButton::get_width() const {
+	auto& msg = is_ready() ? ready : not_ready;
+	
+	return msg.get() == nullptr ? 0 : msg->get_width();
+}
+
 #define LINE_MARGIN 0.01
 
 #define PLAYER_NAME_X 0.04
 #define TEAM_NAME_X 0.02
 #define PLAYER_STATUS_X 0.95
+#define PLAYER_READY_W 0.085
 
 #define TEAM_CHANGE_H 0.4
 #define TEAM_CHANGE_W 0.02
@@ -395,6 +450,7 @@ PlayerView::PlayerView(
 ) : SubView(rect, true),
 	player(player),
 	view(view), manipulator(manipulator),
+	using_ready_button(false),
 	multi_peer(multi_peer) {
 		
 	SDL_Rect button_rect;
@@ -409,19 +465,43 @@ PlayerView::PlayerView(
 	button_rect.y = rect.h * (0.5 - TEAM_CHANGE_DY) - button_rect.h;
 	dec = make_unique<TeamChangeButton>(button_rect, true, *this);
 	view_manager.add_view(dec.get());
+	
+	button_rect.h = rect.h;
+	button_rect.w = rect.w * PLAYER_READY_W;
+	button_rect.y = 0;
+	button_rect.x = (rect.w * PLAYER_STATUS_X) - button_rect.w;
+	ready_button = make_unique<ReadyButton>(
+		button_rect,
+		*this,
+		view,
+		manipulator
+	);
 }
 	
 void PlayerView::sync_display(){
-	bool change_teams = false;
+	bool mine = false;
 	for(auto my_player: view->get_my_players()){
-		if(player == my_player) change_teams = true;
+		if(player == my_player) mine = true;
 	}
-	change_teams &= view->get_settings().using_teams;
+	bool change_teams = mine && view->get_settings().using_teams;
 	
 	int team = view->get_settings().teams[player];
 	
 	inc->set_active(change_teams && team < view->get_settings().team_names.size() -1);
 	dec->set_active(change_teams && team > 0);
+	
+	if(!multi_peer || count(view->get_host_players(), player)){
+		if(using_ready_button){
+			view_manager.remove_view(ready_button.get());
+			using_ready_button = false;
+		}
+	}
+	else if(!using_ready_button){
+		view_manager.add_view(ready_button.get());
+		using_ready_button = true;
+	}
+	
+	ready_button->set_active(mine && using_ready_button);
 }
 
 void PlayerView::draw_content(SDL_Renderer* renderer){
@@ -453,12 +533,6 @@ void PlayerView::draw_content(SDL_Renderer* renderer){
 		renderer
 	);
 
-	if(ready_label.get() == nullptr) ready_label = make_unique<Msg>(
-		"Ready",
-		text_color, FontType::NRM,
-		renderer
-	);
-
 	fill_back(renderer, clear_color);
 	
 	int text_x = get_rect().w * (view->get_settings().using_teams ? PLAYER_NAME_X : TEAM_NAME_X);
@@ -473,9 +547,8 @@ void PlayerView::draw_content(SDL_Renderer* renderer){
 		if(count(view->get_host_players(), player)){
 			host_label->render_centered(text_x, get_rect().h / 2, Align::RIGHT);
 			line_end_x -= host_label->get_width();
-		} else if (view->get_ready().count(player)) {
-			ready_label->render_centered(text_x, get_rect().h / 2, Align::RIGHT);
-			line_end_x -= ready_label->get_width();
+		} else {
+			line_end_x -= ready_button->get_width();
 		}
 	}
 	
