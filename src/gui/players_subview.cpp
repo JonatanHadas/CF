@@ -106,8 +106,9 @@ void PlayerKeyButton::on_active(){
 	play(Sound::CLICK);
 }
 
-void PlayerKeyButton::draw_back(SDL_Renderer* renderer, bool active){
-	fill_back(renderer, active ? active_color : bg_color);
+void PlayerKeyButton::draw_back(SDL_Renderer* renderer, bool active, bool empty){
+	if(active) fill_back(renderer, active_color);
+	else fill_back(renderer, empty ? SDL_Color({64, 0, 0, 255}) : bg_color);
 	draw_frame(renderer, line_color);
 }
 

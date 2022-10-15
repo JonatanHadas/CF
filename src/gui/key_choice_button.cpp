@@ -161,7 +161,7 @@ KeyChoiceButton::KeyChoiceButton(
 ) : KeyChoiceButton(rect, translucent, font, color, (SDL_Scancode)0) {}
 
 void KeyChoiceButton::draw_content(SDL_Renderer* renderer) {
-	draw_back(renderer, active);
+	draw_back(renderer, active, key == 0);
 	
 	if(updated){
 		if(key){

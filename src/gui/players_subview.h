@@ -62,7 +62,7 @@ protected:
 	bool on_set(SDL_Scancode key);
 	void on_active();
 
-	void draw_back(SDL_Renderer* renderer, bool active);
+	void draw_back(SDL_Renderer* renderer, bool active, bool empty);
 public:
 	PlayerKeyButton(
 		const SDL_Rect& rect, PlayerSubView& view,
