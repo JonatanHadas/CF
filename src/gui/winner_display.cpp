@@ -90,7 +90,7 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 			const auto& player_texture = player_textures[settings.colors[player]];
 
 			SDL_Color color = player_texture.get_color();
-			if(active[player]) color.a *= INACTIVE_MULTIPLIER;
+			if(!active[player]) color.a *= INACTIVE_MULTIPLIER;
 			
 			names.push_back(Msg(
 				name_texts.back().c_str(),
