@@ -90,9 +90,10 @@ void TextBox::step() {}
 void TextBox::lose_focus(){
 	if(typing){
 		SDL_StopTextInput();
-		text = last_text;
+		last_text = text;
 		updated = true;
 		typing = false;
+		on_set(text);
 	}
 }
 
