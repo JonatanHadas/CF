@@ -474,10 +474,33 @@ string get_default_name(const char* type, int index){
 	return name;
 }
 
+#define INACTIVE_MULTIPLIER 0.2
+
 void ScoreDrawer::init(SDL_Renderer* renderer){
+	for(int i = 0; i < settings.teams.size(); i++){
+		const auto& player_texture = player_textures[settings.colors[i]];
+		SDL_Color color = player_texture.get_color();
+		const char* name = (settings.names[i].size() ? settings.names[i] : get_default_name("player", i)).c_str();
+		
+		names.push_back(Msg(
+			name,
+			color, FontType::NRM,
+			renderer,
+			player_texture.get_texture()
+		));
+
+		color.a *= INACTIVE_MULTIPLIER;
+		names_inactive.push_back(Msg(
+			name,
+			color, FontType::NRM,
+			renderer,
+			player_texture.get_texture()
+		));
+	}
+	
 	if(settings.using_teams){
 		for(int i = 0; i < settings.team_names.size(); i++){
-			names.push_back(Msg(
+			team_names.push_back(Msg(
 				(settings.team_names[i].size() ? settings.team_names[i] : get_default_name("team", i)).c_str(),
 				text_color,
 				FontType::NRM,
@@ -485,42 +508,25 @@ void ScoreDrawer::init(SDL_Renderer* renderer){
 			));
 		}
 
-		player_names = vector<vector<Msg>>(settings.team_names.size());
+		player_indices = vector<vector<int>>(settings.team_names.size());
 
 		for(int i = 0; i < settings.teams.size(); i++){
 			const auto& player_texture = player_textures[settings.colors[i]];
 			
-			player_names[settings.teams[i]].push_back(Msg(
-				(settings.names[i].size() ? settings.names[i] : get_default_name("player", i)).c_str(),
-				player_texture.get_color(),
-				FontType::NRM,
-				renderer,
-				player_texture.get_texture()
-			));
+			player_indices[settings.teams[i]].push_back(i);
 		}
 	}
 	else{
-		player_names = vector<vector<Msg>>(settings.teams.size());
-		for(int i = 0; i < settings.teams.size(); i++){
-			const auto& player_texture = player_textures[settings.colors[i]];
-
-			names.push_back(Msg(
-				(settings.names[i].size() ? settings.names[i] : get_default_name("player", i)).c_str(),
-				player_texture.get_color(),
-				FontType::NRM,
-				renderer,
-				player_texture.get_texture()
-			));
-		}
+		player_indices = vector<vector<int>>(settings.teams.size());
 	}
 
-	for(int i = 0; i < names.size(); i++) order.push_back(i);
+	for(int i = 0; i < player_indices.size(); i++) order.push_back(i);
 
 	int dy = h * SCORES_DY;
 	int y = h * SCORES_Y;
 	for(int i: order){
 		ys.push_back(y);
-		y += dy * (1 + player_names[i].size());
+		y += dy * (1 + player_indices[i].size());
 	}
 
 }
@@ -530,21 +536,34 @@ void ScoreDrawer::draw(SDL_Renderer* renderer){
 
 	for(int i = 0; i < view->get_scores().size(); i++){
 		if(scores.size() <= i || view->get_scores()[i] != scores[i]){
+			const char* text = to_string(view->get_scores()[i]).c_str();
+			SDL_Color color = settings.using_teams ? text_color : player_textures[settings.colors[i]].get_color();
+			SDL_Texture* texture = settings.using_teams ? NULL :  player_textures[settings.colors[i]].get_texture();
+			
 			Msg msg(
-				to_string(view->get_scores()[i]).c_str(),
-				settings.using_teams ? text_color : player_textures[settings.colors[i]].get_color(),
-				FontType::NRM,
+				text,
+				color, FontType::NRM,
 				renderer,
-				settings.using_teams ? NULL :  player_textures[settings.colors[i]].get_texture()
+				texture
+			);
+			
+			color.a *= INACTIVE_MULTIPLIER;
+			Msg msg_inactive(
+				text,
+				color, FontType::NRM,
+				renderer,
+				texture
 			);
 
 			if(scores.size() <= i){
 				scores.push_back(view->get_scores()[i]);
 				score_texts.push_back(std::move(msg));
+				scores_inactive.push_back(std::move(msg_inactive));
 			}
 			else{
 				scores[i] = view->get_scores()[i];
 				score_texts[i] = std::move(msg);
+				scores_inactive[i] = std::move(msg_inactive);
 			}
 		}
 	}
@@ -553,12 +572,21 @@ void ScoreDrawer::draw(SDL_Renderer* renderer){
 
 	for(int i = 0; i < scores.size(); i++){
 		int y = ys[i];
-		names[i].render_centered(x + w * TEXT_X, y, Align::LEFT);
-		score_texts[i].render_centered(x + w * SCORES_X, y, Align::RIGHT);
+		
+		auto& msgs = settings.using_teams ? team_names : (
+			view->get_states()[i].active ? names : names_inactive
+		);
+		
+		msgs[i].render_centered(x + w * TEXT_X, y, Align::LEFT);
+		(settings.using_teams || view->get_states()[i].active ? score_texts : scores_inactive)[i].render_centered(
+			x + w * SCORES_X, y, Align::RIGHT
+		);
 
-		for(auto& name: player_names[i]){
+		for(auto j: player_indices[i]){
 			y += dy;
-			name.render_centered(x + w * PLAYER_NAME_X, y, Align::LEFT);
+			(view->get_states()[j].active ? names : names_inactive)[j].render_centered(
+				x + w * PLAYER_NAME_X, y, Align::LEFT
+			);
 		}
 	}
 
@@ -660,7 +688,7 @@ void ScoreDrawer::step(){
 	int y = h * SCORES_Y;
 	for(int i: order){
 		ys[i] = follow(ys[i], y, SCORE_FOLLOW_SPEED);
-		y += dy * (1 + player_names[i].size());
+		y += dy * (1 + player_indices[i].size());
 	}
 }
 

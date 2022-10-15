@@ -38,12 +38,12 @@ class ScoreDrawer{
 	bool tie_break;
 	int amount;
 	
-	vector<Msg> names;
+	vector<Msg> names, names_inactive, team_names;
 	
 	vector<int> scores;
-	vector<Msg> score_texts;
+	vector<Msg> score_texts, scores_inactive;
 	
-	vector<vector<Msg>> player_names;
+	vector<vector<int>> player_indices;
 	
 	vector<int> order;
 	vector<int> ys;

@@ -34,7 +34,6 @@ class Game : public GameView, public GameAdvancer, public GameEventListenerAccum
 	vector<vector<PlayerPosition>> histories;
 	vector<PlayerState> states;
 	vector<deque<int>> pending_inputs;
-	vector<bool> player_active;
 
 	map<int, PowerUp> powerups;
 	set<unique_ptr<PowerUpEffect>> powerup_effects;

@@ -41,10 +41,11 @@ public:
 
 class PlayerState{
 public:
-	PlayerState(int turn_state, int counter);
+	PlayerState(int turn_state, int counter, bool active);
 
 	int turn_state;
 	int counter;
+	bool active;
 
 	void serialize(ostream& output) const;
 	static PlayerState deserialize(istream& input);	

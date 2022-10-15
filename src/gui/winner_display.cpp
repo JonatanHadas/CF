@@ -9,9 +9,18 @@
 
 #define MIN_TIME 60
 
+vector<bool> get_active(GameView* view){
+	vector<bool> active;
+
+	for(const auto& state: view->get_states()) active.push_back(state.active);
+
+	return active;
+}
+
 WinnerDisplay::WinnerDisplay(const GameSettings& settings, GameView* view) :
 	settings(settings),
 	scores(view->get_scores()),
+	active(get_active(view)),
 	start(true),
 	timer(MIN_TIME) {}
 	
@@ -20,6 +29,8 @@ string default_name(const char* type, int index){
 	snprintf(name, 50, "%s-%d", type, index);
 	return name;
 }
+
+#define INACTIVE_MULTIPLIER 0.2
 
 void WinnerDisplay::init(SDL_Renderer* renderer){
 	SDL_GetRendererOutputSize(renderer, &screen_width, &screen_height);
@@ -60,10 +71,12 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 		for(int player = 0; player < settings.teams.size(); player++){
 			const auto& player_texture = player_textures[settings.colors[player]];
 			
+			SDL_Color color = player_texture.get_color();
+			if(!active[player]) color.a *= INACTIVE_MULTIPLIER;
+			
 			player_names[order[settings.teams[player]]].push_back(Msg(
 				(settings.names[player].size() ? settings.names[player] : default_name("player", player)).c_str(),
-				player_texture.get_color(),
-				FontType::MID,
+				color, FontType::MID,
 				renderer,
 				player_texture.get_texture()
 			));
@@ -75,19 +88,20 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 			name_texts.push_back(settings.names[player].size() ? settings.names[player] : default_name("player", player));
 			
 			const auto& player_texture = player_textures[settings.colors[player]];
+
+			SDL_Color color = player_texture.get_color();
+			if(active[player]) color.a *= INACTIVE_MULTIPLIER;
 			
 			names.push_back(Msg(
 				name_texts.back().c_str(),
-				player_texture.get_color(),
-				FontType::MID,
+				color, FontType::MID,
 				renderer,
 				player_texture.get_texture()
 			));
 			
 			score_texts.push_back(Msg(
 				to_string(scores[player]).c_str(),
-				player_texture.get_color(),
-				FontType::MID,
+				color, FontType::MID,
 				renderer,
 				player_texture.get_texture()
 			));

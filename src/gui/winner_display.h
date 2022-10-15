@@ -15,6 +15,7 @@ using namespace std;
 class WinnerDisplay : public Gui {
 	const GameSettings settings;
 	const vector<int> scores;
+	const vector<bool> active;
 	
 	int timer;
 	bool start;

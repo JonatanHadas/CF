@@ -17,7 +17,7 @@ void Game::GamePlayerInterface::step(int round, int turn_state){
 	game.pending_inputs[player].push_back(turn_state);
 }
 void Game::GamePlayerInterface::set_active(bool active){
-	game.player_active[player] = active;
+	game.states[player].active = active;
 }
 
 Game::Game(
@@ -33,9 +33,8 @@ Game::Game(
 	tie_break_round(false),
 	game_over(false),
 	histories(teams.size(), vector<PlayerPosition>()),
-	states(teams.size(), PlayerState(0, 0)),
+	states(teams.size(), PlayerState(0, 0, true)),
 	pending_inputs(teams.size(), deque<int>()),
-	player_active(teams.size(), true),
 	cheese_makers(teams.size(), CheeseMaker()),
 	collision_grids(teams.size(), create_collision_grid(board)),
 	teams(teams),
@@ -166,8 +165,8 @@ void Game::allow_step(){}
 bool Game::can_step(){
 	if(game_over) return false;
 
-	for(int i = 0; i < player_active.size(); i++){
-		if(player_active[i] && pending_inputs[i].empty()) return false;
+	for(int i = 0; i < states.size(); i++){
+		if(states[i].active && pending_inputs[i].empty()) return false;
 	}
 	
 	return true;

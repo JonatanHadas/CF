@@ -86,19 +86,21 @@ PlayerPosition PlayerPosition::deserialize(istream& input){
 }
 
 
-PlayerState::PlayerState(int turn_state, int counter) :
-	turn_state(turn_state), counter(counter) {}
+PlayerState::PlayerState(int turn_state, int counter, bool active) :
+	turn_state(turn_state), counter(counter), active(active) {}
 
 void PlayerState::serialize(ostream& output) const {
 	write_raw(output, turn_state);
 	write_raw(output, counter);
+	write_raw(output, active);
 }
 
 PlayerState PlayerState::deserialize(istream& input){
 	auto turn_state = read_raw<int>(input);
 	auto counter = read_raw<int>(input);
+	auto active = read_raw<bool>(input);
 	
-	return PlayerState(turn_state, counter);
+	return PlayerState(turn_state, counter, active);
 }
 
 
