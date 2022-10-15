@@ -79,6 +79,8 @@ GameMenu::GameMenu(
 }
 
 GameMenu::~GameMenu(){
+	settings_menu = nullptr;
+	players->detach_settings();
 	game_gui = nullptr;
 	game = nullptr;
 	game_creator = nullptr;
