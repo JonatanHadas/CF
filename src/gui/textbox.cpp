@@ -32,8 +32,9 @@ TextBox::TextBox(
 void TextBox::set(){
 	if(typing){
 		SDL_StopTextInput();
+
+		if(current_suggestion < suggestions.size()) text = suggestions[current_suggestion];		
 		last_text = text;
-		if(completer != nullptr) completer->add_suggestion(text);
 		updated = true;
 		typing = false;
 		
@@ -65,8 +66,10 @@ bool TextBox::on_event(const SDL_Event& event){
 				}
 				break;
 			case SDLK_TAB:
-				if(!suggestions.size()) break;
+				if(current_suggestion >= suggestions.size()) break;
 				text = suggestions[current_suggestion];
+				update();
+				return true;
 			case SDLK_RETURN:
 			case SDLK_RETURN2:
 			case SDLK_KP_ENTER:
@@ -79,7 +82,7 @@ bool TextBox::on_event(const SDL_Event& event){
 				}
 				return true;
 			case SDLK_DOWN:
-				if(current_suggestion < suggestions.size() - 1){
+				if(current_suggestion < suggestions.size()){
 					current_suggestion++;
 					updated = true;
 				}
@@ -116,7 +119,7 @@ void TextBox::draw_content(SDL_Renderer* renderer){
 				renderer
 			);
 		}
-		else if(!typing || suggestions.size() == 0){
+		else if(!typing || current_suggestion >= suggestions.size()){
 			msg = make_unique<Msg>(
 				get_default_text().c_str(), 
 				typing ? back_color : color,
@@ -130,7 +133,7 @@ void TextBox::draw_content(SDL_Renderer* renderer){
 		
 		updated = false;
 		
-		if(typing && suggestions.size()){
+		if(typing && current_suggestion < suggestions.size()){
 			completion_msg = make_unique<Msg>(
 				suggestions[current_suggestion].substr(text.size()).c_str(),
 				back_color,
@@ -198,4 +201,12 @@ void TextBox::update(){
 
 	if(completer != nullptr) suggestions = completer->get_suggestions(text);
 	current_suggestion = 0;	
+}
+
+void TextBox::add_last_as_suggestion(){
+	if(completer != nullptr && last_text.size()){
+		completer->add_suggestion(last_text);
+	
+		update();
+	}
 }

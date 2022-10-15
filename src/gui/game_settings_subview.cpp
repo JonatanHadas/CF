@@ -616,6 +616,7 @@ void TeamNameBox::draw_back(SDL_Renderer* renderer, bool typing){
 void TeamNameBox::on_set(const string& text){
 	play(Sound::CLICK);
 	view.set_name(text);
+	add_last_as_suggestion();
 }
 
 void TeamNameBox::on_active(){

@@ -71,6 +71,7 @@ public:
 	int get_text_width();
 	
 	void update();
+	void add_last_as_suggestion();
 };
 
 #endif

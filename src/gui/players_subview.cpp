@@ -66,6 +66,7 @@ void PlayerNameBox::draw_back(SDL_Renderer* renderer, bool typing){
 void PlayerNameBox::on_set(const string& text){
 	play(Sound::CLICK);
 	view.set_name(text);
+	add_last_as_suggestion();
 }
 
 void PlayerNameBox::on_active(){

@@ -265,7 +265,10 @@ void HostTextBox::draw_back(SDL_Renderer* renderer, bool typing){
 void HostTextBox::on_set(const string& text){
 	play(Sound::CLICK);
 	connection.connect(text);
-	set_active(false);
+	if(connection.is_active()){
+		set_active(false);
+		add_last_as_suggestion();
+	}
 }
 
 void HostTextBox::on_active(){
