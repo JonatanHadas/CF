@@ -6,7 +6,7 @@ SYS = $(shell uname)
 DBG_FLAGS = -g
 
 ifeq ($(SYS), Linux)
-	CMP_FLAGS = -I"/usr/include/SDL2" -I"enet\include" $(DBG_FLAGS)
+	CMP_FLAGS = -I"/usr/include/SDL2" -I"enet/include" $(DBG_FLAGS)
 	LNK_FLAGS = -L"enet" -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer -lenet
 	EXEC_EXT = 
 else
@@ -14,6 +14,8 @@ ifeq ($(findstring MINGW32, $(SYS)), MINGW32)
 	CMP_FLAGS = -I"C:\MinGW\include\SDL2" -I"enet\include" $(DBG_FLAGS)
 	LNK_FLAGS = -L"C:\MinGW\lib" -L"enet" -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer -lenet64 -lws2_32 -lwinmm
 	EXEC_EXT = .exe
+else
+	$(info Unsupported system $(SYS))
 endif
 endif
 
@@ -105,15 +107,24 @@ OBJECTS_curve_fever := $(COMMON_OBJECTS) $(CLIENT_OBJECTS)
 
 OBJECTS_server := $(COMMON_OBJECTS) $(SERVER_OBJECTS)
 
-EXECUTABLES := curve_fever server
+CLIENT_EXEC := curve_fever
+SERVER_EXEC := server
 
 # rules
 OBJECTS = $(COMMON_OBJECTS) $(SERVER_OBJECTS) $(CLIENT_OBJECTS)
 
 OBJECTS := $(addprefix build/,$(addsuffix .o,$(OBJECTS)))
-EXECUTABLES := $(addprefix build/,$(addsuffix $(EXEC_EXT),$(EXECUTABLES)))
+SERVER_EXEC := $(addprefix build/,$(addsuffix $(EXEC_EXT),$(SERVER_EXEC)))
+CLIENT_EXEC := $(addprefix build/,$(addsuffix $(EXEC_EXT),$(CLIENT_EXEC)))
+EXECUTABLES := $(CLIENT_EXEC) $(SERVER_EXEC)
 
-all: $(EXECUTABLES)
+all: client server
+
+.PHONY: client server
+
+client: $(CLIENT_EXEC)
+
+server: $(SERVER_EXEC)
 
 clear:
 	$(DEL) $(OBJECTS)
