@@ -134,7 +134,9 @@ clear_all: clear
 
 .SECONDEXPANSION:
 $(EXECUTABLES): build/%$(EXEC_EXT): $$(addprefix build/,$$(addsuffix .o,$$(OBJECTS_$$*)))
+	mkdir -p $(dir $@)
 	$(CC) $(CMP_FLAGS) $^ -o $@ $(LNK_FLAGS)
 	
 $(OBJECTS): build/%.o: src/%.cpp $$(addprefix src/,$$(addsuffix .h,$$(HEADS_$$*)))
+	mkdir -p $(dir $@)
 	$(CC) $(CMP_FLAGS) -c $< -o $@
