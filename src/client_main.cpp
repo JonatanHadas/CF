@@ -66,7 +66,6 @@ int main(int argc, char** argv){
 	
 	if(!load_sounds()){
 		cerr << "Error while loading sounds" << endl << Mix_GetError() << endl;
-		return 1;
 	}
 
 	screen = SDL_CreateWindow(
