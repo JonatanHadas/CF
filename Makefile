@@ -120,11 +120,14 @@ EXECUTABLES := $(CLIENT_EXEC) $(SERVER_EXEC)
 
 all: client server
 
-.PHONY: client server
+.PHONY: client server docker
 
 client: $(CLIENT_EXEC)
 
 server: $(SERVER_EXEC)
+
+docker: Dockerfile
+	sudo docker build -t jonatan_h/curve-fever .
 
 clear:
 	$(DEL) $(OBJECTS)

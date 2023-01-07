@@ -2,6 +2,8 @@
 
 #include "colors.h"
 
+#include <string>
+
 NumberButtonChange::NumberButtonChange(
 	const SDL_Rect& rect,
 	const SDL_Color& pressed, const SDL_Color& released, const SDL_Color& inactive,
