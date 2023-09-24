@@ -605,7 +605,7 @@ TeamNameBox::TeamNameBox(
 	TextCompleter& completer,
 	TeamSeparator& view
 ) : TextBox(
-		rect, true,
+		rect, false,
 		FontType::NRM,
 		margin,
 		text_color, {96, 96, 96, 160},
