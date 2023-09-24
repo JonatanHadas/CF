@@ -48,7 +48,13 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 	vector<string> name_texts;
 	
 	if(settings.using_teams){
-		for(auto team: order){
+		vector<int> inverse_order(order.size());
+
+		for(int i = 0; i < order.size(); i++){
+			auto team = order[i];
+			
+			inverse_order[team] = i;
+			
 			name_texts.push_back(settings.team_names[team].size() ? settings.team_names[team] : default_name("team", team));
 			
 			names.push_back(Msg(
@@ -67,14 +73,14 @@ void WinnerDisplay::init(SDL_Renderer* renderer){
 		}
 
 		player_names = vector<vector<Msg>>(settings.team_names.size());
-
+		
 		for(int player = 0; player < settings.teams.size(); player++){
 			const auto& player_texture = player_textures[settings.colors[player]];
 			
 			SDL_Color color = player_texture.get_color();
 			if(!active[player]) color.a *= INACTIVE_MULTIPLIER;
 			
-			player_names[order[settings.teams[player]]].push_back(Msg(
+			player_names[inverse_order[settings.teams[player]]].push_back(Msg(
 				(settings.names[player].size() ? settings.names[player] : default_name("player", player)).c_str(),
 				color, FontType::MID,
 				renderer,
