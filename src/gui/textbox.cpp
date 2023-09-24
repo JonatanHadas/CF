@@ -33,7 +33,7 @@ void TextBox::set(){
 	if(typing){
 		SDL_StopTextInput();
 
-		if(current_suggestion < suggestions.size()) text = suggestions[current_suggestion];		
+		if(current_suggestion < suggestions.size() && current_suggestion >= 0) text = suggestions[current_suggestion];		
 		last_text = text;
 		updated = true;
 		typing = false;
@@ -41,7 +41,7 @@ void TextBox::set(){
 		on_set(text);
 	}
 }
-
+#include <iostream>
 bool TextBox::on_event(const SDL_Event& event){
 	if(!active) return false;
 	switch(event.type){
@@ -76,13 +76,13 @@ bool TextBox::on_event(const SDL_Event& event){
 				set();
 				return true;
 			case SDLK_UP:
-				if(current_suggestion > 0){
+				if(current_suggestion >= 0){
 					current_suggestion--;
 					updated = true;
 				}
 				return true;
 			case SDLK_DOWN:
-				if(current_suggestion < suggestions.size()){
+				if(current_suggestion < 0 || current_suggestion < suggestions.size()){
 					current_suggestion++;
 					updated = true;
 				}
@@ -119,7 +119,7 @@ void TextBox::draw_content(SDL_Renderer* renderer){
 				renderer
 			);
 		}
-		else if(!typing || current_suggestion >= suggestions.size()){
+		else if(!typing || current_suggestion >= suggestions.size() || current_suggestion < 0){
 			msg = make_unique<Msg>(
 				get_default_text().c_str(), 
 				typing ? back_color : color,
@@ -133,7 +133,7 @@ void TextBox::draw_content(SDL_Renderer* renderer){
 		
 		updated = false;
 		
-		if(typing && current_suggestion < suggestions.size()){
+		if(typing && current_suggestion < suggestions.size() && current_suggestion >= 0){
 			completion_msg = make_unique<Msg>(
 				suggestions[current_suggestion].substr(text.size()).c_str(),
 				back_color,
